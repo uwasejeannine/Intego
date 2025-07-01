@@ -1,0 +1,12 @@
+node_modules/
+dist/
+build/
+.env
+config/
+models/
+migrations/
+seeders/
+src/index.js
+__tests__
+DS_STORE/
+.history/

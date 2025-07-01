@@ -1,0 +1,14 @@
+/node_modules
+config
+
+# Environment variables
+.env
+jest.setup.js
+
+# Build
+build/
+dist/
+
+# History
+.history/
+```
