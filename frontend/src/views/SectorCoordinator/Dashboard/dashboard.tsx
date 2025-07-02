@@ -18,35 +18,46 @@ import {
   Cell,
 } from "recharts";
 import axios from "axios";
+import { Users, Leaf, Stethoscope, School } from "lucide-react";
 
 const API_FARMERS = "http://localhost:3000/api/v1/farmers/individual/";
 const API_COOPS = "http://localhost:3000/api/v1/farmers/cooperatives";
+const API_HEALTH = "http://localhost:3000/api/v1/hospital";
+const API_SCHOOLS = "http://localhost:3000/api/v1/schools";
 const API_CROPS = "http://localhost:3000/api/v1/crops";
 
-const COLORS = ["#22c55e", "#ef4444", "#3b82f6"];
+const COLORS = ["#137775", "#099773", "#ef8f20"];
 
 const SectorCoordinatorDashboardPage: React.FC = () => {
   const [farmers, setFarmers] = useState([]);
   const [cooperatives, setCooperatives] = useState([]);
   const [crops, setCrops] = useState([]);
+  const [healthFacilities, setHealthFacilities] = useState([]);
+  const [schools, setSchools] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [farmersRes, coopsRes, cropsRes] = await Promise.all([
+        const [farmersRes, coopsRes, cropsRes, healthRes, schoolsRes] = await Promise.all([
           axios.get(API_FARMERS),
           axios.get(API_COOPS),
           axios.get(API_CROPS),
+          axios.get(API_HEALTH),
+          axios.get(API_SCHOOLS),
         ]);
-        setFarmers(farmersRes.data || []);
-        setCooperatives(coopsRes.data || []);
-        setCrops(cropsRes.data || []);
+        setFarmers(farmersRes.data?.data || farmersRes.data || []);
+        setCooperatives(coopsRes.data?.data || coopsRes.data || []);
+        setCrops(cropsRes.data?.data || cropsRes.data || []);
+        setHealthFacilities(healthRes.data?.data || healthRes.data || []);
+        setSchools(schoolsRes.data?.data || schoolsRes.data || []);
       } catch (err) {
         setFarmers([]);
         setCooperatives([]);
         setCrops([]);
+        setHealthFacilities([]);
+        setSchools([]);
       } finally {
         setLoading(false);
       }
@@ -55,8 +66,6 @@ const SectorCoordinatorDashboardPage: React.FC = () => {
   }, []);
 
   // Mock data for health and education
-  const healthFacilities = 48;
-  const schools = 142;
   const totalPopulation = 486240;
 
   // Mock sector performance data
@@ -111,6 +120,8 @@ const SectorCoordinatorDashboardPage: React.FC = () => {
     },
   ];
 
+  const totalFarmers = (farmers.length || 0) + (cooperatives.length || 0);
+
   return (
     <>
       <Navbar className="z-[1]" />
@@ -136,28 +147,32 @@ const SectorCoordinatorDashboardPage: React.FC = () => {
           {/* Key Metrics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl">
             <MetricCard
-              title="Total Population"
-              value={(totalPopulation || 0).toLocaleString()}
-              subtitle="All Sectors"
-              color="blue"
+              title="Total Farmers"
+              value={Number(farmers?.length || 0).toLocaleString()}
+              subtitle="All farmers in the system"
+              color="green"
+              icon={<Leaf className="w-5 h-5" style={{ color: '#099773' }} />}
             />
             <MetricCard
-              title="Active Farmers"
-              value={(farmers && farmers.length ? farmers.length : 0).toLocaleString()}
-              subtitle="Registered in system"
-              color="green"
+              title="Total Cooperatives"
+              value={Number(cooperatives?.length || 0).toLocaleString()}
+              subtitle="All cooperatives in the system"
+              color="blue"
+              icon={<Users className="w-5 h-5" style={{ color: '#137775' }} />}
             />
             <MetricCard
               title="Health Facilities"
-              value={healthFacilities}
+              value={Number(healthFacilities?.length || 0).toLocaleString()}
               subtitle="All levels"
               color="red"
+              icon={<Stethoscope className="w-5 h-5" style={{ color: '#ef8f20' }} />}
             />
             <MetricCard
               title="Schools"
-              value={schools}
+              value={Number(schools?.length || 0).toLocaleString()}
               subtitle="All levels"
               color="purple"
+              icon={<School className="w-5 h-5" style={{ color: '#137775' }} />}
             />
           </div>
 
@@ -176,9 +191,9 @@ const SectorCoordinatorDashboardPage: React.FC = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="agriculture" fill="#22c55e" name="Agriculture" />
-                    <Bar dataKey="health" fill="#ef4444" name="Health" />
-                    <Bar dataKey="education" fill="#3b82f6" name="Education" />
+                    <Bar dataKey="agriculture" fill="#137775" name="Agriculture" />
+                    <Bar dataKey="health" fill="#099773" name="Health" />
+                    <Bar dataKey="education" fill="#ef8f20" name="Education" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -226,9 +241,9 @@ const SectorCoordinatorDashboardPage: React.FC = () => {
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Line type="monotone" dataKey="seasonA" stroke="#22c55e" name="Season A" strokeWidth={2} />
-                  <Line type="monotone" dataKey="seasonB" stroke="#f59e0b" name="Season B" strokeWidth={2} />
-                  <Line type="monotone" dataKey="seasonC" stroke="#ef4444" name="Season C" strokeWidth={2} />
+                  <Line type="monotone" dataKey="seasonA" stroke="#137775" name="Season A" strokeWidth={2} />
+                  <Line type="monotone" dataKey="seasonB" stroke="#099773" name="Season B" strokeWidth={2} />
+                  <Line type="monotone" dataKey="seasonC" stroke="#ef8f20" name="Season C" strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
@@ -328,7 +343,8 @@ const MetricCard: React.FC<{
   value: string | number;
   subtitle: string;
   color: string;
-}> = ({ title, value, subtitle, color }) => {
+  icon: React.ReactNode;
+}> = ({ title, value, subtitle, color, icon }) => {
   const colorClasses: Record<string, string> = {
     blue: "text-[#137775] bg-blue-100",
     green: "text-green-600 bg-green-100",
@@ -341,10 +357,12 @@ const MetricCard: React.FC<{
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
+          <div className="text-2xl font-bold text-gray-900 mb-2">
+            {Number(value || 0).toLocaleString()}
+          </div>
           {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
         </div>
-        <div className={`p-3 rounded-lg ${colorClasses[color]}`}></div>
+        <div className={`p-3 rounded-lg flex items-center justify-center ${colorClasses[color]}`}>{icon}</div>
       </div>
     </div>
   );

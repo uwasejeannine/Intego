@@ -7,8 +7,8 @@ import SectorCoordinatorDashboardPage from "./views/SectorCoordinator/Dashboard/
 import SectorCoordinatorReportsPage from "./views/SectorCoordinator/Reports/view-reports";
 import SectorCoordinatorReportDetailsPage from "./views/SectorCoordinator/Reports/report-details";
 import Agriculture from "./views/SectorCoordinator/Dashboard/Agriculture";
-import Health from "./views/SectorCoordinator/Dashboard/Health";
-import Education from "./views/SectorCoordinator/Dashboard/Education";
+import Health from "./views/SectorCoordinator/Health/Health";
+import Education from "./views/SectorCoordinator/Education/Education";
 import Alerts from "./views/SectorCoordinator/Notifications/notifications";
 import ProductivityPage from "./views/SectorCoordinator/Agriculture/productivity";
 import InputsSeedsPage from "./views/SectorCoordinator/Agriculture/inputs/seeds";
@@ -18,6 +18,15 @@ import MarketPricesPage from "./views/SectorCoordinator/Agriculture/market/price
 import WeatherInfoPage from "./views/SectorCoordinator/Agriculture/weather";
 import FarmersPage from "./views/SectorCoordinator/Agriculture/Farmers/farmers";
 import CropsPage from "./views/SectorCoordinator/Agriculture/Crops/crops";
+import Facilities from "./views/SectorCoordinator/Health/Facilities";
+import Diseases from "./views/SectorCoordinator/Health/Diseases";
+import Vaccination from "./views/SectorCoordinator/Health/Vaccination";
+import SchoolsPage from "./views/SectorCoordinator/Education/Schools";
+import TeachersPage from "./views/SectorCoordinator/Education/Teachers";
+import StudentsPage from "./views/SectorCoordinator/Education/Students";
+import InfrastructurePage from "./views/SectorCoordinator/Education/Infrastructure";
+import PerformancePage from "./views/SectorCoordinator/Education/Performance";
+import DropoutsPage from "./views/SectorCoordinator/Education/Dropouts";
 
 // DistrictAdministrator routes
 import DistrictAdministratorOverviewPage from "./views/DistrictAdministrator/Overview/overview";
@@ -129,7 +138,16 @@ const SectorCoordinatorRoutes: React.FC = () => {
       <Route path="agriculture/farmers" element={<FarmersPage />} />
       <Route path="agriculture/crops" element={<CropsPage />} />
       <Route path="health" element={<Health />} />
+      <Route path="health/facilities" element={<Facilities />} />
+      <Route path="health/diseases" element={<Diseases />} />
+      <Route path="health/vaccination" element={<Vaccination />} />
       <Route path="education" element={<Education />} />
+      <Route path="education/schools" element={<SchoolsPage />} />
+<Route path="education/teachers" element={<TeachersPage />} />
+<Route path="education/students" element={<StudentsPage />} />
+<Route path="education/infrastructure" element={<InfrastructurePage />} />
+<Route path="education/performance" element={<PerformancePage />} />
+<Route path="education/dropouts" element={<DropoutsPage />} />
       <Route path="alerts" element={<Alerts />} />
       <Route path="overview" element={<SectorCoordinatorOverviewPage />} />
       <Route path="reports-view" element={<SectorCoordinatorReportsPage />} />

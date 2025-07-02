@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   UsersIcon,
   MapPinIcon,
@@ -18,86 +18,75 @@ import {
   Line,
   AreaChart,
   Area,
+  Cell,
 } from 'recharts';
 import SectorCoordinatorSidebar from "@/views/SectorCoordinator/Navigation/sidebar-menu";
 import { Navbar } from "@/components/navigation/main-navbar";
+import { fetchFarmers, fetchCrops, fetchCooperatives } from '@/lib/api/api';
 
 const Agriculture: React.FC = () => {
   const [selectedSeason, setSelectedSeason] = useState('2025-A');
   const [selectedCrop, setSelectedCrop] = useState('all');
+  const [farmers, setFarmers] = useState<any[]>([]);
+  const [crops, setCrops] = useState<any[]>([]);
+  const [cooperatives, setCooperatives] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      fetchFarmers(),
+      fetchCrops(),
+      fetchCooperatives(),
+    ]).then(([farmers, crops, cooperatives]) => {
+      setFarmers(farmers);
+      setCrops(crops);
+      setCooperatives(cooperatives);
+    }).finally(() => setLoading(false));
+  }, []);
+
+  // Overview stats
+  const farmersArray = Array.isArray(farmers) ? farmers : [];
+  const cropsArray = Array.isArray(crops) ? crops : [];
+  const cooperativesArray = Array.isArray(cooperatives) ? cooperatives : [];
+
+  // Calculate total cultivated land from farmers
+  const cultivatedLand = farmersArray.reduce((sum, f) => sum + (Number(f.total_farm_area_hectares) || 0), 0);
+  // Number of crops
+  const numberOfCrops = Array.isArray(crops) ? crops.length : 0;
+  // Average yield per hectare (from crops)
+  const avgYield = cropsArray.length > 0 ? (
+    cropsArray.reduce((sum, c) => sum + (Number(c.expected_yield_per_hectare) || 0), 0) / cropsArray.length
+  ) : 0;
+  // Overview stats for cards
   const overviewStats = {
-    totalFarmers: 45620,
-    cultivatedLand: 28450,
-    seasonalProduction: 125400,
-    cooperatives: 156,
+    totalFarmers: farmersArray.length,
+    cultivatedLand,
+    numberOfCrops,
+    avgYield,
+    cooperatives: cooperativesArray.length,
   };
 
-  const cropsData = [
-    { name: 'Maize', production: 45200, target: 48000, yield: 2.8, area: 16142 },
-    { name: 'Beans', production: 32100, target: 35000, yield: 1.9, area: 16894 },
-    { name: 'Cassava', production: 28800, target: 30000, yield: 12.5, area: 2304 },
-    { name: 'Sweet Potato', production: 19500, target: 22000, yield: 8.9, area: 2191 },
-    { name: 'Rice', production: 15200, target: 18000, yield: 4.2, area: 3619 },
-  ];
+  // Yield per Hectare by Crop (top 5, colored)
+  let yieldData = cropsArray.map((c: any) => ({
+    name: c.crop_name,
+    yield: Number(c.expected_yield_per_hectare) || 0,
+  }));
+  // Sort by yield descending, take top 5
+  yieldData = yieldData.sort((a, b) => b.yield - a.yield).slice(0, 5);
+  // Assign colors: top 4 get green/orange, lowest gets red
+  const barColors = ['#137775', '#099773', '#084C3E', '#ef8f20', '#e01024'];
 
-  const seasonalTrends = [
-    { month: 'Sep', seasonA: 32, seasonB: 0, seasonC: 15 },
-    { month: 'Oct', seasonA: 45, seasonB: 0, seasonC: 28 },
-    { month: 'Nov', seasonA: 68, seasonB: 0, seasonC: 12 },
-    { month: 'Dec', seasonA: 85, seasonB: 0, seasonC: 5 },
-    { month: 'Jan', seasonA: 92, seasonB: 0, seasonC: 0 },
-    { month: 'Feb', seasonA: 78, seasonB: 12, seasonC: 0 },
+  // Data for Individual Farmers vs Cooperatives
+  const farmersVsCoopsData = [
+    { name: 'Individual Farmers', count: farmersArray.length },
+    { name: 'Cooperatives', count: cooperativesArray.length },
   ];
+  const farmersVsCoopsColors = ['#099773', '#ef8f20'];
 
-  const challenges = [
-    {
-      issue: 'Climate Change Impact',
-      severity: 'high',
-      affectedFarmers: 12450,
-      locations: ['Kinyinya', 'Jabana'],
-      recommendation: 'Deploy drought-resistant seed varieties and establish irrigation systems in affected areas. Coordinate with meteorology services for early warning systems.',
-    },
-    {
-      issue: 'Seed Quality',
-      severity: 'medium',
-      affectedFarmers: 8200,
-      locations: ['Remera', 'Gisozi'],
-      recommendation: 'Strengthen quality control measures and establish certified seed distribution centers. Partner with agricultural research institutes.',
-    },
-    {
-      issue: 'Market Access',
-      severity: 'medium',
-      affectedFarmers: 6800,
-      locations: ['Kimironko'],
-      recommendation: 'Develop market linkage programs and improve rural road infrastructure. Establish collection centers and negotiate with buyers.',
-    },
-  ];
-
-  const cooperatives = [
-    {
-      name: 'COOPAGRI Kinyinya',
-      members: 245,
-      crops: ['Maize', 'Beans'],
-      performance: 87,
-      revenue: 2450000,
-    },
-    {
-      name: 'COOPAGRI Remera',
-      members: 189,
-      crops: ['Rice', 'Vegetables'],
-      performance: 92,
-      revenue: 3200000,
-    },
-    {
-      name: 'COOPAGRI Kimironko',
-      members: 156,
-      crops: ['Cassava', 'Sweet Potato'],
-      performance: 78,
-      revenue: 1800000,
-    },
-  ];
+  if (loading) {
+    return <div className="p-12 text-center text-lg">Loading...</div>;
+  }
 
   return (
     <>
@@ -148,10 +137,6 @@ const Agriculture: React.FC = () => {
                 </div>
                 <h3 className="text-xs font-medium text-gray-600 mb-1 uppercase tracking-wide">Total Farmers</h3>
                 <div className="text-2xl font-bold text-gray-900 mb-2">{overviewStats.totalFarmers.toLocaleString()}</div>
-                <div className="flex items-center text-xs">
-                  <span className="font-medium text-green-600">+3.2%</span>
-                  <span className="text-gray-500 ml-1">Since last month</span>
-                </div>
                 <div className="mt-2 h-1 rounded-full bg-[#099773] opacity-20"></div>
               </div>
             </div>
@@ -165,14 +150,10 @@ const Agriculture: React.FC = () => {
                 </div>
                 <h3 className="text-xs font-medium text-gray-600 mb-1 uppercase tracking-wide">Cultivated Land</h3>
                 <div className="text-2xl font-bold text-gray-900 mb-2">{overviewStats.cultivatedLand.toLocaleString()} Ha</div>
-                <div className="flex items-center text-xs">
-                  <span className="font-medium text-green-600">+1.8%</span>
-                  <span className="text-gray-500 ml-1">Since last month</span>
-                </div>
                 <div className="mt-2 h-1 rounded-full bg-[#F89D2D] opacity-20"></div>
               </div>
             </div>
-            {/* Seasonal Production */}
+            {/* Number of Crops */}
             <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-gray-100 min-h-[120px]">
               <div className="p-4">
                 <div className="flex items-center justify-between mb-2">
@@ -180,16 +161,12 @@ const Agriculture: React.FC = () => {
                     <ArrowTrendingUpIcon className="w-5 h-5 text-white" />
                   </div>
                 </div>
-                <h3 className="text-xs font-medium text-gray-600 mb-1 uppercase tracking-wide">Seasonal Production</h3>
-                <div className="text-2xl font-bold text-gray-900 mb-2">{overviewStats.seasonalProduction.toLocaleString()} MT</div>
-                <div className="flex items-center text-xs">
-                  <span className="font-medium text-green-600">+8.5%</span>
-                  <span className="text-gray-500 ml-1">Since last month</span>
-                </div>
+                <h3 className="text-xs font-medium text-gray-600 mb-1 uppercase tracking-wide">Number of Crops</h3>
+                <div className="text-2xl font-bold text-gray-900 mb-2">{overviewStats.numberOfCrops}</div>
                 <div className="mt-2 h-1 rounded-full bg-[#099773] opacity-20"></div>
               </div>
             </div>
-            {/* Cooperatives */}
+            {/* Average Yield per Hectare */}
             <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-gray-100 min-h-[120px]">
               <div className="p-4">
                 <div className="flex items-center justify-between mb-2">
@@ -197,12 +174,8 @@ const Agriculture: React.FC = () => {
                     <ChartBarIcon className="w-5 h-5 text-white" />
                   </div>
                 </div>
-                <h3 className="text-xs font-medium text-gray-600 mb-1 uppercase tracking-wide">Cooperatives</h3>
-                <div className="text-2xl font-bold text-gray-900 mb-2">{overviewStats.cooperatives}</div>
-                <div className="flex items-center text-xs">
-                  <span className="font-medium text-green-600">+2.1%</span>
-                  <span className="text-gray-500 ml-1">Since last month</span>
-                </div>
+                <h3 className="text-xs font-medium text-gray-600 mb-1 uppercase tracking-wide">Avg. Yield per Hectare</h3>
+                <div className="text-2xl font-bold text-gray-900 mb-2">{overviewStats.avgYield.toFixed(2)} T/Ha</div>
                 <div className="mt-2 h-1 rounded-full bg-[#144c49] opacity-20"></div>
               </div>
             </div>
@@ -210,101 +183,48 @@ const Agriculture: React.FC = () => {
 
           {/* Charts Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Crop Production vs Targets */}
+            {/* Yield per Hectare by Crop */}
             <div className="bg-white rounded-lg shadow-sm border p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Crop Production vs Targets
+                Yield per Hectare by Crop
               </h3>
               <div className="overflow-auto max-h-[350px]">
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={cropsData}>
+                  <BarChart data={yieldData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                    <YAxis />
+                    <YAxis label={{ value: 'T/Ha', angle: -90, position: 'insideLeft' }} />
                     <Tooltip />
-                    <Legend />
-                    <Bar dataKey="production" fill="#099773" name="Actual Production" />
-                    <Bar dataKey="target" fill="#F89D2D" name="Target" />
+                    <Bar dataKey="yield" name="Yield (T/Ha)">
+                      {yieldData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={barColors[index] || '#137775'} />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            {/* Seasonal Activity Calendar */}
+            {/* Individual Farmers vs Cooperatives Chart */}
             <div className="bg-white rounded-lg shadow-sm border p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Seasonal Activity Calendar
+                Individual Farmers vs Cooperatives
               </h3>
               <div className="overflow-auto max-h-[350px]">
                 <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={seasonalTrends}>
+                  <BarChart data={farmersVsCoopsData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
+                    <XAxis dataKey="name" />
+                    <YAxis allowDecimals={false} />
                     <Tooltip />
-                    <Area
-                      type="monotone"
-                      dataKey="seasonA"
-                      stackId="1"
-                      stroke="#099773"
-                      fill="#099773"
-                      fillOpacity={0.6}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="seasonB"
-                      stackId="1"
-                      stroke="#F89D2D"
-                      fill="#F89D2D"
-                      fillOpacity={0.6}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="seasonC"
-                      stackId="1"
-                      stroke="#ef4444"
-                      fill="#ef4444"
-                      fillOpacity={0.6}
-                    />
-                  </AreaChart>
+                    <Bar dataKey="count" name="Count">
+                      {farmersVsCoopsData.map((entry, index) => (
+                        <Cell key={`cell-coop-${index}`} fill={farmersVsCoopsColors[index] || '#099773'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
-            </div>
-          </div>
-
-          {/* Challenges & AI Recommendations - Alternating Card Colors */}
-          <div className="py-8">
-            <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center text-[#099773]">Current Challenges & AI Recommendations</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {challenges.map((challenge, index) => {
-                const isColored = index === 1; 
-                return (
-                  <div
-                    key={index}
-                    className={`rounded-2xl shadow-lg flex flex-col items-center p-8 min-h-[320px] ${isColored ? 'bg-[#099773]' : 'bg-white border'}`}
-                  >
-                    {/* Icon placeholder - you can use a relevant icon here */}
-                    <div className="mb-4">
-                      <svg width="40" height="40" fill="none" stroke={isColored ? '#fff' : '#099773'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto">
-                        <circle cx="20" cy="20" r="18" />
-                        <path d="M20 10v8M20 28h.01" />
-                      </svg>
-                    </div>
-                    <h4 className={`font-bold text-lg mb-2 text-center ${isColored ? 'text-white' : 'text-[#099773]'}`}>{challenge.issue}</h4>
-                    <p className={`${isColored ? 'text-white' : 'text-gray-700'} text-sm mb-2 text-center`}>
-                      Affecting {challenge.affectedFarmers.toLocaleString()} farmers in {challenge.locations.join(', ')}
-                    </p>
-                    <div className={`${isColored ? 'text-white' : 'text-gray-700'} text-sm mb-4 text-center`}>
-                      <span className="font-semibold">AI Recommendation:</span> {challenge.recommendation}
-                    </div>
-                    <button
-                      className={`mt-auto px-6 py-2 rounded shadow font-semibold transition ${isColored ? 'bg-white text-[#099773] hover:bg-gray-100' : 'bg-[#099773] text-white hover:bg-[#0f5e5a]'}`}
-                    >
-                      Details
-                    </button>
-                  </div>
-                );
-              })}
             </div>
           </div>
         </div>

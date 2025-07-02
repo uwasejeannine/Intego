@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/navigation/main-navbar";
 import SectorCoordinatorSidebar from "@/views/SectorCoordinator/Navigation/sidebar-menu";
@@ -14,6 +14,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+const API_URL = "/api/v1/seeds";
 
 const seedVarietiesInit = [
   { name: "Maize Hybrid", stock: 1200, distributed: 900, shortage: 0, source: "AgriSeed Ltd" },
@@ -124,7 +126,7 @@ const SeedMetricCards = ({ seedVarieties, sources }: { seedVarieties: any[], sou
 
 const SeedsPage: React.FC = () => {
   const [tab, setTab] = useState("varieties");
-  const [seedVarieties, setSeedVarieties] = useState(seedVarietiesInit);
+  const [seedVarieties, setSeedVarieties] = useState<any[]>([]);
   const [addOpen, setAddOpen] = useState(false);
   const [viewSeed, setViewSeed] = useState<any>(null);
   const [viewOpen, setViewOpen] = useState(false);
@@ -135,10 +137,7 @@ const SeedsPage: React.FC = () => {
   // For request form (unchanged)
   const [request, setRequest] = useState({ variety: "", quantity: "" });
 
-  const [sources, setSources] = useState([
-    { fullName: "John Doe", company: "AgriSeed Ltd", location: "Kigali", seeds: "Maize, Beans", phone: "0788123456", address: "123 Main St" },
-    { fullName: "Jane Smith", company: "SeedCo Rwanda", location: "Huye", seeds: "Rice", phone: "0789654321", address: "456 South Rd" },
-  ]);
+  const [sources, setSources] = useState<any[]>([]);
   const [addSourceOpen, setAddSourceOpen] = useState(false);
   const [viewSource, setViewSource] = useState<any>(null);
   const [viewSourceOpen, setViewSourceOpen] = useState(false);
@@ -146,9 +145,50 @@ const SeedsPage: React.FC = () => {
   const [editSourceOpen, setEditSourceOpen] = useState(false);
   const [newSource, setNewSource] = useState({ fullName: "", company: "", location: "", seeds: "", phone: "", address: "" });
 
-  const handleDeleteSeed = (seed: any) => {
+  useEffect(() => {
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(data => setSeedVarieties(data));
+  }, []);
+
+  const handleAddSeed = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...newSeed,
+        stock: Number(newSeed.stock),
+        distributed: Number(newSeed.distributed),
+        shortage: Number(newSeed.shortage)
+      })
+    });
+    if (res.ok) {
+      const created = await res.json();
+      setSeedVarieties([...seedVarieties, created]);
+      setAddOpen(false);
+      setNewSeed({ name: "", stock: "", distributed: "", shortage: "", source: "" });
+    }
+  };
+
+  const handleEditSeed = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const res = await fetch(`${API_URL}/${editSeed.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editSeed)
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setSeedVarieties(seedVarieties.map(s => s.id === updated.id ? updated : s));
+      setEditOpen(false);
+    }
+  };
+
+  const handleDeleteSeed = async (seed: any) => {
     if (window.confirm("Are you sure you want to delete this seed variety?")) {
-      setSeedVarieties(seedVarieties.filter((s) => s !== seed));
+      const res = await fetch(`${API_URL}/${seed.id}`, { method: "DELETE" });
+      if (res.ok) setSeedVarieties(seedVarieties.filter(s => s.id !== seed.id));
     }
   };
 
@@ -267,7 +307,7 @@ const SeedsPage: React.FC = () => {
                       </DialogTrigger>
                       <DialogContent>
                         <DialogTitle>Add New Seed Variety</DialogTitle>
-                        <form className="space-y-4" onSubmit={e => { e.preventDefault(); setSeedVarieties([...seedVarieties, { ...newSeed, stock: Number(newSeed.stock), distributed: Number(newSeed.distributed), shortage: Number(newSeed.shortage) }]); setAddOpen(false); setNewSeed({ name: "", stock: "", distributed: "", shortage: "", source: "" }); }}>
+                        <form className="space-y-4" onSubmit={handleAddSeed}>
                           <input className="w-full border rounded p-2 text-black" placeholder="Variety Name" value={newSeed.name} onChange={e => setNewSeed({ ...newSeed, name: e.target.value })} required />
                           <input className="w-full border rounded p-2 text-black" placeholder="Stock (kg)" type="number" value={newSeed.stock} onChange={e => setNewSeed({ ...newSeed, stock: e.target.value })} required />
                           <input className="w-full border rounded p-2 text-black" placeholder="Distributed (kg)" type="number" value={newSeed.distributed} onChange={e => setNewSeed({ ...newSeed, distributed: e.target.value })} required />
@@ -320,11 +360,7 @@ const SeedsPage: React.FC = () => {
                   <DialogContent>
                     <DialogTitle>Edit Seed Variety</DialogTitle>
                     {editSeed && (
-                      <form className="space-y-4" onSubmit={e => {
-                        e.preventDefault();
-                        setSeedVarieties(seedVarieties.map(s => s === editSeed ? editSeed : s));
-                        setEditOpen(false);
-                      }}>
+                      <form className="space-y-4" onSubmit={handleEditSeed}>
                         <input className="w-full border rounded p-2 text-black" placeholder="Variety Name" value={editSeed.name} onChange={e => setEditSeed({ ...editSeed, name: e.target.value })} required />
                         <input className="w-full border rounded p-2 text-black" placeholder="Stock (kg)" type="number" value={editSeed.stock} onChange={e => setEditSeed({ ...editSeed, stock: e.target.value })} required />
                         <input className="w-full border rounded p-2 text-black" placeholder="Distributed (kg)" type="number" value={editSeed.distributed} onChange={e => setEditSeed({ ...editSeed, distributed: e.target.value })} required />

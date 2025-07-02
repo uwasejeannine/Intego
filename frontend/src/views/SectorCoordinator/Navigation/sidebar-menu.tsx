@@ -56,6 +56,9 @@ const sectorNav: Record<Sector, SectorNavLink[]> = {
     { name: 'Schools', href: '/sector-coordinator/education/schools', icon: BuildingLibraryIcon },
     { name: 'Students', href: '/sector-coordinator/education/students', icon: UsersIcon },
     { name: 'Teachers', href: '/sector-coordinator/education/teachers', icon: UserGroupIcon },
+    { name: 'Infrastructure', href: '/sector-coordinator/education/infrastructure', icon: BuildingOffice2Icon },
+    { name: 'Performance', href: '/sector-coordinator/education/performance', icon: ChartBarIcon },
+    { name: 'Dropouts', href: '/sector-coordinator/education/dropouts', icon: ExclamationTriangleIcon },
   ],
 };
 

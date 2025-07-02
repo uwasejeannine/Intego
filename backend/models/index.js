@@ -58,6 +58,13 @@ Object.keys(db).forEach((modelName) => {
   }
 });
 
+const Vaccine = require('./vaccines')(sequelize);
+db.Vaccine = Vaccine;
+const VaccinationRecord = require('./vaccination_records')(sequelize);
+db.VaccinationRecord = VaccinationRecord;
+const VaccinationCampaign = require('./vaccination_campaigns')(sequelize);
+db.VaccinationCampaign = VaccinationCampaign;
+
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 

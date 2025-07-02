@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Navbar } from "@/components/navigation/main-navbar";
 import SectorCoordinatorSidebar from "@/views/SectorCoordinator/Navigation/sidebar-menu";
@@ -14,6 +14,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+const API_URL = "/api/v1/pesticides";
 
 const pesticideTypesInit = [
   { name: "Lambda-cyhalothrin", stock: 600, distributed: 500, shortage: 10 },
@@ -169,7 +171,7 @@ const pesticideColumns = (
 
 const PesticidesPage: React.FC = () => {
   const [tab, setTab] = useState("types");
-  const [pesticideTypes, setPesticideTypes] = useState(pesticideTypesInit);
+  const [pesticideTypes, setPesticideTypes] = useState<any[]>([]);
   const [sources, setSources] = useState(pesticideSourcesInit);
   // For types actions
   const [addTypeOpen, setAddTypeOpen] = useState(false);
@@ -186,11 +188,33 @@ const PesticidesPage: React.FC = () => {
   const [editSourceOpen, setEditSourceOpen] = useState(false);
   const [newSource, setNewSource] = useState({ fullName: "", company: "", location: "", pesticides: "", phone: "", address: "" });
 
-  const handleDeleteType = (type: any) => {
-    if (window.confirm("Are you sure you want to delete this pesticide type?")) {
-      setPesticideTypes(pesticideTypes.filter((t) => t !== type));
+  useEffect(() => {
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(data => setPesticideTypes(data));
+  }, []);
+
+  const handleEditType = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const res = await fetch(`${API_URL}/${editType.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editType)
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setPesticideTypes(pesticideTypes.map(t => t.id === updated.id ? updated : t));
+      setEditTypeOpen(false);
     }
   };
+
+  const handleDeleteType = async (type: any) => {
+    if (window.confirm("Are you sure you want to delete this pesticide type?")) {
+      const res = await fetch(`${API_URL}/${type.id}`, { method: "DELETE" });
+      if (res.ok) setPesticideTypes(pesticideTypes.filter(t => t.id !== type.id));
+    }
+  };
+
   const handleDeleteSource = (source: any) => {
     if (window.confirm("Are you sure you want to delete this pesticide source?")) {
       setSources(sources.filter((s) => s !== source));
@@ -309,11 +333,7 @@ const PesticidesPage: React.FC = () => {
                   <DialogContent>
                     <DialogTitle>Edit Pesticide Type</DialogTitle>
                     {editType && (
-                      <form className="space-y-4" onSubmit={e => {
-                        e.preventDefault();
-                        setPesticideTypes(pesticideTypes.map(t => t === editType ? editType : t));
-                        setEditTypeOpen(false);
-                      }}>
+                      <form className="space-y-4" onSubmit={handleEditType}>
                         <input className="w-full border rounded p-2 text-black" placeholder="Type" value={editType.name} onChange={e => setEditType({ ...editType, name: e.target.value })} required />
                         <input className="w-full border rounded p-2 text-black" placeholder="Stock (L)" type="number" value={editType.stock} onChange={e => setEditType({ ...editType, stock: e.target.value })} required />
                         <input className="w-full border rounded p-2 text-black" placeholder="Distributed (L)" type="number" value={editType.distributed} onChange={e => setEditType({ ...editType, distributed: e.target.value })} required />

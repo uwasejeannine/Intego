@@ -229,3 +229,152 @@ export async function deleteContributor(id: number) {
     throw error;
   }
 }
+
+// === SCHOOLS ===
+export async function fetchSchools() {
+  const res = await api.get('/schools');
+  return res.data;
+}
+export async function fetchSchoolById(id: number) {
+  const res = await api.get(`/schools/${id}`);
+  return res.data;
+}
+export async function createSchool(data: any) {
+  const res = await api.post('/schools', data);
+  return res.data;
+}
+export async function updateSchool(id: number, data: any) {
+  const res = await api.put(`/schools/${id}`, data);
+  return res.data;
+}
+export async function deleteSchool(id: number) {
+  const res = await api.delete(`/schools/${id}`);
+  return res.data;
+}
+
+// === STUDENTS ===
+export async function fetchStudents() {
+  const res = await api.get('/students');
+  return res.data;
+}
+export async function fetchStudentById(id: number) {
+  const res = await api.get(`/students/${id}`);
+  return res.data;
+}
+export async function createStudent(data: any) {
+  const res = await api.post('/students', data);
+  return res.data;
+}
+export async function updateStudent(id: number, data: any) {
+  const res = await api.put(`/students/${id}`, data);
+  return res.data;
+}
+export async function deleteStudent(id: number) {
+  const res = await api.delete(`/students/${id}`);
+  return res.data;
+}
+
+// === TEACHERS ===
+export async function fetchTeachers() {
+  const res = await api.get('/teachers');
+  return res.data;
+}
+export async function fetchTeacherById(id: number) {
+  const res = await api.get(`/teachers/${id}`);
+  return res.data;
+}
+export async function createTeacher(data: any) {
+  const res = await api.post('/teachers', data);
+  return res.data;
+}
+export async function updateTeacher(id: number, data: any) {
+  const res = await api.put(`/teachers/${id}`, data);
+  return res.data;
+}
+export async function deleteTeacher(id: number) {
+  const res = await api.delete(`/teachers/${id}`);
+  return res.data;
+}
+
+// === DROPOUTS ===
+export async function fetchDropouts() {
+  const res = await api.get('/dropouts');
+  return res.data;
+}
+export async function fetchDropoutById(id: number) {
+  const res = await api.get(`/dropouts/${id}`);
+  return res.data;
+}
+export async function createDropout(data: any) {
+  const res = await api.post('/dropouts', data);
+  return res.data;
+}
+export async function updateDropout(id: number, data: any) {
+  const res = await api.put(`/dropouts/${id}`, data);
+  return res.data;
+}
+export async function deleteDropout(id: number) {
+  const res = await api.delete(`/dropouts/${id}`);
+  return res.data;
+}
+
+// === PERFORMANCES ===
+export async function fetchPerformances() {
+  const res = await api.get('/performances');
+  return res.data;
+}
+export async function fetchPerformanceById(id: number) {
+  const res = await api.get(`/performances/${id}`);
+  return res.data;
+}
+export async function createPerformance(data: any) {
+  const res = await api.post('/performances', data);
+  return res.data;
+}
+export async function updatePerformance(id: number, data: any) {
+  const res = await api.put(`/performances/${id}`, data);
+  return res.data;
+}
+export async function deletePerformance(id: number) {
+  const res = await api.delete(`/performances/${id}`);
+  return res.data;
+}
+
+// === INFRASTRUCTURES ===
+export async function fetchInfrastructures() {
+  const res = await api.get('/infrastructures');
+  return res.data;
+}
+export async function fetchInfrastructureById(id: number) {
+  const res = await api.get(`/infrastructures/${id}`);
+  return res.data;
+}
+export async function createInfrastructure(data: any) {
+  const res = await api.post('/infrastructures', data);
+  return res.data;
+}
+export async function updateInfrastructure(id: number, data: any) {
+  const res = await api.put(`/infrastructures/${id}`, data);
+  return res.data;
+}
+export async function deleteInfrastructure(id: number) {
+  const res = await api.delete(`/infrastructures/${id}`);
+  return res.data;
+}
+
+export async function fetchFarmers() {
+  const res = await api.get('/farmers/individual/');
+  const data = res.data;
+  return data?.data || data || [];
+}
+export async function fetchCrops() {
+  const res = await api.get('/crops');
+  if (Array.isArray(res.data)) return res.data;
+  if (res.data && Array.isArray(res.data.data)) return res.data.data;
+  return [];
+}
+export async function fetchCooperatives() {
+  const res = await api.get('/farmers/cooperatives');
+  const data = res.data;
+  return data?.data || data || [];
+}

@@ -4,16 +4,7 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Archive extends Model {
     static associate(models) {
-      Archive.belongsTo(models.Project, {
-        foreignKey: "projectId",
-        as: "project",
-        onDelete: "CASCADE",
-      });
-      Archive.belongsTo(models.Category, {
-        foreignKey: "categoriesId",
-        as: "categories",
-        onDelete: "CASCADE",
-      });
+      // Removed associations to Project and Category as they are not used
     }
   }
 

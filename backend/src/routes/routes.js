@@ -8,6 +8,14 @@ const authRouts = require("./authRoutes");
 const farmersRoutes = require("./farmersRoutes");
 const cropRoutes = require("./cropRoutes");
 const hospitalRoutes = require("./hospitalRoutes");
+const seedsRoutes = require("./seedsRoutes");
+const fertilizersRoutes = require("./fertilizersRoutes");
+const pesticidesRoutes = require("./pesticidesRoutes");
+const marketPricesRoutes = require("./marketPricesRoutes");
+const vaccinesRoutes = require('./vaccinesRoutes');
+const vaccinationRecordsRoutes = require('./vaccinationRecordsRoutes');
+const vaccinationCampaignsRoutes = require('./vaccinationCampaignsRoutes');
+const diseasesRoutes = require('./diseasesRoutes');
 
 const router = express.Router();
 
@@ -20,5 +28,19 @@ router.use("/auth", authRouts);
 router.use("/farmers", farmersRoutes); 
 router.use("/crops", cropRoutes);
 router.use("/hospital", hospitalRoutes);
+router.use("/seeds", seedsRoutes);
+router.use("/fertilizers", fertilizersRoutes);
+router.use("/pesticides", pesticidesRoutes);
+router.use("/market-prices", marketPricesRoutes);
+router.use('/vaccines', vaccinesRoutes);
+router.use('/vaccination-records', vaccinationRecordsRoutes);
+router.use('/vaccination-campaigns', vaccinationCampaignsRoutes);
+router.use('/diseases', diseasesRoutes);
+router.use('/schools', require('./schoolRoutes'));
+router.use('/students', require('./studentRoutes'));
+router.use('/teachers', require('./teacherRoutes'));
+router.use('/dropouts', require('./dropoutRoutes'));
+router.use('/performances', require('./performanceRoutes'));
+router.use('/infrastructures', require('./infrastructureRoutes'));
 
 module.exports = router;

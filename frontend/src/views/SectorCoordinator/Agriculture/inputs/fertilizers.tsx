@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Navbar } from "@/components/navigation/main-navbar";
 import SectorCoordinatorSidebar from "@/views/SectorCoordinator/Navigation/sidebar-menu";
@@ -15,17 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const fertilizerTypesInit = [
-  { name: "NPK 17-17-17", stock: 1500, distributed: 1200, shortage: 50 },
-  { name: "Urea", stock: 900, distributed: 800, shortage: 20 },
-  { name: "DAP", stock: 700, distributed: 600, shortage: 10 },
-];
-
-// Sample fertilizer sources
-const fertilizerSourcesInit = [
-  { fullName: "Alice Niyonsaba", company: "FertiCo Ltd", location: "Kigali", fertilizers: "NPK, Urea", phone: "0788222333", address: "12 Main St" },
-  { fullName: "Eric Mugisha", company: "AgroInput Rwanda", location: "Huye", fertilizers: "DAP", phone: "0789444555", address: "45 South Rd" },
-];
+const API_URL = "/api/v1/fertilizers";
 
 // Metric Cards Component
 const FertilizerMetricCards = ({ fertilizerTypes, sources }: { fertilizerTypes: any[], sources: any[] }) => {
@@ -137,7 +127,24 @@ const fertilizerColumns = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }: any) => null // No actions for types
+    cell: ({ row }: any) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="h-8 w-8 flex items-center justify-center rounded hover:bg-gray-100">
+            <MoreHorizontal className="h-5 w-5" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem onClick={() => { setEditFertilizer(row.original); setEditOpen(true); }}>
+            <Pencil className="h-4 w-4 mr-2 text-yellow-600" /> Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleDeleteFertilizer(row.original)}>
+            <Trash2 className="h-4 w-4 mr-2 text-red-600" /> Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ),
   },
 ];
 
@@ -182,14 +189,67 @@ const sourceColumns = [
 
 const FertilizersPage: React.FC = () => {
   const [tab, setTab] = useState("types");
-  const [fertilizerTypes, setFertilizerTypes] = useState(fertilizerTypesInit);
-  const [sources, setSources] = useState(fertilizerSourcesInit);
+  const [fertilizerTypes, setFertilizerTypes] = useState<any[]>([]);
+  const [addOpen, setAddOpen] = useState(false);
   const [addSourceOpen, setAddSourceOpen] = useState(false);
+  const [editFertilizer, setEditFertilizer] = useState<any>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [newFertilizer, setNewFertilizer] = useState({ name: "", stock: "", distributed: "", shortage: "" });
+
+  // Sources remain local for now
+  const [sources, setSources] = useState<any[]>([]);
   const [viewSource, setViewSource] = useState<any>(null);
   const [viewSourceOpen, setViewSourceOpen] = useState(false);
   const [editSource, setEditSource] = useState<any>(null);
   const [editSourceOpen, setEditSourceOpen] = useState(false);
   const [newSource, setNewSource] = useState({ fullName: "", company: "", location: "", fertilizers: "", phone: "", address: "" });
+
+  useEffect(() => {
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(data => setFertilizerTypes(data));
+  }, []);
+
+  const handleAddFertilizer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...newFertilizer,
+        stock: Number(newFertilizer.stock),
+        distributed: Number(newFertilizer.distributed),
+        shortage: Number(newFertilizer.shortage)
+      })
+    });
+    if (res.ok) {
+      const created = await res.json();
+      setFertilizerTypes([...fertilizerTypes, created]);
+      setAddOpen(false);
+      setNewFertilizer({ name: "", stock: "", distributed: "", shortage: "" });
+    }
+  };
+
+  const handleEditFertilizer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const res = await fetch(`${API_URL}/${editFertilizer.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editFertilizer)
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setFertilizerTypes(fertilizerTypes.map(f => f.id === updated.id ? updated : f));
+      setEditOpen(false);
+    }
+  };
+
+  const handleDeleteFertilizer = async (fertilizer: any) => {
+    if (window.confirm("Are you sure you want to delete this fertilizer type?")) {
+      const res = await fetch(`${API_URL}/${fertilizer.id}`, { method: "DELETE" });
+      if (res.ok) setFertilizerTypes(fertilizerTypes.filter(f => f.id !== fertilizer.id));
+    }
+  };
 
   const handleDeleteSource = (source: any) => {
     if (window.confirm("Are you sure you want to delete this fertilizer source?")) {
@@ -219,6 +279,23 @@ const FertilizersPage: React.FC = () => {
                   <TabsTrigger value="sources">Fertilizer Sources</TabsTrigger>
                 </div>
                 <div className="flex justify-items-end">
+                  {tab === "types" && (
+                    <Dialog open={addOpen} onOpenChange={setAddOpen}>
+                      <DialogTrigger asChild>
+                        <Button className="bg-[#137775] text-white">Add Fertilizer</Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogTitle>Add New Fertilizer</DialogTitle>
+                        <form className="space-y-4" onSubmit={handleAddFertilizer}>
+                          <input className="w-full border rounded p-2 text-black" placeholder="Type" value={newFertilizer.name} onChange={e => setNewFertilizer({ ...newFertilizer, name: e.target.value })} required />
+                          <input className="w-full border rounded p-2 text-black" placeholder="Stock (kg)" type="number" value={newFertilizer.stock} onChange={e => setNewFertilizer({ ...newFertilizer, stock: e.target.value })} required />
+                          <input className="w-full border rounded p-2 text-black" placeholder="Distributed (kg)" type="number" value={newFertilizer.distributed} onChange={e => setNewFertilizer({ ...newFertilizer, distributed: e.target.value })} required />
+                          <input className="w-full border rounded p-2 text-black" placeholder="Shortage (kg)" type="number" value={newFertilizer.shortage} onChange={e => setNewFertilizer({ ...newFertilizer, shortage: e.target.value })} required />
+                          <Button type="submit" className="bg-[#137775] text-white">Add</Button>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  )}
                   {tab === "sources" && (
                     <Dialog open={addSourceOpen} onOpenChange={setAddSourceOpen}>
                       <DialogTrigger asChild>

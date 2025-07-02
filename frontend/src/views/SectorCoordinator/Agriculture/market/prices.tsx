@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Navbar } from "@/components/navigation/main-navbar";
 import SectorCoordinatorSidebar from "@/views/SectorCoordinator/Navigation/sidebar-menu";
@@ -14,6 +14,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+const API_URL = "/api/v1/market-prices";
 
 const priceHistoryInit = [
   { date: "2024-06-01", crop: "Maize", price: 320 },
@@ -128,7 +130,7 @@ const priceColumns = (
 ];
 
 const MarketPricesPage: React.FC = () => {
-  const [priceHistory, setPriceHistory] = useState(priceHistoryInit);
+  const [priceHistory, setPriceHistory] = useState<any[]>([]);
   // For prices actions
   const [addPriceOpen, setAddPriceOpen] = useState(false);
   const [viewPrice, setViewPrice] = useState<any>(null);
@@ -137,9 +139,30 @@ const MarketPricesPage: React.FC = () => {
   const [editPriceOpen, setEditPriceOpen] = useState(false);
   const [newPrice, setNewPrice] = useState({ date: "", crop: "", price: "" });
 
-  const handleDeletePrice = (price: any) => {
+  useEffect(() => {
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(data => setPriceHistory(data));
+  }, []);
+
+  const handleEditPrice = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const res = await fetch(`${API_URL}/${editPrice.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editPrice)
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setPriceHistory(priceHistory.map(p => p.id === updated.id ? updated : p));
+      setEditPriceOpen(false);
+    }
+  };
+
+  const handleDeletePrice = async (price: any) => {
     if (window.confirm("Are you sure you want to delete this price record?")) {
-      setPriceHistory(priceHistory.filter((p) => p !== price));
+      const res = await fetch(`${API_URL}/${price.id}`, { method: "DELETE" });
+      if (res.ok) setPriceHistory(priceHistory.filter(p => p.id !== price.id));
     }
   };
 
@@ -192,14 +215,11 @@ const MarketPricesPage: React.FC = () => {
                 <DialogContent>
                   <DialogTitle>Edit Price</DialogTitle>
                   {editPrice && (
-                    <form className="space-y-4" onSubmit={e => {
-                      e.preventDefault();
-                      setPriceHistory(priceHistory.map(p => p === editPrice ? editPrice : p));
-                      setEditPriceOpen(false);
-                    }}>
+                    <form className="space-y-4" onSubmit={handleEditPrice}>
                       <input className="w-full border rounded p-2 text-black" placeholder="Date (YYYY-MM-DD)" value={editPrice.date} onChange={e => setEditPrice({ ...editPrice, date: e.target.value })} required />
                       <input className="w-full border rounded p-2 text-black" placeholder="Crop" value={editPrice.crop} onChange={e => setEditPrice({ ...editPrice, crop: e.target.value })} required />
                       <input className="w-full border rounded p-2 text-black" placeholder="Price (RWF/kg)" type="number" value={editPrice.price} onChange={e => setEditPrice({ ...editPrice, price: e.target.value })} required />
+                      <input className="w-full border rounded p-2 text-black" placeholder="Unit" value={editPrice.unit} onChange={e => setEditPrice({ ...editPrice, unit: e.target.value })} required />
                       <Button type="submit" className="bg-[#137775] text-white">Save</Button>
                     </form>
                   )}
