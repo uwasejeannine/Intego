@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { User } from "@/types/types";
 import {
@@ -28,18 +28,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 interface UpdateUserProps {}
 
+type UserUpdate = Partial<User>;
+
 const UpdateUser: React.FC<UpdateUserProps> = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [, setLoading] = useState<boolean>(true);
+  const [, setError] = useState<string | null>(null);
   const [isContactEditable, setIsContactEditable] = useState<boolean>(false);
   const [isPersonalEditable, setIsPersonalEditable] = useState<boolean>(false);
   const [isCompanyEditable, setIsCompanyEditable] = useState<boolean>(false);
-  const [isPasswordEditable, setIsPasswordEditable] = useState<boolean>(false);
-  const [isContactUpdating, setIsContactUpdating] = useState<boolean>(false);
-  const [isPersonalUpdating, setIsPersonalUpdating] = useState<boolean>(false);
-  const [isCompanyUpdating, setIsCompanyUpdating] = useState<boolean>(false);
-  const [isPasswordUpdating, setIsPasswordUpdating] = useState<boolean>(false);
   const isMobile = useMediaQuery("(max-width: 900px)");
   const { userId } = useAuthStore();
   const [fullName, setFullName] = useState<string>("");
@@ -54,10 +51,6 @@ const UpdateUser: React.FC<UpdateUserProps> = () => {
 
   const toggleCompanyEdit = () => {
     setIsCompanyEditable(!isCompanyEditable);
-  };
-
-  const togglePasswordEdit = () => {
-    setIsPasswordEditable(!isPasswordEditable);
   };
 
   useEffect(() => {
@@ -83,68 +76,48 @@ const UpdateUser: React.FC<UpdateUserProps> = () => {
   }, [userId]);
 
   const handleContactUpdate = async () => {
-    setIsContactUpdating(true);
     try {
       await axios.put(`http://localhost:3000/api/v1/users/users/${user?.id}`, {
         email: user?.email,
         phoneNumber: user?.phoneNumber,
       });
-      setIsContactUpdating(false);
       setIsContactEditable(false);
       // Show success toast
     } catch (error: any) {
-      setIsContactUpdating(false);
       // Show error toast
     }
   };
 
   const handlePersonalUpdate = async () => {
-    setIsPersonalUpdating(true);
     try {
       await axios.put(`http://localhost:3000/api/v1/users/users/${user?.id}`, {
         first_name: user?.first_name,
         last_name: user?.last_name,
         gender: user?.gender,
       });
-      setIsPersonalUpdating(false);
       setIsPersonalEditable(false);
       // Show success toast
     } catch (error: any) {
-      setIsPersonalUpdating(false);
       // Show error toast
     }
   };
 
   const handleCompanyUpdate = async () => {
-    setIsCompanyUpdating(true);
     try {
       await axios.put(`http://localhost:3000/api/v1/users/users/${user?.id}`, {
         agencyName: user?.agencyName,
-        sector: user?.sector,
-        position: user?.position,
+        sectorofOperations: user?.sectorofOperations,
       });
-      setIsCompanyUpdating(false);
       setIsCompanyEditable(false);
       // Show success toast
     } catch (error: any) {
-      setIsCompanyUpdating(false);
       // Show error toast
     }
   };
 
-  const handlePasswordUpdate = async () => {
-    setIsPasswordUpdating(true);
-    try {
-      await axios.put(`http://localhost:3000/api/v1/users/users/${user?.id}`, {
-        password: user?.password,
-      });
-      setIsPasswordUpdating(false);
-      setIsPasswordEditable(false);
-      // Show success toast
-    } catch (error: any) {
-      setIsPasswordUpdating(false);
-      // Show error toast
-    }
+  // Helper for type-safe setUser
+  const updateUser = (update: UserUpdate) => {
+    setUser((prev) => (prev ? { ...prev, ...update } : prev));
   };
 
   return (
@@ -205,17 +178,17 @@ const UpdateUser: React.FC<UpdateUserProps> = () => {
                   <>
                     <Input
                       type="email"
-                      value={user?.email}
+                      value={user?.email || ""}
                       onChange={(e) =>
-                        setUser({ ...user, email: e.target.value })
+                        updateUser({ email: e.target.value })
                       }
                       readOnly={!isContactEditable}
                     />
                     <Input
                       type="tel"
-                      value={user?.phoneNumber}
+                      value={user?.phoneNumber || ""}
                       onChange={(e) =>
-                        setUser({ ...user, phoneNumber: e.target.value })
+                        updateUser({ phoneNumber: e.target.value })
                       }
                       readOnly={!isContactEditable}
                     />
@@ -232,13 +205,8 @@ const UpdateUser: React.FC<UpdateUserProps> = () => {
                   <Button
                     type="button"
                     onClick={handleContactUpdate}
-                    disabled={isContactUpdating}
                   >
-                    {isContactUpdating ? (
-                      <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      "Update"
-                    )}
+                    Update
                   </Button>
                 </CardFooter>
               )}
@@ -264,38 +232,34 @@ const UpdateUser: React.FC<UpdateUserProps> = () => {
                   <>
                     <Input
                       type="text"
-                      value={user?.first_name}
+                      value={user?.first_name || ""}
                       onChange={(e) =>
-                        setUser({ ...user, first_name: e.target.value })
+                        updateUser({ first_name: e.target.value })
                       }
                       readOnly={!isPersonalEditable}
                     />
                     <Input
                       type="text"
-                      value={user?.last_name}
+                      value={user?.last_name || ""}
                       onChange={(e) =>
-                        setUser({ ...user, last_name: e.target.value })
+                        updateUser({ last_name: e.target.value })
                       }
                       readOnly={!isPersonalEditable}
                     />
                     <Select
-                      value={user?.gender}
-                      onChange={(e) =>
-                        setUser({ ...user, gender: e.target.value })
+                      value={user?.gender || ""}
+                      onValueChange={(value) =>
+                        updateUser({ gender: value })
                       }
                       disabled={!isPersonalEditable}
                     >
-                       <SelectTrigger>
-                                              <SelectValue placeholder="Select Currency" />
-                                            </SelectTrigger>
-                                          <SelectContent>
-                                            <SelectItem value="Male">
-                                              Male
-                                            </SelectItem>
-                                            <SelectItem value="Female">
-                                              Female
-                                            </SelectItem>
-                                          </SelectContent>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Male">Male</SelectItem>
+                        <SelectItem value="Female">Female</SelectItem>
+                      </SelectContent>
                     </Select>
                   </>
                 ) : (
@@ -311,13 +275,8 @@ const UpdateUser: React.FC<UpdateUserProps> = () => {
                   <Button
                     type="button"
                     onClick={handlePersonalUpdate}
-                    disabled={isPersonalUpdating}
                   >
-                    {isPersonalUpdating ? (
-                      <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      "Update"
-                    )}
+                    Update
                   </Button>
                 </CardFooter>
               )}
@@ -338,30 +297,22 @@ const UpdateUser: React.FC<UpdateUserProps> = () => {
                   />
                 )}
               </CardHeader>
-              <CardContent>
+              <CardContent className="grid grid-cols-1 gap-2">
                 {isCompanyEditable ? (
                   <>
                     <Input
                       type="text"
-                      value={user?.agencyName}
+                      value={user?.agencyName || ""}
                       onChange={(e) =>
-                        setUser({ ...user, agencyName: e.target.value })
+                        updateUser({ agencyName: e.target.value })
                       }
                       readOnly={!isCompanyEditable}
                     />
                     <Input
                       type="text"
-                      value={user?.sector}
+                      value={user?.sectorofOperations || ""}
                       onChange={(e) =>
-                        setUser({ ...user, sector: e.target.value })
-                      }
-                      readOnly={!isCompanyEditable}
-                    />
-                    <Input
-                      type="text"
-                      value={user?.position}
-                      onChange={(e) =>
-                        setUser({ ...user, position: e.target.value })
+                        updateUser({ sectorofOperations: e.target.value })
                       }
                       readOnly={!isCompanyEditable}
                     />
@@ -369,8 +320,7 @@ const UpdateUser: React.FC<UpdateUserProps> = () => {
                 ) : (
                   <>
                     <p>Agency Name: {user?.agencyName}</p>
-                    <p>Sector of Operations: {user?.sector}</p>
-                    <p>Position: {user?.position}</p>
+                    <p>Sector of Operations: {user?.sectorofOperations}</p>
                   </>
                 )}
               </CardContent>
@@ -379,66 +329,8 @@ const UpdateUser: React.FC<UpdateUserProps> = () => {
                   <Button
                     type="button"
                     onClick={handleCompanyUpdate}
-                    disabled={isCompanyUpdating}
                   >
-                    {isCompanyUpdating ? (
-                      <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      "Update"
-                    )}
-                  </Button>
-                </CardFooter>
-              )}
-            </Card>
-
-            <Card className="dark:bg-slate-700 mb-4">
-              <CardHeader className="flex flex-row justify-between">
-                <h1 className="font-bold">Change Password</h1>
-                {isPasswordEditable ? (
-                  <X
-                    className="w-5 h-5 cursor-pointer text-primary"
-                    onClick={togglePasswordEdit}
-                  />
-                ) : (
-                  <Icons.EditIcon
-                    className="w-5 h-5 cursor-pointer text-primary"
-                    onClick={togglePasswordEdit}
-                  />
-                )}
-              </CardHeader>
-              <CardContent>
-                {isPasswordEditable ? (
-                  <>
-                    <Input
-                      type="password"
-                      value={user?.password}
-                      onChange={(e) =>
-                        setUser({ ...user, password: e.target.value })
-                      }
-                      readOnly={!isPasswordEditable}
-                    />
-                    <Input
-                      type="password"
-                      placeholder="Confirm Password"
-                      readOnly={!isPasswordEditable}
-                    />
-                  </>
-                ) : (
-                  <p>********</p>
-                )}
-              </CardContent>
-              {isPasswordEditable && (
-                <CardFooter>
-                  <Button
-                    type="button"
-                    onClick={handlePasswordUpdate}
-                    disabled={isPasswordUpdating}
-                  >
-                    {isPasswordUpdating ? (
-                      <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      "Update"
-                    )}
+                    Update
                   </Button>
                 </CardFooter>
               )}

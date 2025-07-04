@@ -89,7 +89,7 @@ const ErrorBoundaryFallback: React.FC<{
   error?: Error;
   info?: React.ErrorInfo;
   theme: string;
-}> = ({ errorCode, errorMessage, error, info, theme }) => {
+}> = ({ errorCode, errorMessage, error, info }) => {
   const navigate = useNavigate();
 
   const navigateToHome = () => {

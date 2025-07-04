@@ -3,10 +3,9 @@ import { Card } from "@/components/ui/card";
 import { Navbar } from "@/components/navigation/main-navbar";
 import SectorCoordinatorSidebar from "@/views/SectorCoordinator/Navigation/sidebar-menu";
 import { DataTable } from "@/components/tables/farmers/data-table";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Eye, MoreHorizontal, Pencil, Trash2, Package, TrendingDown, Truck, Users } from "lucide-react";
+import { Eye, MoreHorizontal, Pencil, Trash2, Package, TrendingDown, Truck} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,13 +15,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const API_URL = "/api/v1/market-prices";
-
-const priceHistoryInit = [
-  { date: "2024-06-01", crop: "Maize", price: 320 },
-  { date: "2024-05-25", crop: "Maize", price: 310 },
-  { date: "2024-05-18", crop: "Beans", price: 400 },
-  { date: "2024-05-10", crop: "Rice", price: 600 },
-];
 
 // Metric Cards Component
 const PriceMetricCards = ({ priceHistory }: { priceHistory: any[] }) => {

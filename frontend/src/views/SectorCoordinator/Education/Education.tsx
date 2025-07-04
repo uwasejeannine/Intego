@@ -52,14 +52,6 @@ const Education: React.FC = () => {
     classrooms: infras.reduce((sum, i) => sum + (Number(i.classrooms) || 0), 0),
   };
 
-  // Enrollment by level (example: count by level field if available)
-  const enrollmentData = [
-    { level: 'Primary', enrolled: students.filter(s => s.level === 'Primary').length, target: 0, rate: 0 },
-    { level: 'Lower Secondary', enrolled: students.filter(s => s.level === 'Lower Secondary').length, target: 0, rate: 0 },
-    { level: 'Upper Secondary', enrolled: students.filter(s => s.level === 'Upper Secondary').length, target: 0, rate: 0 },
-    { level: 'TVET', enrolled: students.filter(s => s.level === 'TVET').length, target: 0, rate: 0 },
-  ];
-
   // Performance by subject (example: group by subject)
   const perfBySubject: Record<string, { pass_rate: number[], national_avg: number[] }> = {};
   performances.forEach(p => {
@@ -67,11 +59,7 @@ const Education: React.FC = () => {
     if (p.passRate) perfBySubject[p.subject].pass_rate.push(Number((p.passRate+'').replace('%','')));
     if (p.nationalAvg) perfBySubject[p.subject].national_avg.push(Number((p.nationalAvg+'').replace('%','')));
   });
-  const performanceData = Object.entries(perfBySubject).map(([subject, arr]) => ({
-    subject,
-    pass_rate: arr.pass_rate.length ? (arr.pass_rate.reduce((a,b)=>a+b,0)/arr.pass_rate.length) : 0,
-    national_avg: arr.national_avg.length ? (arr.national_avg.reduce((a,b)=>a+b,0)/arr.national_avg.length) : 0,
-  }));
+
 
   // Infrastructure status
   const totalSchools = schools.length || 1;

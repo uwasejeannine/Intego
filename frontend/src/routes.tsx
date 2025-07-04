@@ -4,8 +4,6 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import SectorCoordinatorUpdateProfilePage from "@/views/SectorCoordinator/Profile/update-profile";
 import SectorCoordinatorOverviewPage from "@/views/SectorCoordinator/Overview/overview";
 import SectorCoordinatorDashboardPage from "./views/SectorCoordinator/Dashboard/dashboard";
-import SectorCoordinatorReportsPage from "./views/SectorCoordinator/Reports/view-reports";
-import SectorCoordinatorReportDetailsPage from "./views/SectorCoordinator/Reports/report-details";
 import Agriculture from "./views/SectorCoordinator/Dashboard/Agriculture";
 import Health from "./views/SectorCoordinator/Health/Health";
 import Education from "./views/SectorCoordinator/Education/Education";
@@ -31,19 +29,35 @@ import DropoutsPage from "./views/SectorCoordinator/Education/Dropouts";
 // DistrictAdministrator routes
 import DistrictAdministratorOverviewPage from "./views/DistrictAdministrator/Overview/overview";
 import DistrictAdministratorUpdateProfilePage from "./views/DistrictAdministrator/Profile/update-profile";
-import DistrictAdministratorReportsPage from "./views/DistrictAdministrator/Reports/view-reports";
 import DistrictAdministratorDashboardPage from "./views/DistrictAdministrator/Dashboard/dashboard";
-import DistrictAdministratorReportDetailsPage from "./views/DistrictAdministrator/Reports/report-details";
+import DA_Education from "./views/DistrictAdministrator/Education/Education";
+import DA_Schools from "./views/DistrictAdministrator/Education/Schools";
+import DA_Students from "./views/DistrictAdministrator/Education/Students";
+import DA_Teachers from "./views/DistrictAdministrator/Education/Teachers";
+import DA_Health from "./views/DistrictAdministrator/Health/Health";
+import DA_Facilities from "./views/DistrictAdministrator/Health/Facilities";
+import DA_Diseases from "./views/DistrictAdministrator/Health/Diseases";
+import DA_Vaccination from "./views/DistrictAdministrator/Health/Vaccination";
+import DA_AgricultureOverview from "./views/DistrictAdministrator/Agriculture/agriculture";
+import DA_Crops from "./views/DistrictAdministrator/Agriculture/Crops/crops";
+import DA_Farmers from "./views/DistrictAdministrator/Agriculture/Farmers/farmers";
+import DA_Infrastructure from "./views/DistrictAdministrator/Education/Infrastructure";
+import DA_Dropouts from "./views/DistrictAdministrator/Education/Dropouts";
+import DA_Performance from "./views/DistrictAdministrator/Education/Performance";
+import DA_Weather from "./views/DistrictAdministrator/Agriculture/weather";
+import DA_Seeds from "./views/DistrictAdministrator/Agriculture/inputs/seeds";
+import DA_Fertilizers from "./views/DistrictAdministrator/Agriculture/inputs/fertilizers";
+import DA_Pesticides from "./views/DistrictAdministrator/Agriculture/inputs/pesticides";
+import DA_MarketPrices from "./views/DistrictAdministrator/Agriculture/market/prices";
+import DA_Productivity from "./views/DistrictAdministrator/Agriculture/productivity";
 
 // Admin routes
 import UserViewPage from "./views/Admin/Users/user-view";
 import AddUserPage from "./views/Admin/Users/add-user";
 import AdminOverviewPage from "./views/Admin/Overview/overview";
 import AuthenticationPage from "./views/Authentication/authentication";
-import { NotFoundPage } from "./ErrorPage";
 import AdminUpdateProfilePage from "./views/Admin/Profile/update-profile";
 import { useAuthStore } from "./stores/authStore";
-import ForbiddenPage from "./ForbiddenPage";
 import UpdateUserPage from "./views/Admin/Users/update-user";
 import RolesManagementPage from "./views/Admin/Roles/roles-management";
 import AdminDashboardPage from "./views/Admin/Dashboard/dashboard";
@@ -143,15 +157,13 @@ const SectorCoordinatorRoutes: React.FC = () => {
       <Route path="health/vaccination" element={<Vaccination />} />
       <Route path="education" element={<Education />} />
       <Route path="education/schools" element={<SchoolsPage />} />
-<Route path="education/teachers" element={<TeachersPage />} />
-<Route path="education/students" element={<StudentsPage />} />
-<Route path="education/infrastructure" element={<InfrastructurePage />} />
-<Route path="education/performance" element={<PerformancePage />} />
-<Route path="education/dropouts" element={<DropoutsPage />} />
+      <Route path="education/teachers" element={<TeachersPage />} />
+      <Route path="education/students" element={<StudentsPage />} />
+      <Route path="education/infrastructure" element={<InfrastructurePage />} />
+      <Route path="education/performance" element={<PerformancePage />} />
+      <Route path="education/dropouts" element={<DropoutsPage />} />
       <Route path="alerts" element={<Alerts />} />
       <Route path="overview" element={<SectorCoordinatorOverviewPage />} />
-      <Route path="reports-view" element={<SectorCoordinatorReportsPage />} />
-      <Route path="report/:id" element={<SectorCoordinatorReportDetailsPage />} />
       <Route path="update-profile" element={<SectorCoordinatorUpdateProfilePage />} />
       <Route path="*" element={<AuthenticationPage />} />
     </Routes>
@@ -163,15 +175,28 @@ const DistrictAdministratorRoutes: React.FC = () => {
     <Routes>
       <Route path="overview" element={<DistrictAdministratorOverviewPage />} />
       <Route path="dashboard" element={<DistrictAdministratorDashboardPage />} />
-      <Route path="reports-view" element={<DistrictAdministratorReportsPage />} />
-      <Route
-        path="report/:id"
-        element={<DistrictAdministratorReportDetailsPage />}
-      />
-      <Route
-        path="update-profile"
-        element={<DistrictAdministratorUpdateProfilePage />}
-      />
+      <Route path="update-profile" element={<DistrictAdministratorUpdateProfilePage />} />
+      <Route path="education" element={<DA_Education />} />
+      <Route path="education/schools" element={<DA_Schools />} />
+      <Route path="education/students" element={<DA_Students />} />
+      <Route path="education/teachers" element={<DA_Teachers />} />
+      <Route path="health" element={<DA_Health />} />
+      <Route path="health/facilities" element={<DA_Facilities />} />
+      <Route path="health/diseases" element={<DA_Diseases />} />
+      <Route path="health/vaccination" element={<DA_Vaccination />} />
+      <Route path="agriculture" element={<DA_AgricultureOverview />} />
+      <Route path="agriculture/overview" element={<DA_AgricultureOverview />} />
+      <Route path="agriculture/productivity" element={<DA_Productivity />} />
+      <Route path="agriculture/crops" element={<DA_Crops />} />
+      <Route path="agriculture/farmers" element={<DA_Farmers />} />
+      <Route path="education/infrastructure" element={<DA_Infrastructure />} />
+      <Route path="education/dropouts" element={<DA_Dropouts />} />
+      <Route path="education/performance" element={<DA_Performance />} />
+      <Route path="agriculture/weather" element={<DA_Weather />} />
+      <Route path="agriculture/inputs/seeds" element={<DA_Seeds />} />
+      <Route path="agriculture/inputs/fertilizers" element={<DA_Fertilizers />} />
+      <Route path="agriculture/inputs/pesticides" element={<DA_Pesticides />} />
+      <Route path="agriculture/market/prices" element={<DA_MarketPrices />} />
       <Route path="*" element={<AuthenticationPage />} />
     </Routes>
   );

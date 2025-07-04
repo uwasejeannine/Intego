@@ -141,7 +141,7 @@ export const columns: ColumnDef<Profile>[] = [
             <CellComponent row={row} />
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <DeleteUserComponent userId={row.original.id ?? 0} />
+            <DeleteUserComponent userId={Number(row.original.id) || 0} />
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

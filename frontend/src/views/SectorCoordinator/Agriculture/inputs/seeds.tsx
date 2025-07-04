@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Navbar } from "@/components/navigation/main-navbar";
 import SectorCoordinatorSidebar from "@/views/SectorCoordinator/Navigation/sidebar-menu";
 import { DataTable } from "@/components/tables/farmers/data-table";
@@ -17,15 +17,6 @@ import {
 
 const API_URL = "/api/v1/seeds";
 
-const seedVarietiesInit = [
-  { name: "Maize Hybrid", stock: 1200, distributed: 900, shortage: 0, source: "AgriSeed Ltd" },
-  { name: "Beans Improved", stock: 800, distributed: 700, shortage: 50, source: "SeedCo Rwanda" },
-  { name: "Rice IR64", stock: 500, distributed: 400, shortage: 20, source: "AgriSeed Ltd" },
-];
-const suppliers = [
-  { name: "AgriSeed Ltd", contact: "0788 123 456" },
-  { name: "SeedCo Rwanda", contact: "0789 654 321" },
-];
 
 // Metric Cards Component
 const SeedMetricCards = ({ seedVarieties, sources }: { seedVarieties: any[], sources: any[] }) => {
@@ -133,10 +124,6 @@ const SeedsPage: React.FC = () => {
   const [newSeed, setNewSeed] = useState({ name: "", stock: "", distributed: "", shortage: "", source: "" });
   const [editSeed, setEditSeed] = useState<any>(null);
   const [editOpen, setEditOpen] = useState(false);
-
-  // For request form (unchanged)
-  const [request, setRequest] = useState({ variety: "", quantity: "" });
-
   const [sources, setSources] = useState<any[]>([]);
   const [addSourceOpen, setAddSourceOpen] = useState(false);
   const [viewSource, setViewSource] = useState<any>(null);

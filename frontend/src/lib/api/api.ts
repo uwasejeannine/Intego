@@ -4,7 +4,6 @@ import {
   loginFormSchema,
   passwordResetFormSchema,
   changePasswordFormSchema,
-  updateProfileFormSchema,
   reportFormSchema,
   categoriesSchema,
   VerificationCodeSchema,
@@ -377,4 +376,17 @@ export async function fetchCooperatives() {
   const res = await api.get('/farmers/cooperatives');
   const data = res.data;
   return data?.data || data || [];
+}
+
+export async function fetchFeedbackForUser(userId: number) {
+  // Ensure userId is a number
+  const res = await fetch(`/api/v1/feedback?toUserId=${userId}`);
+  const data = await res.json();
+  return data.feedbacks || [];
+}
+
+export async function fetchFeedbackForCrop(itemId: number | string) {
+  const res = await fetch(`/api/v1/feedback?section=crops&itemId=${itemId}`);
+  const data = await res.json();
+  return data.feedbacks || [];
 }

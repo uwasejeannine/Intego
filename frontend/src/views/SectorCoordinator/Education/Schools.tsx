@@ -4,7 +4,7 @@ import { Navbar } from "@/components/navigation/main-navbar";
 import SectorCoordinatorSidebar from "@/views/SectorCoordinator/Navigation/sidebar-menu";
 import { DataTable } from "@/components/tables/farmers/data-table";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Eye, MoreHorizontal, Pencil, Trash2, Users, MapPin, BookOpen, TrendingDown } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { fetchSchools, createSchool, updateSchool, deleteSchool } from "@/lib/api/api";

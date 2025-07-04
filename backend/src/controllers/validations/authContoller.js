@@ -67,7 +67,7 @@ class AuthController {
         console.log('🔒 Account is locked');
         
         // Send an email about the account lockout
-        const transporter = nodemailer.createTransporter({
+        const transporter = nodemailer.createTransport({
           service: "Gmail",
           port: 465,
           secure: true,
@@ -259,7 +259,7 @@ class AuthController {
       await user.save();
 
       // Send email with unhashed code
-      const transporter = nodemailer.createTransporter({
+      const transporter = nodemailer.createTransport({
         service: "Gmail",
         port: 465,
         secure: true,

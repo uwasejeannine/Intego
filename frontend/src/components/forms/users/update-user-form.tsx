@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { User } from "@/types/types";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardHeader } from "@/components/ui/card";
 import useMediaQuery from "@/hooks/useMediaQuery";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,9 +22,7 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -32,37 +30,29 @@ import { updateProfileFormSchema } from "@/lib/validation/schema";
 import { useToast } from "@/components/ui/use-toast";
 
 type FormData = z.infer<typeof updateProfileFormSchema>;
+
 type E164Number = string;
-type OptionType = { value: string; label: string };
 
 const UpdateUserForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [, setUser] = useState<User | null>(null);
+  const [, setLoading] = useState<boolean>(true);
+  const [, setError] = useState<string | null>(null);
   const [phoneNumber, setPhoneNumber] = useState<E164Number>("");
   const { toast } = useToast();
   const isMobile = useMediaQuery("(max-width: 900px)");
-  const [fullName, setFullName] = useState<string>("");
-
-  const options: OptionType[] = [
-    { value: "Male", label: "Male" },
-    { value: "Female", label: "Female" },
-  ];
+  const [, setFullName] = useState<string>("");
 
   const form = useForm<FormData>({
     resolver: zodResolver(updateProfileFormSchema),
     defaultValues: {
-      email: "",
-      phoneNumber: "",
       first_name: "",
       last_name: "",
       gender: "",
-      sector: "",
-      location: "",
+      phoneNumber: "",
+      agencyName: "",
+      sectorofOperations: "",
       position: "",
-      newPassword: "",
-      confirmPassword: "",
     },
   });
 
@@ -86,11 +76,13 @@ const UpdateUserForm: React.FC = () => {
     };
 
     fetchUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
     const { first_name, last_name } = form.getValues();
     setFullName(`${first_name} ${last_name}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.watch("first_name"), form.watch("last_name")]);
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
@@ -120,8 +112,6 @@ const UpdateUserForm: React.FC = () => {
         <Card className="flex justify-center items-center justify-items-center mb-8 dark:bg-slate-700">
           <CardHeader className="font-bold text-xl">User Details</CardHeader>
         </Card>
-        
-        {/* White container with shadow and border radius */}
         <div className="bg-white rounded-lg shadow-lg p-8">
           <Form {...form}>
             <form
@@ -164,16 +154,20 @@ const UpdateUserForm: React.FC = () => {
               />
               <FormField
                 control={form.control}
-                name="email"
+                name="gender"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[#137775] font-semibold">Email Address</FormLabel>
+                    <FormLabel className="text-[#137775] font-semibold">Gender</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="Email Address" 
-                        {...field} 
-                        className="border-gray-300 focus:border-[#137775] text-black placeholder:text-gray-500"
-                      />
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger className="w-full border-gray-300 focus:border-[#137775] text-black">
+                          <SelectValue placeholder="Select gender" className="text-gray-500" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white">
+                          <SelectItem value="Male" className="text-black hover:bg-[#137775] hover:text-white">Male</SelectItem>
+                          <SelectItem value="Female" className="text-black hover:bg-[#137775] hover:text-white">Female</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -204,90 +198,13 @@ const UpdateUserForm: React.FC = () => {
               />
               <FormField
                 control={form.control}
-                name="gender"
+                name="agencyName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[#137775] font-semibold">Gender</FormLabel>
-                    <FormControl>
-                      <Select
-                        {...field}
-                        value={
-                          options.find((option: OptionType) => option.value === field.value)?.value
-                        }
-                        onChange={(option: OptionType) => {
-                          field.onChange(option.value);
-                        }}
-                      >
-                        <SelectTrigger className="w-full border-gray-300 focus:border-[#137775] text-black">
-                          <SelectValue placeholder="Select gender" className="text-gray-500" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white">
-                          <SelectGroup>
-                            <SelectLabel className="text-[#137775]">Sex</SelectLabel>
-                            <SelectItem value="Male" className="text-black hover:bg-[#137775] hover:text-white">Male</SelectItem>
-                            <SelectItem value="Female" className="text-black hover:bg-[#137775] hover:text-white">Female</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="sector"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[#137775] font-semibold">Sector of Operations</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="border-gray-300 focus:border-[#137775] text-black">
-                          <SelectValue placeholder="Select a sector" className="text-gray-500" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="Agriculture" className="text-black hover:bg-[#137775] hover:text-white">Agriculture</SelectItem>
-                        <SelectItem value="Health" className="text-black hover:bg-[#137775] hover:text-white">Health</SelectItem>
-                        <SelectItem value="Education" className="text-black hover:bg-[#137775] hover:text-white">Education</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="position"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[#137775] font-semibold">Position</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="border-gray-300 focus:border-[#137775] text-black">
-                          <SelectValue placeholder="Select a role" className="text-gray-500" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="sectorCoordinator" className="text-black hover:bg-[#137775] hover:text-white">Sector Coordinator</SelectItem>
-                        <SelectItem value="admin" className="text-black hover:bg-[#137775] hover:text-white">Admin</SelectItem>
-                        <SelectItem value="districtAdministrator" className="text-black hover:bg-[#137775] hover:text-white">District Administrator</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="newPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[#137775] font-semibold">New Password</FormLabel>
+                    <FormLabel className="text-[#137775] font-semibold">Agency Name</FormLabel>
                     <FormControl>
                       <Input 
-                        type="password" 
-                        placeholder="New Password" 
+                        placeholder="Agency Name" 
                         {...field} 
                         className="border-gray-300 focus:border-[#137775] text-black placeholder:text-gray-500"
                       />
@@ -298,17 +215,43 @@ const UpdateUserForm: React.FC = () => {
               />
               <FormField
                 control={form.control}
-                name="confirmPassword"
+                name="sectorofOperations"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[#137775] font-semibold">Confirm Password</FormLabel>
+                    <FormLabel className="text-[#137775] font-semibold">Sector of Operations</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Confirm Password"
-                        {...field}
-                        className="border-gray-300 focus:border-[#137775] text-black placeholder:text-gray-500"
-                      />
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger className="border-gray-300 focus:border-[#137775] text-black">
+                          <SelectValue placeholder="Select a sector" className="text-gray-500" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white">
+                          <SelectItem value="Agriculture" className="text-black hover:bg-[#137775] hover:text-white">Agriculture</SelectItem>
+                          <SelectItem value="Health" className="text-black hover:bg-[#137775] hover:text-white">Health</SelectItem>
+                          <SelectItem value="Education" className="text-black hover:bg-[#137775] hover:text-white">Education</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="position"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[#137775] font-semibold">Position</FormLabel>
+                    <FormControl>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger className="border-gray-300 focus:border-[#137775] text-black">
+                          <SelectValue placeholder="Select a position" className="text-gray-500" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white">
+                          <SelectItem value="sectorCoordinator" className="text-black hover:bg-[#137775] hover:text-white">Sector Coordinator</SelectItem>
+                          <SelectItem value="admin" className="text-black hover:bg-[#137775] hover:text-white">Admin</SelectItem>
+                          <SelectItem value="districtAdministrator" className="text-black hover:bg-[#137775] hover:text-white">District Administrator</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

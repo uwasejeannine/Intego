@@ -85,9 +85,3 @@ export const addUserFormSchema = z.object({
   }),
   roleId: z.number().min(1, "Please select a role"),
 });
-
-const ContributorSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  phoneNumber: z.string().min(10, "Phone number is required"),
-  role: z.string().min(1, "Role is required"),
-});

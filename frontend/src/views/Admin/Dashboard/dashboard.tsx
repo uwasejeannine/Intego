@@ -8,7 +8,7 @@ const AdminDashboardPage: React.FC = () => {
     <>
       <Navbar className="z-[1]" />
       <AdminSidebar />
-      <Dashboard user="admin" />
+      <Dashboard />
     </>
   );
 };

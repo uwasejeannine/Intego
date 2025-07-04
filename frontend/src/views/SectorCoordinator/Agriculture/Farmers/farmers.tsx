@@ -5,7 +5,6 @@ import { DataTable } from "@/components/tables/farmers/data-table";
 import { columns } from "@/components/tables/farmers/columns";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useNavigate } from "react-router-dom";
 import { MoreHorizontal, Eye, Pencil, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
@@ -93,8 +92,6 @@ const FarmersPage: React.FC = () => {
 
   const [viewFarmerOpen, setViewFarmerOpen] = useState(false);
   const [viewFarmer, setViewFarmer] = useState<any>(null);
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchFarmers();

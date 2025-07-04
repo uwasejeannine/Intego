@@ -38,6 +38,15 @@ export function ChangePasswordForm({ onSubmit }: ChangePasswordFormProps) {
     setIsLoading(true);
     try {
       const resetUserId = usePasswordResetStore.getState().resetUserId;
+      if (!resetUserId) {
+        setIsLoading(false);
+        toast({
+          title: "User Not Found",
+          description: "The user was not found.",
+          variant: "destructive",
+        });
+        return;
+      }
       await changePassword(resetUserId, data.newPassword);
       usePasswordResetStore.getState().clearResetUserId();
       setIsLoading(false);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle} from "@/components/ui/dialog";
 import { Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Navbar } from "@/components/navigation/main-navbar";
 import { Button } from "@/components/ui/button";

@@ -7,12 +7,11 @@ import {
 
 import { Toaster } from "./components/ui/toaster";
 import { ThemeProvider } from "./components/theme-provider";
-import ErrorBoundary, { NotFoundPage } from "./ErrorPage";
+import ErrorBoundary from "./ErrorPage";
 import React, { Suspense } from "react";
 import Logo from "@/assets/logo.svg";
 import { Icons } from "./components/ui/icons";
 import { useAuthStore } from "./stores/authStore";
-import ForbiddenPage from "./ForbiddenPage";
 
 const LoadingUI = () => {
   return (

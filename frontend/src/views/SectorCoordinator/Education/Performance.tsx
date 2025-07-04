@@ -22,7 +22,7 @@ const perfColumns = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }: any) => (
+    cell: ({}: any) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button className="h-8 w-8 flex items-center justify-center rounded hover:bg-gray-100">

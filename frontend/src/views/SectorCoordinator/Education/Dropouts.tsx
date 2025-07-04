@@ -9,72 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { fetchDropouts, createDropout, updateDropout, deleteDropout } from "@/lib/api/api";
 
-const dropoutColumns = [
-  {
-    id: "rowNumber",
-    header: "No.",
-    cell: ({ row }: any) => row.index + 1,
-  },
-  { accessorKey: "name", header: "Name" },
-  { accessorKey: "school", header: "School" },
-  { accessorKey: "grade", header: "Grade" },
-  { accessorKey: "reason", header: "Reason" },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }: any) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className="h-8 w-8 flex items-center justify-center rounded hover:bg-gray-100">
-            <MoreHorizontal className="w-5 h-5" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => {/* handleView(row.original) */}}>
-            <Eye className="h-4 w-4 mr-2 text-blue-600" /> View Details
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => {/* handleEdit(row.original) */}}>
-            <Pencil className="h-4 w-4 mr-2 text-yellow-600" /> Edit
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => {/* handleDelete(row.original) */}}>
-            <Trash2 className="h-4 w-4 mr-2 text-red-600" /> Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
-  },
-];
-
-const DropoutMetricCards = ({ data }: { data: any[] }) => {
-  const totalDropouts = data.length;
-  const pregnancyCases = data.filter(d => d.reason && d.reason.toLowerCase().includes('pregnan')).length;
-  const reintegrated = data.filter(d => d.reintegration && d.reintegration.toLowerCase() === 'yes').length;
-  const earlyWarnings = data.filter(d => d.earlyWarning && d.earlyWarning.toLowerCase() === 'yes').length;
-  const metrics = [
-    { title: "Total Dropouts", value: totalDropouts, icon: TrendingDown, color: "#137775", bg: "bg-[#137775]" },
-    { title: "Pregnancy Cases", value: pregnancyCases, icon: Calendar, color: "#099773", bg: "bg-[#099773]" },
-    { title: "Reintegrated", value: reintegrated, icon: Users, color: "#F89D2D", bg: "bg-[#F89D2D]" },
-    { title: "Early Warnings", value: earlyWarnings, icon: Phone, color: "#e01024", bg: "bg-[#e01024]" },
-  ];
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {metrics.map((metric, i) => {
-        const Icon = metric.icon;
-        return (
-          <div key={i} className="bg-white rounded-2xl shadow-lg border min-h-[120px] p-4 flex flex-col items-start">
-            <div className={`p-2 rounded-xl mb-2`} style={{ background: metric.color }}>
-              <Icon className="w-5 h-5 text-white" />
-            </div>
-            <h3 className="text-xs font-medium text-gray-600 mb-1 uppercase tracking-wide">{metric.title}</h3>
-            <div className="text-2xl font-bold text-gray-900 mb-2">{metric.value}</div>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
-
 const DropoutsPage: React.FC = () => {
   const [openAdd, setOpenAdd] = useState(false);
   const [openView, setOpenView] = useState(false);
@@ -95,13 +29,6 @@ const DropoutsPage: React.FC = () => {
     absenteeism: "",
     contact: "",
   });
-
-  useEffect(() => {
-    setLoading(true);
-    fetchDropouts()
-      .then((dropouts) => setData(dropouts))
-      .finally(() => setLoading(false));
-  }, []);
 
   const handleView = (row: any) => {
     setSelectedRow(row);
@@ -162,6 +89,80 @@ const DropoutsPage: React.FC = () => {
     setOpenDelete(false);
   };
 
+  useEffect(() => {
+    setLoading(true);
+    fetchDropouts()
+      .then((dropouts) => setData(dropouts))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const dropoutColumns = [
+    {
+      id: "rowNumber",
+      header: "No.",
+      cell: ({ row }: any) => row.index + 1,
+    },
+    { accessorKey: "name", header: "Name" },
+    { accessorKey: "school", header: "School" },
+    { accessorKey: "grade", header: "Grade" },
+    { accessorKey: "reason", header: "Reason" },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }: any) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => handleView(row.original)}>
+              <Eye className="h-4 w-4 mr-2 text-blue-600" /> View Details
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleEdit(row.original)}>
+              <Pencil className="h-4 w-4 mr-2 text-yellow-600" /> Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleDelete(row.original)}>
+              <Trash2 className="h-4 w-4 mr-2 text-red-600" /> Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
+
+  const DropoutMetricCards = ({ data }: { data: any[] }) => {
+    const totalDropouts = data.length;
+    const pregnancyCases = data.filter(d => d.reason && d.reason.toLowerCase().includes('pregnan')).length;
+    const reintegrated = data.filter(d => d.reintegration && d.reintegration.toLowerCase() === 'yes').length;
+    const earlyWarnings = data.filter(d => d.earlyWarning && d.earlyWarning.toLowerCase() === 'yes').length;
+    const metrics = [
+      { title: "Total Dropouts", value: totalDropouts, icon: TrendingDown, color: "#137775", bg: "bg-[#137775]" },
+      { title: "Pregnancy Cases", value: pregnancyCases, icon: Calendar, color: "#099773", bg: "bg-[#099773]" },
+      { title: "Reintegrated", value: reintegrated, icon: Users, color: "#F89D2D", bg: "bg-[#F89D2D]" },
+      { title: "Early Warnings", value: earlyWarnings, icon: Phone, color: "#e01024", bg: "bg-[#e01024]" },
+    ];
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {metrics.map((metric, i) => {
+          const Icon = metric.icon;
+          return (
+            <div key={i} className="bg-white rounded-2xl shadow-lg border min-h-[120px] p-4 flex flex-col items-start">
+              <div className={`p-2 rounded-xl mb-2`} style={{ background: metric.color }}>
+                <Icon className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-xs font-medium text-gray-600 mb-1 uppercase tracking-wide">{metric.title}</h3>
+              <div className="text-2xl font-bold text-gray-900 mb-2">{metric.value}</div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <>
       <Navbar />
@@ -184,32 +185,7 @@ const DropoutsPage: React.FC = () => {
             {loading ? (
               <div className="p-8 text-center">Loading...</div>
             ) : (
-              <DataTable columns={dropoutColumns.map(col =>
-                col.id === 'actions' ? {
-                  ...col,
-                  cell: ({ row }: any) => (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="h-8 w-8 flex items-center justify-center rounded hover:bg-gray-100">
-                          <MoreHorizontal className="w-5 h-5" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => handleView(row.original)}>
-                          <Eye className="h-4 w-4 mr-2 text-blue-600" /> View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEdit(row.original)}>
-                          <Pencil className="h-4 w-4 mr-2 text-yellow-600" /> Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDelete(row.original)}>
-                          <Trash2 className="h-4 w-4 mr-2 text-red-600" /> Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )
-                } : col
-              )} data={data} userType="sectorCoordinator" initialLoading={false} />
+              <DataTable columns={dropoutColumns} data={data} userType="sectorCoordinator" initialLoading={false} />
             )}
           </Card>
         </div>

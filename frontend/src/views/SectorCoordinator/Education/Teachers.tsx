@@ -3,9 +3,9 @@ import { Card } from "@/components/ui/card";
 import { Navbar } from "@/components/navigation/main-navbar";
 import SectorCoordinatorSidebar from "@/views/SectorCoordinator/Navigation/sidebar-menu";
 import { DataTable } from "@/components/tables/farmers/data-table";
-import { Users, BookOpen, Calendar, TrendingDown, Phone, MoreHorizontal, Eye, Pencil, Trash2 } from "lucide-react";
+import { Users, BookOpen, Calendar, TrendingDown, MoreHorizontal, Eye, Pencil, Trash2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { fetchTeachers, createTeacher, updateTeacher, deleteTeacher } from "@/lib/api/api";
 

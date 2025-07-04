@@ -114,79 +114,6 @@ const FertilizerMetricCards = ({ fertilizerTypes, sources }: { fertilizerTypes: 
   );
 };
 
-const fertilizerColumns = [
-  {
-    id: "rowNumber",
-    header: "#",
-    cell: ({ row }: any) => row.index + 1,
-  },
-  { accessorKey: "name", header: "Type" },
-  { accessorKey: "stock", header: "Stock (kg)" },
-  { accessorKey: "distributed", header: "Distributed (kg)" },
-  { accessorKey: "shortage", header: "Shortage (kg)" },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }: any) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className="h-8 w-8 flex items-center justify-center rounded hover:bg-gray-100">
-            <MoreHorizontal className="h-5 w-5" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => { setEditFertilizer(row.original); setEditOpen(true); }}>
-            <Pencil className="h-4 w-4 mr-2 text-yellow-600" /> Edit
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleDeleteFertilizer(row.original)}>
-            <Trash2 className="h-4 w-4 mr-2 text-red-600" /> Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
-  },
-];
-
-const sourceColumns = [
-  {
-    id: "rowNumber",
-    header: "#",
-    cell: ({ row }: any) => row.index + 1,
-  },
-  { accessorKey: "fullName", header: "Full Name" },
-  { accessorKey: "company", header: "Company Name" },
-  { accessorKey: "location", header: "Location" },
-  { accessorKey: "fertilizers", header: "Fertilizers They Have" },
-  { accessorKey: "phone", header: "Phone Number" },
-  { accessorKey: "address", header: "Address" },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }: any) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className="h-8 w-8 flex items-center justify-center rounded hover:bg-gray-100">
-            <MoreHorizontal className="h-5 w-5" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => { setViewSource(row.original); setViewSourceOpen(true); }}>
-            <Eye className="h-4 w-4 mr-2 text-blue-600" /> View Details
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => { setEditSource(row.original); setEditSourceOpen(true); }}>
-            <Pencil className="h-4 w-4 mr-2 text-yellow-600" /> Edit
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleDeleteSource(row.original)}>
-            <Trash2 className="h-4 w-4 mr-2 text-red-600" /> Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
-  },
-];
-
 const FertilizersPage: React.FC = () => {
   const [tab, setTab] = useState("types");
   const [fertilizerTypes, setFertilizerTypes] = useState<any[]>([]);
@@ -194,6 +121,8 @@ const FertilizersPage: React.FC = () => {
   const [addSourceOpen, setAddSourceOpen] = useState(false);
   const [editFertilizer, setEditFertilizer] = useState<any>(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [viewFertilizer, setViewFertilizer] = useState<any>(null);
+  const [viewOpen, setViewOpen] = useState(false);
   const [newFertilizer, setNewFertilizer] = useState({ name: "", stock: "", distributed: "", shortage: "" });
 
   // Sources remain local for now
@@ -251,11 +180,93 @@ const FertilizersPage: React.FC = () => {
     }
   };
 
+  const handleViewFertilizer = (fertilizer: any) => {
+    setViewFertilizer(fertilizer);
+    setViewOpen(true);
+  };
+
   const handleDeleteSource = (source: any) => {
     if (window.confirm("Are you sure you want to delete this fertilizer source?")) {
       setSources(sources.filter((s) => s !== source));
     }
   };
+
+  // Move fertilizerColumns and sourceColumns inside the component
+  const fertilizerColumns = [
+    {
+      id: "rowNumber",
+      header: "#",
+      cell: ({ row }: any) => row.index + 1,
+    },
+    { accessorKey: "name", header: "Type" },
+    { accessorKey: "stock", header: "Stock (kg)" },
+    { accessorKey: "distributed", header: "Distributed (kg)" },
+    { accessorKey: "shortage", header: "Shortage (kg)" },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }: any) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="h-8 w-8 flex items-center justify-center rounded hover:bg-gray-100">
+              <MoreHorizontal className="h-5 w-5" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => handleViewFertilizer(row.original)}>
+              <Eye className="h-4 w-4 mr-2 text-blue-600" /> View Details
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => { setEditFertilizer(row.original); setEditOpen(true); }}>
+              <Pencil className="h-4 w-4 mr-2 text-yellow-600" /> Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleDeleteFertilizer(row.original)}>
+              <Trash2 className="h-4 w-4 mr-2 text-red-600" /> Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
+
+  const sourceColumns = [
+    {
+      id: "rowNumber",
+      header: "#",
+      cell: ({ row }: any) => row.index + 1,
+    },
+    { accessorKey: "fullName", header: "Full Name" },
+    { accessorKey: "company", header: "Company Name" },
+    { accessorKey: "location", header: "Location" },
+    { accessorKey: "fertilizers", header: "Fertilizers They Have" },
+    { accessorKey: "phone", header: "Phone Number" },
+    { accessorKey: "address", header: "Address" },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }: any) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="h-8 w-8 flex items-center justify-center rounded hover:bg-gray-100">
+              <MoreHorizontal className="h-5 w-5" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => { setViewSource(row.original); setViewSourceOpen(true); }}>
+              <Eye className="h-4 w-4 mr-2 text-blue-600" /> View Details
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => { setEditSource(row.original); setEditSourceOpen(true); }}>
+              <Pencil className="h-4 w-4 mr-2 text-yellow-600" /> Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleDeleteSource(row.original)}>
+              <Trash2 className="h-4 w-4 mr-2 text-red-600" /> Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
 
   return (
     <>
@@ -321,6 +332,35 @@ const FertilizersPage: React.FC = () => {
             <Card className="w-full dark:bg-slate-500">
               <TabsContent value="types">
                 <DataTable columns={fertilizerColumns} data={fertilizerTypes} userType="sectorCoordinator" initialLoading={false} />
+                {/* View Fertilizer Dialog */}
+                <Dialog open={viewOpen} onOpenChange={setViewOpen}>
+                  <DialogContent>
+                    <DialogTitle>Fertilizer Details</DialogTitle>
+                    {viewFertilizer && (
+                      <div className="space-y-2 text-black">
+                        <div><b>Type:</b> {viewFertilizer.name}</div>
+                        <div><b>Stock (kg):</b> {viewFertilizer.stock}</div>
+                        <div><b>Distributed (kg):</b> {viewFertilizer.distributed}</div>
+                        <div><b>Shortage (kg):</b> {viewFertilizer.shortage}</div>
+                      </div>
+                    )}
+                  </DialogContent>
+                </Dialog>
+                {/* Edit Fertilizer Dialog */}
+                <Dialog open={editOpen} onOpenChange={setEditOpen}>
+                  <DialogContent>
+                    <DialogTitle>Edit Fertilizer</DialogTitle>
+                    {editFertilizer && (
+                      <form className="space-y-4" onSubmit={handleEditFertilizer}>
+                        <input className="w-full border rounded p-2 text-black" placeholder="Type" value={editFertilizer.name} onChange={e => setEditFertilizer({ ...editFertilizer, name: e.target.value })} required />
+                        <input className="w-full border rounded p-2 text-black" placeholder="Stock (kg)" type="number" value={editFertilizer.stock} onChange={e => setEditFertilizer({ ...editFertilizer, stock: e.target.value })} required />
+                        <input className="w-full border rounded p-2 text-black" placeholder="Distributed (kg)" type="number" value={editFertilizer.distributed} onChange={e => setEditFertilizer({ ...editFertilizer, distributed: e.target.value })} required />
+                        <input className="w-full border rounded p-2 text-black" placeholder="Shortage (kg)" type="number" value={editFertilizer.shortage} onChange={e => setEditFertilizer({ ...editFertilizer, shortage: e.target.value })} required />
+                        <Button type="submit" className="bg-[#137775] text-white">Save</Button>
+                      </form>
+                    )}
+                  </DialogContent>
+                </Dialog>
               </TabsContent>
               <TabsContent value="sources">
                 <Dialog open={viewSourceOpen} onOpenChange={setViewSourceOpen}>

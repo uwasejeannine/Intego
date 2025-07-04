@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   HeartIcon,
-  UserGroupIcon,
   BuildingOffice2Icon,
   ExclamationTriangleIcon,
   ArrowTrendingUpIcon,
@@ -16,28 +15,17 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  AreaChart,
-  Area,
+
 } from 'recharts';
 import SectorCoordinatorSidebar from "@/views/SectorCoordinator/Navigation/sidebar-menu";
 import { Navbar } from "@/components/navigation/main-navbar";
 
 const Health: React.FC = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState('monthly');
-  const [selectedHealthFacility, setSelectedHealthFacility] = useState('all');
-
-  // State for backend data
-  const [overviewStats, setOverviewStats] = useState({ totalPatients: 0, healthFacilities: 0, vaccinationRate: 0, maternalMortality: 0 });
+  const [, setOverviewStats] = useState({ totalPatients: 0, healthFacilities: 0, vaccinationRate: 0, maternalMortality: 0 });
   const [diseaseData, setDiseaseData] = useState<any[]>([]);
-  const [monthlyTrends, setMonthlyTrends] = useState<any[]>([]);
   const [vaccinationData, setVaccinationData] = useState<any[]>([]);
   const [healthFacilities, setHealthFacilities] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     // Fetch diseases
@@ -89,39 +77,6 @@ const Health: React.FC = () => {
       setOverviewStats(prev => ({ ...prev, vaccinationRate: avgCoverage }));
     }
   }, [vaccinationData]);
-
-  const challenges = [
-    {
-      issue: 'Malaria Outbreak',
-      severity: 'high',
-      affectedAreas: ['Kinyinya', 'Jabana'],
-      cases: 1250,
-      recommendation: 'Immediate deployment of bed nets and indoor spraying. Increase surveillance and community education programs.',
-    },
-    {
-      issue: 'Vaccine Supply Shortage',
-      severity: 'medium',
-      affectedAreas: ['Remera', 'Kimironko'],
-      cases: 0,
-      recommendation: 'Emergency procurement of vaccines and temporary redistribution from other districts.',
-    },
-    {
-      issue: 'Staff Shortage',
-      severity: 'medium',
-      affectedAreas: ['Multiple locations'],
-      cases: 0,
-      recommendation: 'Deploy mobile health teams and prioritize recruitment of critical care staff.',
-    },
-  ];
-
-  const COLORS = ['#137775', '#099773', '#F89D2D'];
-
-  // Aggregate stats from fetched data
-  const totalPatients = healthFacilities.reduce((sum: number, f: any) => sum + (f.patients || 0), 0);
-  const healthFacilityCount = healthFacilities.length;
-  const vaccinationRate = overviewStats.vaccinationRate;
-  const maternalMortality = overviewStats.maternalMortality || 'N/A';
-
   // Stat cards: Only show real data
   const totalVaccines = vaccinationData.length;
   const totalDiseases = diseaseData.length;
@@ -187,16 +142,16 @@ const Health: React.FC = () => {
                 Disease Trends
               </h3>
               {latestDiseaseData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={latestDiseaseData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="cases" fill="#137775" name="Cases" />
-                  </BarChart>
-                </ResponsiveContainer>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={latestDiseaseData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="cases" fill="#137775" name="Cases" />
+                </BarChart>
+              </ResponsiveContainer>
               ) : (
                 <div className="text-center text-gray-400 py-16">No disease data available</div>
               )}
@@ -208,17 +163,17 @@ const Health: React.FC = () => {
                 Vaccination Coverage vs Targets
               </h3>
               {latestVaccinationData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={latestVaccinationData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="coverage" fill="#ef8f20" name="Current Coverage" />
-                    <Bar dataKey="target" fill="#099773" name="Target" />
-                  </BarChart>
-                </ResponsiveContainer>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={latestVaccinationData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="coverage" fill="#ef8f20" name="Current Coverage" />
+                  <Bar dataKey="target" fill="#099773" name="Target" />
+                </BarChart>
+              </ResponsiveContainer>
               ) : (
                 <div className="text-center text-gray-400 py-16">No vaccination data available</div>
               )}

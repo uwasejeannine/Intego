@@ -17,11 +17,6 @@ import {
 
 const API_URL = "/api/v1/pesticides";
 
-const pesticideTypesInit = [
-  { name: "Lambda-cyhalothrin", stock: 600, distributed: 500, shortage: 10 },
-  { name: "Imidacloprid", stock: 400, distributed: 350, shortage: 5 },
-  { name: "Glyphosate", stock: 300, distributed: 250, shortage: 0 },
-];
 
 // Sample pesticide sources
 const pesticideSourcesInit = [

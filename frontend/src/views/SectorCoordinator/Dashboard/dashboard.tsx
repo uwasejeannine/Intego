@@ -31,10 +31,10 @@ const COLORS = ["#137775", "#099773", "#ef8f20"];
 const SectorCoordinatorDashboardPage: React.FC = () => {
   const [farmers, setFarmers] = useState([]);
   const [cooperatives, setCooperatives] = useState([]);
-  const [crops, setCrops] = useState([]);
+  const [, setCrops] = useState([]);
   const [healthFacilities, setHealthFacilities] = useState([]);
   const [schools, setSchools] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [,setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,8 +65,6 @@ const SectorCoordinatorDashboardPage: React.FC = () => {
     fetchData();
   }, []);
 
-  // Mock data for health and education
-  const totalPopulation = 486240;
 
   // Mock sector performance data
   const sectorsData = [
@@ -120,7 +118,6 @@ const SectorCoordinatorDashboardPage: React.FC = () => {
     },
   ];
 
-  const totalFarmers = (farmers.length || 0) + (cooperatives.length || 0);
 
   return (
     <>

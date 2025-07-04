@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { cn } from "@/lib/utils";
 import { Icons } from "@/components/ui/icons";
@@ -19,6 +19,7 @@ import useMediaQuery from "@/hooks/useMediaQuery";
 import { useAuthStore } from "@/stores/authStore";
 import { Link } from "react-router-dom";
 import { User } from "@/types/types";
+import { fetchFeedbackForUser } from "@/lib/api/api";
 
 type NavbarProps = {
   className?: string;
@@ -28,8 +29,9 @@ export function Navbar({ className = "", ...props }: NavbarProps) {
   const { logout, userId, userType } = useAuthStore();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [, setLoading] = useState<boolean>(true);
+  const [, setError] = useState<string | null>(null);
+  const [feedbackCount, setFeedbackCount] = useState(0);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -51,6 +53,11 @@ export function Navbar({ className = "", ...props }: NavbarProps) {
 
     fetchUser();
   }, [userId]);
+
+  useEffect(() => {
+    if ((userType !== "sectorCoordinator" && userType !== "districtAdministrator") || !userId) return;
+    fetchFeedbackForUser(Number(userId)).then(fbs => setFeedbackCount(fbs.length));
+  }, [userId, userType]);
 
   const handleLogout = () => {
     logout();
@@ -95,8 +102,13 @@ export function Navbar({ className = "", ...props }: NavbarProps) {
           <li className="lg:mr-[30px] flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div className="flex items-center cursor-pointer">
+                <div className="flex items-center cursor-pointer relative">
                   <Icons.NotificationIcon className="w-[24px] h-[24px] text-white" />
+                  {(userType === "sectorCoordinator" || userType === "districtAdministrator") && feedbackCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs px-1.5 py-0.5">
+                      {feedbackCount}
+                    </span>
+                  )}
                 </div>
               </DropdownMenuTrigger>
 

@@ -19,7 +19,6 @@ const API_URL = "/api/v1/hospital";
 const Facilities: React.FC = () => {
   const [hospitals, setHospitals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [selectedHospital, setSelectedHospital] = useState<any>(null);

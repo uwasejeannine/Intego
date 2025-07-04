@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import {
   overviewItemsForITAdmin,
   overviewItemsForSeniorManagement,
-  overviewItemsForProjectManager,
   overviewItemsForMandEOfficer,
 } from "./sub-components/overviewItems";
 import { UserType } from "@/types/types";
@@ -35,8 +34,6 @@ const SpeedDial: React.FC<SpeedDialProps> = ({ user, userTypePath }) => {
         return overviewItemsForSeniorManagement;
       case "MandEOfficer":
         return overviewItemsForMandEOfficer;
-      case "projectManager":
-        return overviewItemsForProjectManager;
       case "ITAdmin":
         return overviewItemsForITAdmin;
       default:
@@ -62,7 +59,7 @@ const SpeedDial: React.FC<SpeedDialProps> = ({ user, userTypePath }) => {
               exit={{ opacity: 0, x: 50 }}
               transition={{ duration: 0.3 }}
             >
-              {overviewDisplayItems.map((item, index) => (
+              {overviewDisplayItems.map((item: any, index: number) => (
                 <React.Fragment key={index}>
                   {item.dialogOptions ? (
                     <Dialog>
@@ -86,7 +83,7 @@ const SpeedDial: React.FC<SpeedDialProps> = ({ user, userTypePath }) => {
                         </DialogHeader>
                         <div className="grid grid-cols-2 gap-4">
                           {item.dialogOptions.map(
-                            (dialogOption, dialogIndex) => (
+                            (dialogOption: any, dialogIndex: number) => (
                               <Link
                                 key={dialogIndex}
                                 to={`/${userTypePath}${dialogOption.href}`}

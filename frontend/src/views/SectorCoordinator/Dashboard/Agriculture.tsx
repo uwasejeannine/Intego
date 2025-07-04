@@ -12,12 +12,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
   Cell,
 } from 'recharts';
 import SectorCoordinatorSidebar from "@/views/SectorCoordinator/Navigation/sidebar-menu";
@@ -26,7 +21,6 @@ import { fetchFarmers, fetchCrops, fetchCooperatives } from '@/lib/api/api';
 
 const Agriculture: React.FC = () => {
   const [selectedSeason, setSelectedSeason] = useState('2025-A');
-  const [selectedCrop, setSelectedCrop] = useState('all');
   const [farmers, setFarmers] = useState<any[]>([]);
   const [crops, setCrops] = useState<any[]>([]);
   const [cooperatives, setCooperatives] = useState<any[]>([]);
@@ -196,7 +190,7 @@ const Agriculture: React.FC = () => {
                     <YAxis label={{ value: 'T/Ha', angle: -90, position: 'insideLeft' }} />
                     <Tooltip />
                     <Bar dataKey="yield" name="Yield (T/Ha)">
-                      {yieldData.map((entry, index) => (
+                      {yieldData.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={barColors[index] || '#137775'} />
                       ))}
                     </Bar>
@@ -218,7 +212,7 @@ const Agriculture: React.FC = () => {
                     <YAxis allowDecimals={false} />
                     <Tooltip />
                     <Bar dataKey="count" name="Count">
-                      {farmersVsCoopsData.map((entry, index) => (
+                      {farmersVsCoopsData.map((_, index) => (
                         <Cell key={`cell-coop-${index}`} fill={farmersVsCoopsColors[index] || '#099773'} />
                       ))}
                     </Bar>

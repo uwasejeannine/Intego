@@ -39,7 +39,7 @@ const updatedAddUserFormSchema = z.object({
   sectorofOperations: z.enum(["Education", "Agriculture", "Health"], {
     required_error: "Please select a sector of operations",
   }),
-  roleId: z.number().min(1, "Please select a role"),
+  roleId: z.string().min(1, "Please select a role"),
 });
 
 type FormData = z.infer<typeof updatedAddUserFormSchema>;
@@ -49,7 +49,7 @@ const steps = [
   { label: "Step 2", description: "Professional Information" },
 ];
 
-function StepperFormActions({ onSubmit, isLoading }) {
+function StepperFormActions({ onSubmit, isLoading }: { onSubmit: () => void; isLoading: boolean }) {
   const {
     nextStep,
     prevStep,
@@ -117,7 +117,7 @@ const CreateUserForm: React.FC = () => {
       gender: "",
       phoneNumber: "",
       sectorofOperations: undefined,
-      roleId: 0,
+      roleId: "",
     },
   });
 
@@ -148,7 +148,10 @@ const CreateUserForm: React.FC = () => {
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      await addUser(data);
+      await addUser({
+        ...data,
+        roleId: parseInt(data.roleId, 10),
+      });
       form.reset();
       setIsLoading(false);
       toast({
@@ -326,7 +329,7 @@ const CreateUserForm: React.FC = () => {
                                   </FormLabel>
                                   <Select
                                     onValueChange={field.onChange}
-                                    defaultValue={field.value}
+                                    value={field.value}
                                   >
                                     <FormControl>
                                       <SelectTrigger className="focus:border-[#137775] focus:ring-[#137775]">
@@ -396,7 +399,7 @@ const CreateUserForm: React.FC = () => {
                                 </FormLabel>
                                 <Select
                                   onValueChange={field.onChange}
-                                  defaultValue={field.value}
+                                  value={field.value}
                                 >
                                   <FormControl>
                                     <SelectTrigger className="focus:border-[#137775] focus:ring-[#137775]">
@@ -440,10 +443,8 @@ const CreateUserForm: React.FC = () => {
                                   Role
                                 </FormLabel>
                                 <Select
-                                  onValueChange={(value) =>
-                                    field.onChange(parseInt(value))
-                                  }
-                                  defaultValue={field.value.toString()}
+                                  onValueChange={field.onChange}
+                                  value={field.value}
                                 >
                                   <FormControl>
                                     <SelectTrigger className="focus:border-[#137775] focus:ring-[#137775]">

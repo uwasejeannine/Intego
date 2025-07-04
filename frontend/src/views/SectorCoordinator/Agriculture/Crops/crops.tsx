@@ -12,7 +12,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { DataTable } from "@/components/tables/farmers/data-table";
 
 const API_URL = "http://localhost:3000/api/v1/crops";
@@ -38,7 +38,6 @@ const NUMBER_COLUMN = {
 };
 
 export default function CropsPage() {
-  const [tab, setTab] = useState("all");
   const [crops, setCrops] = useState<any[]>([]);
   const [currentSeasonCrops, setCurrentSeasonCrops] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

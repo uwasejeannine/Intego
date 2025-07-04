@@ -62,7 +62,6 @@ export const useAuthStore = create<AuthState>()(
           
           // Extract what we know exists from your database query
           const {
-            message,
             token,
             roleId,
             first_name,
@@ -79,7 +78,6 @@ export const useAuthStore = create<AuthState>()(
           const phoneNumber = response.phoneNumber || null;
           const agencyName = response.agencyName || null;
           const sectorofOperations = response.sectorofOperations || null;
-          const position = response.position || null;
           
           const userType = roleIdToUserTypeMap[roleId] || null;
           console.log('🎭 Mapped userType:', userType, 'from roleId:', roleId);

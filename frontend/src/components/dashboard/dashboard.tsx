@@ -1,51 +1,34 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  BarChart,
   ResponsiveContainer,
   CartesianGrid,
   XAxis,
   YAxis,
   Tooltip,
   Legend,
-  Bar,
   LineChart,
   Line,
-  AreaChart,
-  Area,
   PieChart,
   Pie,
   Cell,
 } from "recharts";
 import { useAuthStore } from "@/stores/authStore";
-import { Link, useNavigate } from "react-router-dom";
-import AnimatedNumber from "@/components/ui/animate-numbers";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { UserType, Category, AgencyName } from "@/types/types";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import useMediaQuery from "@/hooks/useMediaQuery";
-import { useParams } from "react-router-dom";
-import { fetchReports, fetchUsers, fetchRoles } from "@/lib/api/api";
-import type { Report, Role } from "@/types/types";
+import { fetchUsers, fetchRoles } from "@/lib/api/api";
+import type { Role } from "@/types/types";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-
-// Import individual icons from lucide-react as fallback
 import { 
   Users, 
   UserCheck, 
   UserX, 
   DollarSign, 
   Info,
-  MoreVertical,
   User,
   Edit,
   Trash2
 } from "lucide-react";
-
-interface DashboardProps {
-  user: UserType;
-}
 
 export interface Project {
   id: number;
@@ -53,17 +36,9 @@ export interface Project {
   cumulativeAchievements: number;
 }
 
-const CATEGORIES: Category[] = [
-  { id: "1", name: "Crop Production Projects" },
-  { id: "2", name: "Livestock Development Projects" },
-  { id: "3", name: "Agricultural Research Projects" },
-];
-
-const AGENCIES: AgencyName[] = ["MINAGRI", "RAB", "NAEB"];
-
-const AdminDashboard: React.FC<DashboardProps> = ({ user }) => {
-  const { userType, first_name } = useAuthStore();
-  const [users, setUsers] = useState<any[]>([]);
+const AdminDashboard: React.FC = () => {
+  const { first_name } = useAuthStore();
+  const [, setUsers] = useState<any[]>([]);
   const [userStats, setUserStats] = useState({ total: 0, active: 0, inactive: 0 });
   const [recentUsers, setRecentUsers] = useState<any[]>([]);
   const [userRegistrations, setUserRegistrations] = useState<any[]>([]);
@@ -77,13 +52,13 @@ const AdminDashboard: React.FC<DashboardProps> = ({ user }) => {
         const users = await fetchUsers();
         setUsers(users);
         const total = users.length;
-        const active = users.filter((u) => u.status === "Active").length;
-        const inactive = users.filter((u) => u.status === "Inactive").length;
+        const active = users.filter((u: any) => u.status === "Active").length;
+        const inactive = users.filter((u: any) => u.status === "Inactive").length;
         setUserStats({ total, active, inactive });
         setRecentUsers(users.slice(0, 4));
         // Group registrations by month for the line chart
         const regByMonth: { [key: string]: number } = {};
-        users.forEach((u) => {
+        users.forEach((u: any) => {
           const date = new Date(u.createdAt);
           const month = date.toLocaleString("default", { month: "short" });
           regByMonth[month] = (regByMonth[month] || 0) + 1;
@@ -123,7 +98,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ user }) => {
     icon: React.ComponentType<any>;
     trend?: number;
     color: string;
-  }> = ({ title, value, subtitle, icon: Icon, trend, color }) => {
+  }> = ({ title, value, subtitle, icon: Icon, trend }) => {
     return (
       <Card className="cards dark:bg-slate-800">
         <CardContent className="p-6">
@@ -219,7 +194,7 @@ const AdminDashboard: React.FC<DashboardProps> = ({ user }) => {
                   dataKey="value"
                   label
                 >
-                  {pieData.map((entry, index) => (
+                  {pieData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
                   ))}
                 </Pie>

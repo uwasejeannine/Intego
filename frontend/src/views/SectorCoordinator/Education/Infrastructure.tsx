@@ -5,7 +5,7 @@ import SectorCoordinatorSidebar from "@/views/SectorCoordinator/Navigation/sideb
 import { DataTable } from "@/components/tables/farmers/data-table";
 import { BookOpen, Users, TrendingDown, MapPin, MoreHorizontal, Eye, Pencil, Trash2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { fetchInfrastructures, createInfrastructure, updateInfrastructure, deleteInfrastructure } from "@/lib/api/api";
 

@@ -28,7 +28,6 @@ export function DataTableFacetedFilter<TData, TValue>({
   title,
   options,
 }: DataTableFacetedFilterProps<TData, TValue>) {
-  const facets = column?.getFacetedUniqueValues();
   const [selectedValues, setSelectedValues] = React.useState(
     new Set(column?.getFilterValue() as string[]),
   );

@@ -5,7 +5,7 @@ import SectorCoordinatorSidebar from "@/views/SectorCoordinator/Navigation/sideb
 import { DataTable } from "@/components/tables/farmers/data-table";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Eye, MoreHorizontal, Pencil, Trash2, Sun, CloudRain, Wind, AlertTriangle } from "lucide-react";
+import { Eye, MoreHorizontal, Pencil, Trash2, Sun, CloudRain,  AlertTriangle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -147,7 +147,7 @@ const forecastColumns = (
 
 const WeatherInfoPage: React.FC = () => {
   const [forecast, setForecast] = useState(forecastInit);
-  const [alerts, setAlerts] = useState(alertsInit);
+  const [alerts] = useState(alertsInit);
   // For forecast actions
   const [addForecastOpen, setAddForecastOpen] = useState(false);
   const [viewForecast, setViewForecast] = useState<any>(null);
