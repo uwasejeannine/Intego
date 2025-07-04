@@ -22,8 +22,8 @@ const LoadingUI = () => {
         className="h-40 w-40 flex items-center justify-center"
       />
       <div className="flex items-center justify-center flex-col p-5">
-        <h1 className="font-bold text-2xl">MINAGRI</h1>
-        <p className="text-lg">Project Tracker System</p>
+        <h1 className="font-bold text-2xl">Local Goverment</h1>
+        <p className="text-lg">Intego360</p>
       </div>
       <div>
         <Icons.spinner className="animate-spin text-primary dark:text-white" />
