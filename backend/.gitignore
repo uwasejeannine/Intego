@@ -1,5 +1,5 @@
 /node_modules
-config
+-/config
 
 # Environment variables
 .env
@@ -11,4 +11,3 @@ dist/
 
 # History
 .history/
-```
