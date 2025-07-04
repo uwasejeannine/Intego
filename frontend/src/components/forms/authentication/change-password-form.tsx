@@ -53,7 +53,7 @@ export function ChangePasswordForm({ onSubmit }: ChangePasswordFormProps) {
       onSubmit(); // Callback function to execute after successful password change
       toast({
         title: "Password Changed",
-        description: "Your password has been successfully changed.",
+        description: "  password has been successfully changed.",
       });
     } catch (error: any) {
       setIsLoading(false);
@@ -85,7 +85,7 @@ export function ChangePasswordForm({ onSubmit }: ChangePasswordFormProps) {
               <FormControl>
                 <Input
                   type="password"
-                  placeholder="Enter your new password"
+                  placeholder="Enter   new password"
                   {...field}
                 />
               </FormControl>
@@ -103,7 +103,7 @@ export function ChangePasswordForm({ onSubmit }: ChangePasswordFormProps) {
               <FormControl>
                 <Input
                   type="password"
-                  placeholder="Re-enter your new password"
+                  placeholder="Re-enter   new password"
                   {...field}
                 />
               </FormControl>
@@ -114,7 +114,7 @@ export function ChangePasswordForm({ onSubmit }: ChangePasswordFormProps) {
 
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-          Reset Your Password
+          Reset   Password
         </Button>
       </form>
     </Form>

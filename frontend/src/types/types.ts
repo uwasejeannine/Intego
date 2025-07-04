@@ -99,7 +99,7 @@ export type Profile = {
   gender?: string;
   agencyName?: string;
   sectorofOperations?: string;
-  yourRole?: string;
+   Role?: string;
   position?: string;
   roleId?: string;
   newPassword?: string;

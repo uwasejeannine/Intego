@@ -143,7 +143,7 @@ const UpdateUser: React.FC<UpdateUserProps> = () => {
               </DialogTrigger>
               <DialogContent className="dark:bg-slate-700">
                 <DialogHeader>
-                  <DialogTitle>Update Your Profile Image</DialogTitle>
+                  <DialogTitle>Update   Profile Image</DialogTitle>
                   <DialogDescription>
                     <ImageUpload />
                   </DialogDescription>

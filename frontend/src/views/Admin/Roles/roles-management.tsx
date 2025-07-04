@@ -197,7 +197,7 @@ const RolesManagementPage: React.FC = () => {
                     <Icons.RoleIcon className="w-6 h-6 text-gray-400" />
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No roles found</h3>
-                  <p className="text-gray-500 mb-4">Get started by adding your first role.</p>
+                  <p className="text-gray-500 mb-4">Get started by adding   first role.</p>
                   <Button 
                     onClick={() => handleOpen()} 
                     className="bg-[#137775] hover:bg-[#0f5f5d] text-white"

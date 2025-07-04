@@ -63,7 +63,7 @@ export function PasswordResetForm({
       // Code already sent
       toast({
         title: "Code Already Sent",
-        description: "A verification code has already been sent to your email.",
+        description: "A verification code has already been sent to   email.",
         icon: <Icons.EmailAlreadySent className="w-10 h-10 text-gray-600" />,
       });
     } else if (error.response?.status === 404) {
@@ -78,7 +78,7 @@ export function PasswordResetForm({
       toast({
         title: "Account Locked",
         description:
-          "Your account has been locked due to multiple failed attempts. Please contact support to unlock your account.",
+          "  account has been locked due to multiple failed attempts. Please contact support to unlock   account.",
         icon: <Icons.AccountLockedIcon className="w-10 h-10 text-red-600" />,
       });
     } else if (error.response?.status >= 500) {

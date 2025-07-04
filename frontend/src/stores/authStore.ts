@@ -26,7 +26,7 @@ interface AuthState {
   logout: () => void;
 }
 
-// Map roleId to userType - Updated to match your database
+// Map roleId to userType - Updated to match   database
 const roleIdToUserTypeMap: Record<number, UserType> = {
   2: "admin",  
   3: "districtAdministrator",            
@@ -60,7 +60,7 @@ export const useAuthStore = create<AuthState>()(
           const response = await login(email, password);
           console.log('📡 Full API Response:', response);
           
-          // Extract what we know exists from your database query
+          // Extract what we know exists from   database query
           const {
             token,
             roleId,
@@ -69,7 +69,7 @@ export const useAuthStore = create<AuthState>()(
             profileImage,
           } = response;
           
-          // Use response.id as userId since your DB returns "id"
+          // Use response.id as userId since   DB returns "id"
           const userId = response.userId || response.id;
           
           // Set defaults for fields that might not exist

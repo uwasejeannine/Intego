@@ -102,7 +102,7 @@ const ProductivityPage: React.FC = () => {
           {/* Header */}
           <div className="w-full max-w-6xl">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">District Productivity Overview</h1>
-            <p className="text-gray-600">Monitor agricultural productivity across your district</p>
+            <p className="text-gray-600">Monitor agricultural productivity across   district</p>
           </div>
 
           {/* Metric Cards */}

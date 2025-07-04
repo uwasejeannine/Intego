@@ -88,7 +88,7 @@ export function UserAuthForm({ onForgotPasswordClick }: UserAuthFormProps) {
         toast({
           title: "Account Locked",
           description:
-            "Your account has been locked due to multiple failed login attempts. Check your email for unlocking instructions.",
+            "  account has been locked due to multiple failed login attempts. Check   email for unlocking instructions.",
           icon: <Icons.AccountLockedIcon className="w-10 h-10 text-red-600" />,
         });
       } else if (error.response?.status >= 404) {
@@ -153,7 +153,7 @@ export function UserAuthForm({ onForgotPasswordClick }: UserAuthFormProps) {
                     type="password"
                     {...field}
                     disabled={isLoading}
-                    placeholder="Enter your password"
+                    placeholder="Enter   password"
                   />
                 </FormControl>
                 <FormMessage>

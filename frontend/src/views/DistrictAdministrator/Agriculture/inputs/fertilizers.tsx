@@ -373,7 +373,7 @@ const FertilizersPage: React.FC = () => {
               </div>
               <textarea
                 className="w-full border rounded p-2 text-black min-h-[100px]"
-                placeholder="Enter your feedback..."
+                placeholder="Enter   feedback..."
                 value={feedbackText}
                 onChange={e => setFeedbackText(e.target.value)}
                 required

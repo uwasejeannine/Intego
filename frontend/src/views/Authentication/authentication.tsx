@@ -72,7 +72,7 @@ export function AuthenticationPage() {
                 Forgot Password
               </h1>
               <p className="text-gray-500 text-base">
-                Enter your email to verify your account
+                Enter   email to verify   account
               </p>
             </div>
             <div className="form-card">
@@ -91,7 +91,7 @@ export function AuthenticationPage() {
                 Verification Code
               </h1>
               <p className="text-gray-500 text-base">
-                Enter the verification code sent to your email
+                Enter the verification code sent to   email
               </p>
             </div>
             <div className="form-card">
@@ -110,7 +110,7 @@ export function AuthenticationPage() {
                 Reset Password
               </h1>
               <p className="text-gray-500 text-base">
-                Enter your new password
+                Enter   new password
               </p>
             </div>
             <div className="form-card">
@@ -173,7 +173,7 @@ export function AuthenticationPage() {
           <div className="text-center">
             <img
               src={IntegoImage}
-              alt="Project Tracking"
+              alt="Intego360"
               className="max-w-xs mx-auto mb-4"
             />
             <h3 className="text-white text-xl font-bold uppercase tracking-wider">
