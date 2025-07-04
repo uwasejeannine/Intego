@@ -89,7 +89,7 @@ class AuthController {
           <div style="background-color: #078ECE; color: white; text-align: center; padding: 10px;">
             <h2 style="font-weight: bold;">Account Lockout Notification</h2>
           </div>
-          <p style="text-align: center;">Your account has been temporarily locked due to multiple unsuccessful login attempts. Please contact the administrator to unlock your account.</p>
+          <p style="text-align: center;">  account has been temporarily locked due to multiple unsuccessful login attempts. Please contact the administrator to unlock   account.</p>
           <div style="text-align: center; color: #078ECE;">
             <p>The Digital Office | MINAGRI</p>
           </div>
@@ -104,7 +104,7 @@ class AuthController {
         }
 
         return res.status(403).json({
-          message: "Account locked. Please check your email for instructions to unlock your account.",
+          message: "Account locked. Please check   email for instructions to unlock   account.",
         });
       }
 
@@ -130,7 +130,7 @@ class AuthController {
           // ... email code ...
 
           return res.status(403).json({
-            message: "Account locked due to too many failed attempts. Please check your email for instructions.",
+            message: "Account locked due to too many failed attempts. Please check   email for instructions.",
           });
         }
 
@@ -156,7 +156,7 @@ class AuthController {
           username: user.username,
           email: user.email
         }, 
-        process.env.JWT_SECRET || process.env.JWT_SECRET_KEY || "your_secret_key",
+        process.env.JWT_SECRET || process.env.JWT_SECRET_KEY || " _secret_key",
         { expiresIn: "24h" }
       );
 
@@ -241,7 +241,7 @@ class AuthController {
           (codeExpirationTime - currentTime) / (1000 * 60),
         ); // Calculate time difference in minutes
         return res.status(400).json({
-          message: `A code was already sent to your email. Please wait ${timeDiff} minutes before requesting a new one.`,
+          message: `A code was already sent to   email. Please wait ${timeDiff} minutes before requesting a new one.`,
         });
       }
 
@@ -281,7 +281,7 @@ class AuthController {
         <div style="background-color: #078ECE; color: white; text-align: center; padding: 10px;">
           <h2 style="font-weight: bold;">Password Reset Code</h2>
         </div>
-        <p style="text-align: center;">Your password reset code is:</p>
+        <p style="text-align: center;">  password reset code is:</p>
         <pre style="text-align: center; font-size: 20px; background: #f0f0f0; padding: 10px; border-radius: 5px;">${code}</pre>
         <p style="text-align: center; color: #666; font-size: 14px;">This code will expire in 15 minutes.</p>
         <div style="text-align: center; color: #078ECE;">
@@ -297,7 +297,7 @@ class AuthController {
         } else {
           console.log('✅ Password reset email sent:', info.response);
           return res.status(200).json({ 
-            message: "Password reset code sent to your email",
+            message: "Password reset code sent to   email",
             success: true 
           });
         }

@@ -247,14 +247,14 @@ class UsersController {
             <h2 style="font-weight: bold;">Welcome to Intego360</h2>
           </div>
           <p style="text-align: center;">Hello ${newUser.first_name},</p>
-          <p style="text-align: center;">Your account has been created successfully.</p>
-          <p style="text-align: center;">Your username is:</p>
+          <p style="text-align: center;">  account has been created successfully.</p>
+          <p style="text-align: center;">  username is:</p>
           <pre style="text-align: center; font-size: 20px; background: #f0f0f0; padding: 10px; border-radius: 5px;">${newUser.username}</pre>
-          <p style="text-align: center;">Your temporary password is:</p>
+          <p style="text-align: center;">  temporary password is:</p>
           <pre style="text-align: center; font-size: 20px; background: #f0f0f0; padding: 10px; border-radius: 5px;">${tempPassword}</pre>
           <p style="text-align: center;">Please use the following link to login:</p>
           <p style="text-align: center;"><a href="${loginLink}" style="color: #137775; text-decoration: none; font-weight: bold;">${loginLink}</a></p>
-          <p style="text-align: center; color: #666; font-size: 14px;">Please change your password after your first login for security purposes.</p>
+          <p style="text-align: center; color: #666; font-size: 14px;">Please change   password after   first login for security purposes.</p>
           <div style="text-align: center; color: #137775; margin-top: 20px;">
             <p>The Local Government | Rwanda</p>
           </div>
