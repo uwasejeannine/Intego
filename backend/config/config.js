@@ -28,7 +28,12 @@ module.exports = {
     dialect: "postgres",
   },
   production: {
-    use_env_variable: "POSTGRES_URL",
+    // use_env_variable: "POSTGRES_URL",
+    username: "intego_db_71w3_user",
+    password: "ksJ07vBdwNiKJS94A26IiRJdnO7dS2Nz",
+    database: "intego_db_71w3",
+    host: "dpg-d1jvcu2li9vc738s6rqg-a.oregon-postgres.render.com",
+    port: 5432,
     dialect: "postgres",
     dialectOptions: {
       ssl: {
