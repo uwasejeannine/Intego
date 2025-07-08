@@ -28,9 +28,9 @@ interface AuthState {
 
 // Map roleId to userType - Updated to match   database
 const roleIdToUserTypeMap: Record<number, UserType> = {
-  2: "admin",  
-  3: "districtAdministrator",            
-  1: "sectorCoordinator",      
+  3: "admin",  
+  4: "districtAdministrator",            
+  2: "sectorCoordinator",      
 };
 
 export const useAuthStore = create<AuthState>()(

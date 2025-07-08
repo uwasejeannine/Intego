@@ -96,7 +96,13 @@ function App() {
                 />
                 <Route
                   path="admin/*"
-                  element={<AdminRoutes />}
+                  element={
+                    isAuthenticated && userType === "admin" ? (
+                      <AdminRoutes />
+                    ) : (
+                      <Navigate to="/auth/login" replace />
+                    )
+                  }
                 />
                 <Route path="auth/*" element={<AuthenticationRoutes />} />
                 <Route
