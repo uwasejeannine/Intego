@@ -96,7 +96,7 @@ const Agriculture: React.FC = () => {
                 <p className="mt-1 text-sm text-gray-500">
                   Monitor agricultural performance and support farmer development
                 </p>
-              </div>
+          </div>
               <div className="flex flex-col md:flex-row md:items-center md:space-x-6 mt-4 md:mt-0">
                 <div className="flex items-center space-x-2">
                   <label htmlFor="season" className="text-sm font-medium text-gray-700"></label>
@@ -116,8 +116,8 @@ const Agriculture: React.FC = () => {
                   <span className="text-base font-semibold text-[#137775]">Kinyinya Sector</span>
                 </div>
               </div>
-            </div>
-          </div>
+                  </div>
+                </div>
 
           {/* Overview Statistics - Metric Card Style */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
