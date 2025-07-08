@@ -8,7 +8,7 @@ const path = require("path");
 
 dotenv.config();
 
-const { PORT, DB_NAME } = process.env;
+const { PORT } = process.env;
 
 const app = express();
 
@@ -24,7 +24,7 @@ const server = app.listen(PORT || 3000, () => {
 const dbCon = async () => {
   try {
     await db.sequelize.authenticate();
-    console.log(`Database ${DB_NAME} connected successfully`);
+    console.log(`Database Intego360 connected successfully`);
   } catch (error) {
     console.log(error);
   }

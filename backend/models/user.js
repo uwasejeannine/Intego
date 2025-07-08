@@ -4,20 +4,9 @@ const bcrypt = require("bcrypt");
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate(models) {
-      // Define associations here
-      User.belongsTo(models.Project, {
-        foreignKey: "projectId",
-        as: "project",
-        onDelete: "CASCADE",
-      });
       User.hasMany(models.Backup, {
         foreignKey: "userId",
         as: "backups",
-        onDelete: "CASCADE",
-      });
-      User.hasMany(models.Discussion, {
-        foreignKey: "userId",
-        as: "discussions",
         onDelete: "CASCADE",
       });
       User.belongsTo(models.Role, {
