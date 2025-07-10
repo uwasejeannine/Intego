@@ -16,9 +16,9 @@ import { useToast } from "@/components/ui/use-toast";
 
 // Define a mapping of roleId to role name
 const roleMap = {
-   2: "admin",  
-  3: "districtAdministrator",            
-  1: "sectorCoordinator",      
+  3: "admin",
+  4: "districtAdministrator",
+  2: "sectorCoordinator",
 };
 
 interface CellComponentProps {

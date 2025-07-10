@@ -19,7 +19,7 @@ const Diseases: React.FC = () => {
   const [editDisease, setEditDisease] = useState<any>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
-  const [newDisease, setNewDisease] = useState({ name: "", available_at: "", consultation_fee: "", referral_required: false });
+  const [newDisease, setNewDisease] = useState({ name: "", available_at: "", consultation_fee: "", referral_required: false, symptoms: [], treatment: "" });
   
   // Conditions state
   const [viewCondition, setViewCondition] = useState<any>(null);
@@ -51,13 +51,15 @@ const Diseases: React.FC = () => {
       body: JSON.stringify({
         ...newDisease,
         consultation_fee: Number(newDisease.consultation_fee),
+        symptoms: newDisease.symptoms,
+        treatment: newDisease.treatment,
       })
     });
     if (res.ok) {
       const created = await res.json();
       setDiseases([...diseases, created]);
       setAddOpen(false);
-      setNewDisease({ name: "", available_at: "", consultation_fee: "", referral_required: false });
+      setNewDisease({ name: "", available_at: "", consultation_fee: "", referral_required: false, symptoms: [], treatment: "" });
     }
   };
 
@@ -213,6 +215,8 @@ const Diseases: React.FC = () => {
                             <input className="w-full border rounded p-2 text-black" placeholder="Disease Name" value={newDisease.name} onChange={e => setNewDisease({ ...newDisease, name: e.target.value })} required />
                             <input className="w-full border rounded p-2 text-black" placeholder="Available At" value={newDisease.available_at} onChange={e => setNewDisease({ ...newDisease, available_at: e.target.value })} required />
                             <input className="w-full border rounded p-2 text-black" placeholder="Consultation Fee" type="number" value={newDisease.consultation_fee} onChange={e => setNewDisease({ ...newDisease, consultation_fee: e.target.value })} required />
+                            <input className="w-full border rounded p-2 text-black" placeholder="Symptoms (comma separated)" value={newDisease.symptoms.join ? newDisease.symptoms.join(", ") : newDisease.symptoms} onChange={e => setNewDisease({ ...newDisease, symptoms: e.target.value.split(",").map(s => s.trim()) })} />
+                            <input className="w-full border rounded p-2 text-black" placeholder="Treatment" value={newDisease.treatment} onChange={e => setNewDisease({ ...newDisease, treatment: e.target.value })} />
                             <div className="flex items-center space-x-2">
                               <input type="checkbox" checked={!!newDisease.referral_required} onChange={e => setNewDisease({ ...newDisease, referral_required: e.target.checked })} />
                               <label className="text-black">Referral Required</label>
@@ -256,6 +260,8 @@ const Diseases: React.FC = () => {
                           <div><b>Available At:</b> {viewDisease.available_at}</div>
                           <div><b>Consultation Fee:</b> {viewDisease.consultation_fee}</div>
                           <div><b>Referral Required:</b> {viewDisease.referral_required ? "Yes" : "No"}</div>
+                          {viewDisease.symptoms && <div><b>Symptoms:</b> {Array.isArray(viewDisease.symptoms) ? viewDisease.symptoms.join(", ") : viewDisease.symptoms}</div>}
+                          {viewDisease.treatment && <div><b>Treatment:</b> {viewDisease.treatment}</div>}
                         </div>
                       )}
                     </DialogContent>

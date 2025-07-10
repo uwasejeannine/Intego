@@ -40,7 +40,6 @@ const NUMBER_COLUMN = {
 export default function CropsPage() {
   const [crops, setCrops] = useState<any[]>([]);
   const [currentSeasonCrops, setCurrentSeasonCrops] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editCrop, setEditCrop] = useState<any>(null);
@@ -66,15 +65,12 @@ export default function CropsPage() {
   }, []);
 
   const fetchCrops = async () => {
-    setLoading(true);
     try {
       const res = await fetch(API_URL);
       const data = await res.json();
       setCrops(data?.data || data || []);
     } catch {
       setCrops([]);
-    } finally {
-      setLoading(false);
     }
   };
   const fetchCurrentSeason = async () => {
@@ -220,10 +216,10 @@ export default function CropsPage() {
             </Card>
             <Card className="w-full dark:bg-slate-500">
               <TabsContent value="all">
-                <DataTable columns={COLUMNS_WITH_ACTIONS} data={crops} userType="sectorCoordinator" initialLoading={loading} />
+                <DataTable columns={COLUMNS_WITH_ACTIONS} data={crops} userType="sectorCoordinator" />
               </TabsContent>
               <TabsContent value="current">
-                <DataTable columns={COLUMNS_WITH_ACTIONS} data={currentSeasonCrops} userType="sectorCoordinator" initialLoading={loading} />
+                <DataTable columns={COLUMNS_WITH_ACTIONS} data={currentSeasonCrops} userType="sectorCoordinator" />
               </TabsContent>
             </Card>
           </Tabs>

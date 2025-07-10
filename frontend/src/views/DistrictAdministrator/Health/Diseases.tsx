@@ -164,6 +164,8 @@ const Diseases: React.FC = () => {
                           <div><b>Available At:</b> {viewDisease.available_at}</div>
                           <div><b>Consultation Fee:</b> {viewDisease.consultation_fee}</div>
                           <div><b>Referral Required:</b> {viewDisease.referral_required ? "Yes" : "No"}</div>
+                          {viewDisease.symptoms && <div><b>Symptoms:</b> {Array.isArray(viewDisease.symptoms) ? viewDisease.symptoms.join(", ") : viewDisease.symptoms}</div>}
+                          {viewDisease.treatment && <div><b>Treatment:</b> {viewDisease.treatment}</div>}
                         </div>
                       )}
                     </DialogContent>

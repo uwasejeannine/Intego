@@ -26,6 +26,14 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
       },
+      symptoms: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
+      treatment: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

@@ -45,7 +45,6 @@ const COOP_COLUMNS = [
 
 const FarmersPage: React.FC = () => {
   const [farmers, setFarmers] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<'individual' | 'cooperative'>('individual');
   const [regions, setRegions] = useState<any[]>([]);
@@ -100,7 +99,6 @@ const FarmersPage: React.FC = () => {
   }, []);
 
   const fetchFarmers = async () => {
-    setLoading(true);
     try {
       const res = await fetch(API_URL);
       const data = await res.json();
@@ -108,8 +106,6 @@ const FarmersPage: React.FC = () => {
       setFarmers(data?.data || data || []);
     } catch (e) {
       setFarmers([]);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -438,10 +434,10 @@ const FarmersPage: React.FC = () => {
             </Card>
             <Card className="w-full dark:bg-slate-500">
               <TabsContent value="individual">
-                <DataTable columns={INDIVIDUAL_COLUMNS} data={farmers} userType="sectorCoordinator" initialLoading={loading} />
+                <DataTable columns={INDIVIDUAL_COLUMNS} data={farmers} userType="sectorCoordinator" />
               </TabsContent>
               <TabsContent value="cooperative">
-                <DataTable columns={COOP_COLUMNS_WITH_ACTIONS} data={coopList} userType="sectorCoordinator" initialLoading={loading} />
+                <DataTable columns={COOP_COLUMNS_WITH_ACTIONS} data={coopList} userType="sectorCoordinator" />
               </TabsContent>
             </Card>
           </Tabs>

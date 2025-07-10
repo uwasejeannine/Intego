@@ -38,6 +38,31 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
       },
+      symptoms: {
+        type: DataTypes.TEXT, // store as JSON string or comma-separated
+        allowNull: true,
+        get() {
+          const raw = this.getDataValue('symptoms');
+          try {
+            return raw ? JSON.parse(raw) : [];
+          } catch {
+            return raw ? raw.split(',').map(s => s.trim()) : [];
+          }
+        },
+        set(val) {
+          if (Array.isArray(val)) {
+            this.setDataValue('symptoms', JSON.stringify(val));
+          } else if (typeof val === 'string') {
+            this.setDataValue('symptoms', val);
+          } else {
+            this.setDataValue('symptoms', null);
+          }
+        }
+      },
+      treatment: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
     },
     {
       sequelize,

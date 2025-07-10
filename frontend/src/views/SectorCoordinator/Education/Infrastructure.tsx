@@ -45,7 +45,6 @@ const InfrastructurePage: React.FC = () => {
   const [openDelete, setOpenDelete] = useState(false);
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
     school: "",
     classrooms: "",
@@ -62,10 +61,11 @@ const InfrastructurePage: React.FC = () => {
   });
 
   useEffect(() => {
-    setLoading(true);
     fetchInfrastructures()
       .then((infras) => setData(infras))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        // No longer needed
+      });
   }, []);
 
   const handleView = (row: any) => {
@@ -187,11 +187,7 @@ const InfrastructurePage: React.FC = () => {
             <Button className="bg-[#137775]" onClick={handleAdd}>Add Infrastructure</Button>
           </div>
           <Card className="w-full dark:bg-slate-500">
-            {loading ? (
-              <div className="p-8 text-center">Loading...</div>
-            ) : (
-              <DataTable columns={infraColumns} data={data} userType="sectorCoordinator" initialLoading={false} />
-            )}
+            <DataTable columns={infraColumns} data={data} userType="sectorCoordinator" initialLoading={false} />
           </Card>
         </div>
       </main>

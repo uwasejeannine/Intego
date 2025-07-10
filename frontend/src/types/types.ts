@@ -1,3 +1,8 @@
+// Role ID mapping enforced throughout the app:
+// 3: admin
+// 4: districtAdministrator
+// 2: sectorCoordinator
+
 import * as React from "react";
 
 export const flagStatus = [
@@ -13,16 +18,11 @@ export type Role = {
 };
 
 export const roles = [
-  { label: "MandEOfficer", value: "MandEOfficer" },
-  { label: "ITAdmin", value: "ITAdmin" },
-  { label: "projectManager", value: "projectManager" },
-  { label: "seniorManagement", value: "seniorManagement" },
-  { label: "Sector Coordinator", value: "sectorCoordinator" },
-  { label: "District Administrator", value: "districtAdministrator" },
-  { label: "Admin", value: "admin" },
+  { label: "Admin", value: "admin", id: 3 },
+  { label: "District Administrator", value: "districtAdministrator", id: 4 },
+  { label: "Sector Coordinator", value: "sectorCoordinator", id: 2 },
 ];
 
-export type AgencyName = "MINAGRI" | "NAEB" | "RAB";
 
 export type SidebarItem = {
   label: React.ReactNode;

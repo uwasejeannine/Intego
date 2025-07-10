@@ -16,7 +16,6 @@ const DropoutsPage: React.FC = () => {
   const [openDelete, setOpenDelete] = useState(false);
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
     name: "",
     school: "",
@@ -90,10 +89,8 @@ const DropoutsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    setLoading(true);
     fetchDropouts()
-      .then((dropouts) => setData(dropouts))
-      .finally(() => setLoading(false));
+      .then((dropouts) => setData(dropouts));
   }, []);
 
   const dropoutColumns = [
@@ -182,11 +179,7 @@ const DropoutsPage: React.FC = () => {
             <Button className="bg-[#137775]" onClick={handleAdd}>Add Dropout</Button>
           </div>
           <Card className="w-full dark:bg-slate-500">
-            {loading ? (
-              <div className="p-8 text-center">Loading...</div>
-            ) : (
-              <DataTable columns={dropoutColumns} data={data} userType="sectorCoordinator" initialLoading={false} />
-            )}
+            <DataTable columns={dropoutColumns} data={data} userType="sectorCoordinator" initialLoading={false} />
           </Card>
         </div>
       </main>
