@@ -9,6 +9,8 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
+const API_URL = import.meta.env.VITE_API_URL || "https://intego360.onrender.com/api/v1";
+
 const Diseases: React.FC = () => {
   const [tab, setTab] = useState("diseases");
   const [diseases, setDiseases] = useState<any[]>([]);
@@ -30,7 +32,7 @@ const Diseases: React.FC = () => {
   const [newCondition, setNewCondition] = useState({ name: "", available_at: "", consultation_fee: "", referral_required: false });
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/v1/diseases')
+    fetch(`${API_URL}/diseases`)
       .then(res => res.json())
       .then(data => setDiseases(Array.isArray(data) ? data : data.data || []))
       .finally(() => setLoading(false));
@@ -45,7 +47,7 @@ const Diseases: React.FC = () => {
 
   const handleAddDisease = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch('http://localhost:3000/api/v1/diseases', {
+    const res = await fetch(`${API_URL}/diseases`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

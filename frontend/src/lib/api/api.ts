@@ -14,8 +14,9 @@ import { Contributor } from "@/types/types";
 
 import { useAuthStore } from "@/stores/authStore";
 
+// Use environment variable for API URL if available, otherwise default to Render deployment
 const api = axios.create({
-  baseURL: "http://localhost:3000/api/v1",
+  baseURL: import.meta.env.VITE_API_URL || "https://intego360.onrender.com/api/v1",
 });
 
 export async function login(email: string, password: string) {

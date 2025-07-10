@@ -18,7 +18,7 @@ import {
 import { useAuthStore } from "@/stores/authStore";
 import { fetchFeedbackForCrop } from "@/lib/api/api";
 
-const API_URL = "/api/v1/pesticides";
+const API_URL = import.meta.env.VITE_API_URL || "https://intego360.onrender.com/api/v1/pesticides";
 
 
 const pesticideSourcesInit = [
@@ -145,7 +145,7 @@ const PesticidesPage: React.FC = () => {
   const { userId } = useAuthStore();
 
   useEffect(() => {
-    fetch(API_URL)
+    fetch(`${API_URL}`)
       .then(res => res.json())
       .then(data => setPesticideTypes(data));
   }, []);
@@ -198,7 +198,7 @@ const PesticidesPage: React.FC = () => {
     if (!feedbackPesticide || !userId) return;
     setFeedbackSubmitting(true);
     try {
-      await fetch("/api/v1/feedback", {
+      await fetch(`${API_URL}/feedback`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -228,7 +228,7 @@ const PesticidesPage: React.FC = () => {
     if (!feedbackSource || !userId) return;
     setFeedbackSourceSubmitting(true);
     try {
-      await fetch("/api/v1/feedback", {
+      await fetch(`${API_URL}/feedback`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

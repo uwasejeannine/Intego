@@ -8,6 +8,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
+const API_URL = import.meta.env.VITE_API_URL || "https://intego360.onrender.com/api/v1";
+
 const Diseases: React.FC = () => {
   const [tab, setTab] = useState("diseases");
   const [diseases, setDiseases] = useState<any[]>([]);
@@ -21,7 +23,7 @@ const Diseases: React.FC = () => {
   const [viewConditionOpen, setViewConditionOpen] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/v1/diseases')
+    fetch(`${API_URL}/diseases`)
       .then(res => res.json())
       .then(data => setDiseases(Array.isArray(data) ? data : data.data || []))
       .finally(() => setLoading(false));
