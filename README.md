@@ -154,6 +154,25 @@ Watch a walkthrough of the Intego360 project here:
 
 ---
 
+**Testing Credetials
+** 
+Admin. 
+Email: jeannineuwasee@gmail.com
+Passward: 4cd5b4f0ae576ef145b4
+Once logged in as an admin, you can create additional users and assign them different roles to access the platform based on their responsibilities.
+
+Sector Coodinator
+
+Email: jeannine.uwase@gmail.com
+Passward: 812c2637efa3344c6532
+
+District Administrator
+
+Email: gentilleuwamahoro28@gmail.com
+Passward: 812c2637efa3344c6532
+
+
+
 ## Live Project
 
 Access the deployed app here:  
