@@ -434,10 +434,10 @@ const FarmersPage: React.FC = () => {
             </Card>
             <Card className="w-full dark:bg-slate-500">
               <TabsContent value="individual">
-                <DataTable columns={INDIVIDUAL_COLUMNS} data={farmers} userType="sectorCoordinator" />
+                <DataTable columns={INDIVIDUAL_COLUMNS} data={farmers} userType="sectorCoordinator" initialLoading={false} />
               </TabsContent>
               <TabsContent value="cooperative">
-                <DataTable columns={COOP_COLUMNS_WITH_ACTIONS} data={coopList} userType="sectorCoordinator" />
+                <DataTable columns={COOP_COLUMNS_WITH_ACTIONS} data={coopList} userType="sectorCoordinator" initialLoading={false} />
               </TabsContent>
             </Card>
           </Tabs>

@@ -17,7 +17,6 @@ import { DataTable } from "@/components/tables/farmers/data-table";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://intego360.onrender.com/api/v1/crops";
 const CURRENT_SEASON_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/current-season` : "https://intego360.onrender.com/api/v1/current-season";
-const FEEDBACK_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/feedback` : "https://intego360.onrender.com/api/v1/feedback";
 
 const CROP_COLUMNS = [
   { accessorKey: "crop_name", header: () => <div className="text-center">Crop Name</div>, cell: ({ row }: any) => <div className="text-center">{row.original.crop_name}</div> },
@@ -217,10 +216,10 @@ export default function CropsPage() {
             </Card>
             <Card className="w-full dark:bg-slate-500">
               <TabsContent value="all">
-                <DataTable columns={COLUMNS_WITH_ACTIONS} data={crops} userType="sectorCoordinator" />
+                <DataTable columns={COLUMNS_WITH_ACTIONS} data={crops} userType="sectorCoordinator" initialLoading={false} />
               </TabsContent>
               <TabsContent value="current">
-                <DataTable columns={COLUMNS_WITH_ACTIONS} data={currentSeasonCrops} userType="sectorCoordinator" />
+                <DataTable columns={COLUMNS_WITH_ACTIONS} data={currentSeasonCrops} userType="sectorCoordinator" initialLoading={false} />
               </TabsContent>
             </Card>
           </Tabs>
