@@ -17,9 +17,8 @@ import { DataTable } from "@/components/tables/farmers/data-table";
 import { useAuthStore } from "@/stores/authStore";
 import { fetchFeedbackForCrop } from "@/lib/api/api";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://intego360.onrender.com/api/v1/crops";
-const CURRENT_SEASON_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/current-season` : "https://intego360.onrender.com/api/v1/current-season";
-const FEEDBACK_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/feedback` : "https://intego360.onrender.com/api/v1/feedback";
+const API_URL = "http://localhost:3000/api/v1/crops";
+const CURRENT_SEASON_URL = "http://localhost:3000/api/v1/crops/current-season";
 
 const CROP_COLUMNS = [
   { accessorKey: "crop_name", header: () => <div className="text-center">Crop Name</div>, cell: ({ row }: any) => <div className="text-center">{row.original.crop_name}</div> },
@@ -117,7 +116,7 @@ export default function CropsPage() {
     if (!feedbackCrop || !userId) return;
     setFeedbackSubmitting(true);
     try {
-      await fetch(FEEDBACK_URL, {
+      await fetch("http://localhost:3000/api/v1/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -147,7 +146,7 @@ export default function CropsPage() {
     if (!replyFeedback || !userId) return;
     setFeedbackSubmitting(true);
     try {
-      await fetch(FEEDBACK_URL, {
+      await fetch("http://localhost:3000/api/v1/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

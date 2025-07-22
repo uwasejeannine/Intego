@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const API_URL = "http://localhost:3000/api/v1/farmers/individual/";
 const COOP_API_URL = "http://localhost:3000/api/v1/farmers/cooperatives";
@@ -381,52 +382,54 @@ const FarmersPage: React.FC = () => {
                         <Button variant={tab === 'individual' ? 'default' : 'outline'} onClick={() => setTab('individual')}>Individual</Button>
                         <Button variant={tab === 'cooperative' ? 'default' : 'outline'} onClick={() => setTab('cooperative')}>Cooperative</Button>
                       </div>
-                      {tab === 'individual' ? (
-                        <form className="space-y-4" onSubmit={handleSubmit}>
-                          <input name="first_name" placeholder="First Name" value={form.first_name} onChange={handleChange} required className="w-full border rounded p-2 text-black" />
-                          <input name="last_name" placeholder="Last Name" value={form.last_name} onChange={handleChange} required className="w-full border rounded p-2 text-black" />
-                          <input name="email" placeholder="Email" value={form.email} onChange={handleChange} required className="w-full border rounded p-2 text-black" />
-                          <input name="phone" placeholder="Phone" value={form.phone} onChange={handleChange} required className="w-full border rounded p-2 text-black" />
-                          <select name="region_id" value={form.region_id} onChange={handleChange} required className="w-full border rounded p-2 text-black">
-                            <option value="">Select Region</option>
-                            {regions.map((r) => (
-                              <option key={r.id} value={r.id}>{r.regionName}</option>
-                            ))}
-                          </select>
-                          <input name="address" placeholder="Address" value={form.address} onChange={handleChange} required className="w-full border rounded p-2 text-black" />
-                          <input name="farm_location" placeholder="Farm Location" value={form.farm_location} onChange={handleChange} required className="w-full border rounded p-2 text-black" />
-                          <input name="total_farm_area_hectares" type="number" placeholder="Total Farm Area (Ha)" value={form.total_farm_area_hectares} onChange={handleChange} required className="w-full border rounded p-2 text-black" />
-                          <input name="years_experience" type="number" placeholder="Years Experience" value={form.years_experience} onChange={handleChange} required className="w-full border rounded p-2 text-black" />
-                          <select name="farmer_type" value={form.farmer_type} onChange={handleChange} required className="w-full border rounded p-2 text-black">
-                            <option value="commercial">Commercial</option>
-                            <option value="subsistence">Subsistence</option>
-                          </select>
-                          <input name="primary_crops" placeholder="Primary Crops (comma separated)" value={form.primary_crops} onChange={handleChange} required className="w-full border rounded p-2 text-black" />
-                          <input name="registration_date" type="date" value={form.registration_date} onChange={handleChange} required className="w-full border rounded p-2 text-black" />
-                          <Button type="submit" disabled={submitting}>{submitting ? "Adding..." : "Add Farmer"}</Button>
-                        </form>
-                      ) : (
-                        <form className="space-y-4" onSubmit={handleCoopSubmit}>
-                          <input name="cooperativeName" placeholder="Cooperative Name" value={coopForm.cooperativeName} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
-                          <input name="location" placeholder="Location" value={coopForm.location} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
-                          <input name="numberOfFarmers" type="number" placeholder="Number of Farmers" value={coopForm.numberOfFarmers} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
-                          <input name="totalLandSize" type="number" placeholder="Total Land Size (Ha)" value={coopForm.totalLandSize} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
-                          <input name="contactPersonPhone" placeholder="Contact Person Phone" value={coopForm.contactPersonPhone} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
-                          <input name="contactPersonEmail" placeholder="Contact Person Email" value={coopForm.contactPersonEmail} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
-                          <select name="regionId" value={coopForm.regionId} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black">
-                            <option value="">Select Region</option>
-                            {regions.map((r) => (
-                              <option key={r.id} value={r.id}>{r.regionName}</option>
-                            ))}
-                          </select>
-                          <input name="mainCrops" placeholder="Main Crops (comma separated)" value={coopForm.mainCrops} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
-                          <div className="flex items-center space-x-2">
-                            <input type="checkbox" name="isActive" checked={coopForm.isActive} onChange={e => setCoopForm({ ...coopForm, isActive: e.target.checked })} />
-                            <label htmlFor="isActive" className="text-black">Active</label>
-                          </div>
-                          <Button type="submit" disabled={submitting}>{submitting ? "Adding..." : "Add Cooperative"}</Button>
-                        </form>
-                      )}
+                      <ScrollArea className="max-h-[400px] p-2">
+                        {tab === 'individual' ? (
+                          <form className="space-y-4" onSubmit={handleSubmit}>
+                            <input name="first_name" placeholder="First Name" value={form.first_name} onChange={handleChange} required className="w-full border rounded p-2 text-black" />
+                            <input name="last_name" placeholder="Last Name" value={form.last_name} onChange={handleChange} required className="w-full border rounded p-2 text-black" />
+                            <input name="email" placeholder="Email" value={form.email} onChange={handleChange} required className="w-full border rounded p-2 text-black" />
+                            <input name="phone" placeholder="Phone" value={form.phone} onChange={handleChange} required className="w-full border rounded p-2 text-black" />
+                            <select name="region_id" value={form.region_id} onChange={handleChange} required className="w-full border rounded p-2 text-black">
+                              <option value="">Select Region</option>
+                              {regions.map((r) => (
+                                <option key={r.id} value={r.id}>{r.regionName}</option>
+                              ))}
+                            </select>
+                            <input name="address" placeholder="Address" value={form.address} onChange={handleChange} required className="w-full border rounded p-2 text-black" />
+                            <input name="farm_location" placeholder="Farm Location" value={form.farm_location} onChange={handleChange} required className="w-full border rounded p-2 text-black" />
+                            <input name="total_farm_area_hectares" type="number" placeholder="Total Farm Area (Ha)" value={form.total_farm_area_hectares} onChange={handleChange} required className="w-full border rounded p-2 text-black" />
+                            <input name="years_experience" type="number" placeholder="Years Experience" value={form.years_experience} onChange={handleChange} required className="w-full border rounded p-2 text-black" />
+                            <select name="farmer_type" value={form.farmer_type} onChange={handleChange} required className="w-full border rounded p-2 text-black">
+                              <option value="commercial">Commercial</option>
+                              <option value="subsistence">Subsistence</option>
+                            </select>
+                            <input name="primary_crops" placeholder="Primary Crops (comma separated)" value={form.primary_crops} onChange={handleChange} required className="w-full border rounded p-2 text-black" />
+                            <input name="registration_date" type="date" value={form.registration_date} onChange={handleChange} required className="w-full border rounded p-2 text-black" />
+                            <Button type="submit" disabled={submitting}>{submitting ? "Adding..." : "Add Farmer"}</Button>
+                          </form>
+                        ) : (
+                          <form className="space-y-4" onSubmit={handleCoopSubmit}>
+                            <input name="cooperativeName" placeholder="Cooperative Name" value={coopForm.cooperativeName} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
+                            <input name="location" placeholder="Location" value={coopForm.location} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
+                            <input name="numberOfFarmers" type="number" placeholder="Number of Farmers" value={coopForm.numberOfFarmers} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
+                            <input name="totalLandSize" type="number" placeholder="Total Land Size (Ha)" value={coopForm.totalLandSize} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
+                            <input name="contactPersonPhone" placeholder="Contact Person Phone" value={coopForm.contactPersonPhone} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
+                            <input name="contactPersonEmail" placeholder="Contact Person Email" value={coopForm.contactPersonEmail} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
+                            <select name="regionId" value={coopForm.regionId} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black">
+                              <option value="">Select Region</option>
+                              {regions.map((r) => (
+                                <option key={r.id} value={r.id}>{r.regionName}</option>
+                              ))}
+                            </select>
+                            <input name="mainCrops" placeholder="Main Crops (comma separated)" value={coopForm.mainCrops} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
+                            <div className="flex items-center space-x-2">
+                              <input type="checkbox" name="isActive" checked={coopForm.isActive} onChange={e => setCoopForm({ ...coopForm, isActive: e.target.checked })} />
+                              <label htmlFor="isActive" className="text-black">Active</label>
+                            </div>
+                            <Button type="submit" disabled={submitting}>{submitting ? "Adding..." : "Add Cooperative"}</Button>
+                          </form>
+                        )}
+                      </ScrollArea>
                     </DialogContent>
                   </Dialog>
                 </div>
@@ -434,10 +437,10 @@ const FarmersPage: React.FC = () => {
             </Card>
             <Card className="w-full dark:bg-slate-500">
               <TabsContent value="individual">
-                <DataTable columns={INDIVIDUAL_COLUMNS} data={farmers} userType="sectorCoordinator" initialLoading={false} />
+                <DataTable columns={INDIVIDUAL_COLUMNS} data={farmers} userType="sectorCoordinator" />
               </TabsContent>
               <TabsContent value="cooperative">
-                <DataTable columns={COOP_COLUMNS_WITH_ACTIONS} data={coopList} userType="sectorCoordinator" initialLoading={false} />
+                <DataTable columns={COOP_COLUMNS_WITH_ACTIONS} data={coopList} userType="sectorCoordinator" />
               </TabsContent>
             </Card>
           </Tabs>

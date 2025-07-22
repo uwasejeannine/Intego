@@ -162,13 +162,13 @@ const AdminDashboard: React.FC = () => {
               icon={UserX}
               color="#ef4444"
               />
-              <StatCard
-              title="Revenue"
-              value={"$3,345"}
-              subtitle="This month"
-              icon={DollarSign}
-              color="#137775"
-              />
+             <StatCard
+  title="Verified Users"
+  value={3}
+  subtitle="Accounts with verified emails"
+  icon={UserX}
+  color="#3b82f6"
+/>
             </div>
           </div>
 

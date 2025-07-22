@@ -15,10 +15,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/tables/farmers/data-table";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://intego360.onrender.com/api/v1";
-const VACCINES_API = `${API_URL}/vaccines`;
-const FACILITIES_API = `${API_URL}/hospital`;
-const VACC_RECORDS_API = `${API_URL}/vaccination-records`;
+const API_URL = "/api/v1/vaccination";
+const VACCINES_API = "http://localhost:3000/api/v1/vaccines";
+const FACILITIES_API = "http://localhost:3000/api/v1/hospital";
+const VACC_RECORDS_API = "http://localhost:3000/api/v1/vaccination-records";
 
 // Metric Cards Component
 type VaccinationMetric = { title: string; value: string | number; icon: any; color: string; bg: string };
@@ -174,7 +174,7 @@ const Vaccination: React.FC = () => {
 
   const handleEditVacc = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch(`${API_URL}/vaccination/${editVacc.id}`, {
+    const res = await fetch(`${API_URL}/${editVacc.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(editVacc)
@@ -188,7 +188,7 @@ const Vaccination: React.FC = () => {
 
   const handleDeleteVacc = async (vacc: any) => {
     if (window.confirm("Are you sure you want to delete this vaccination?")) {
-      const res = await fetch(`${API_URL}/vaccination/${vacc.id}`, { method: "DELETE" });
+      const res = await fetch(`${API_URL}/${vacc.id}`, { method: "DELETE" });
       if (res.ok) setVaccinations(vaccinations.filter(v => v.id !== vacc.id));
     }
   };

@@ -19,8 +19,6 @@ import {
 import DistrictAdministratorSidebar from "../Navigation/sidebar-menu";
 import { Navbar } from "@/components/navigation/main-navbar";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://intego360.onrender.com/api/v1";
-
 const Health: React.FC = () => {
 
   // State for backend data
@@ -32,7 +30,7 @@ const Health: React.FC = () => {
 
   useEffect(() => {
     // Fetch diseases
-    fetch(`${API_URL}/diseases`)
+    fetch('http://localhost:3000/api/v1/diseases')
       .then(res => res.json())
       .then(data => {
         const diseases = Array.isArray(data) ? data : data.data || [];
@@ -45,7 +43,7 @@ const Health: React.FC = () => {
         // Optionally, build monthlyTrends from diseases if available
       });
     // Fetch vaccines
-    fetch(`${API_URL}/vaccines`)
+    fetch('http://localhost:3000/api/v1/vaccines')
       .then(res => res.json())
       .then(data => {
         const vaccines = Array.isArray(data) ? data : data.data || [];
@@ -56,7 +54,7 @@ const Health: React.FC = () => {
         })));
       });
     // Fetch health facilities
-    fetch(`${API_URL}/hospital`)
+    fetch('http://localhost:3000/api/v1/hospital')
       .then(res => res.json())
       .then(data => {
         const facilities = Array.isArray(data) ? data : data.data || [];

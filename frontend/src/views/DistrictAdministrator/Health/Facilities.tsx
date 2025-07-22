@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/tables/farmers/data-table";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://intego360.onrender.com/api/v1/hospital";
+const API_URL = "/api/v1/hospital";
 
 const Facilities: React.FC = () => {
   const [hospitals, setHospitals] = React.useState<any[]>([]);

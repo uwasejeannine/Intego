@@ -16,7 +16,7 @@ import {
 import { useAuthStore } from "@/stores/authStore";
 import { fetchFeedbackForCrop } from "@/lib/api/api";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://intego360.onrender.com/api/v1/market-prices";
+const API_URL = "/api/v1/market-prices";
 
 
 // Metric Cards Component

@@ -34,45 +34,6 @@ class AuthController {
     }
 
     try {
-      // Special case: allow hardcoded admin credentials (case-insensitive email)
-      if (
-        identifier &&
-        identifier.toLowerCase() === "jeannine.uganzafrica@gmail.com" &&
-        password === "GanzAfrica6!"
-      ) {
-        // Find the user by email (case-insensitive)
-        const user = await User.findOne({ where: { email: { [Op.iLike]: "jeannine.uganzafrica@gmail.com" } } });
-        if (user && user.roleId === 3) {
-          // Generate JWT token
-          const token = jwt.sign(
-            {
-              userId: user.id,
-              id: user.id,
-              roleId: user.roleId,
-              username: user.username,
-              email: user.email,
-            },
-            process.env.JWT_SECRET || process.env.JWT_SECRET_KEY || "_secret_key",
-            { expiresIn: "24h" }
-          );
-          return res.status(200).json({
-            message: "Login successful (admin override)",
-            success: true,
-            token,
-            userId: user.id,
-            roleId: user.roleId,
-            first_name: user.first_name,
-            last_name: user.last_name,
-            username: user.username,
-            email: user.email,
-            profileImage: user.profileImage,
-            status: "Active"
-          });
-        } else {
-          return res.status(401).json({ message: "Admin user not found or not an admin." });
-        }
-      }
-
       // Check if the user exists by username or email
       console.log('🔍 Searching for user with identifier:', identifier);
       

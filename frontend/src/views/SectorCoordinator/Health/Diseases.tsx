@@ -9,8 +9,6 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://intego360.onrender.com/api/v1";
-
 const Diseases: React.FC = () => {
   const [tab, setTab] = useState("diseases");
   const [diseases, setDiseases] = useState<any[]>([]);
@@ -21,8 +19,7 @@ const Diseases: React.FC = () => {
   const [editDisease, setEditDisease] = useState<any>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
-  // Change the newDisease state initialization to explicitly type symptoms as string[]
-  const [newDisease, setNewDisease] = useState<{ name: string; available_at: string; consultation_fee: string; referral_required: boolean; symptoms: string[]; treatment: string }>({ name: "", available_at: "", consultation_fee: "", referral_required: false, symptoms: [], treatment: "" });
+  const [newDisease, setNewDisease] = useState({ name: "", available_at: "", consultation_fee: "", referral_required: false, symptoms: [], treatment: "" });
   
   // Conditions state
   const [viewCondition, setViewCondition] = useState<any>(null);
@@ -33,7 +30,7 @@ const Diseases: React.FC = () => {
   const [newCondition, setNewCondition] = useState({ name: "", available_at: "", consultation_fee: "", referral_required: false });
 
   useEffect(() => {
-    fetch(`${API_URL}/diseases`)
+    fetch('http://localhost:3000/api/v1/diseases')
       .then(res => res.json())
       .then(data => setDiseases(Array.isArray(data) ? data : data.data || []))
       .finally(() => setLoading(false));
@@ -48,7 +45,7 @@ const Diseases: React.FC = () => {
 
   const handleAddDisease = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch(`${API_URL}/diseases`, {
+    const res = await fetch('http://localhost:3000/api/v1/diseases', {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -218,7 +215,7 @@ const Diseases: React.FC = () => {
                             <input className="w-full border rounded p-2 text-black" placeholder="Disease Name" value={newDisease.name} onChange={e => setNewDisease({ ...newDisease, name: e.target.value })} required />
                             <input className="w-full border rounded p-2 text-black" placeholder="Available At" value={newDisease.available_at} onChange={e => setNewDisease({ ...newDisease, available_at: e.target.value })} required />
                             <input className="w-full border rounded p-2 text-black" placeholder="Consultation Fee" type="number" value={newDisease.consultation_fee} onChange={e => setNewDisease({ ...newDisease, consultation_fee: e.target.value })} required />
-                            <input className="w-full border rounded p-2 text-black" placeholder="Symptoms (comma separated)" value={Array.isArray(newDisease.symptoms) ? newDisease.symptoms.join(", ") : String(newDisease.symptoms)} onChange={e => setNewDisease({ ...newDisease, symptoms: e.target.value.split(",").map(s => s.trim()) as string[] })} />
+                            <input className="w-full border rounded p-2 text-black" placeholder="Symptoms (comma separated)" value={newDisease.symptoms.join ? newDisease.symptoms.join(", ") : newDisease.symptoms} onChange={e => setNewDisease({ ...newDisease, symptoms: e.target.value.split(",").map(s => s.trim()) })} />
                             <input className="w-full border rounded p-2 text-black" placeholder="Treatment" value={newDisease.treatment} onChange={e => setNewDisease({ ...newDisease, treatment: e.target.value })} />
                             <div className="flex items-center space-x-2">
                               <input type="checkbox" checked={!!newDisease.referral_required} onChange={e => setNewDisease({ ...newDisease, referral_required: e.target.checked })} />
