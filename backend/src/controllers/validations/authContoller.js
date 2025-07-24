@@ -2,7 +2,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
-const { User, Sequelize } = require("../../../models/index");
+const { User, Role, Sequelize } = require("../../../models/index");
 const { Op } = Sequelize;
 
 class AuthController {
@@ -24,7 +24,9 @@ class AuthController {
     console.log('🔍 Password provided:', password ? 'Yes' : 'No');
 
     if (!identifier || !password) {
+      console.log('❌ Missing credentials');
       return res.status(400).json({ 
+        status: 'error',
         message: "Username/email and password are required",
         received: {
           identifier: !!identifier,
@@ -41,6 +43,11 @@ class AuthController {
         where: {
           [Op.or]: [{ username: identifier }, { email: identifier }],
         },
+        include: [{
+          model: Role,
+          as: 'role',
+          attributes: ['id', 'name']
+        }],
         attributes: [
           "id",
           "username",
@@ -52,6 +59,8 @@ class AuthController {
           "profileImage",
           "loginAttempts",
           "status",
+          "district_id",
+          "sector_id"
         ],
       });
 
@@ -59,52 +68,18 @@ class AuthController {
 
       if (!user) {
         console.log('❌ User not found');
-        return res.status(404).json({ message: "User not found" });
+        return res.status(404).json({ 
+          status: 'error',
+          message: "User not found" 
+        });
       }
 
       // Check if the account is locked
       if (user.status === "Locked") {
         console.log('🔒 Account is locked');
-        
-        // Send an email about the account lockout
-        const transporter = nodemailer.createTransport({
-          service: "Gmail",
-          port: 465,
-          secure: true,
-          auth: {
-            user: process.env.EMAIL_USERNAME || "jeannineuwasee@gmail.com",
-            pass: process.env.EMAIL_PASSWORD || "yeur whbl uqmm bpea",
-          },
-          debug: true,
-        });
-
-        const mailOptions = {
-          from: `"Digital Office" <${process.env.EMAIL_USERNAME || "jeannineuwasee@gmail.com"}>`,
-          to: user.email,
-          subject: "Account Lockout Notification",
-          html: `
-          <div style="text-align: center;">
-            <img src="https://www.minagri.gov.rw/index.php?eID=dumpFile&t=f&f=1679&token=c456432515e20118795fbbd0cce379ac2bcd0a14" alt="Logo" style="width: 100px; height: 100px;">
-          </div>
-          <div style="background-color: #078ECE; color: white; text-align: center; padding: 10px;">
-            <h2 style="font-weight: bold;">Account Lockout Notification</h2>
-          </div>
-          <p style="text-align: center;">  account has been temporarily locked due to multiple unsuccessful login attempts. Please contact the administrator to unlock   account.</p>
-          <div style="text-align: center; color: #078ECE;">
-            <p>The Digital Office | MINAGRI</p>
-          </div>
-        `,
-        };
-
-        try {
-          await transporter.sendMail(mailOptions);
-          console.log('📧 Lockout notification email sent');
-        } catch (emailError) {
-          console.error('❌ Failed to send lockout email:', emailError);
-        }
-
         return res.status(403).json({
-          message: "Account locked. Please check   email for instructions to unlock   account.",
+          status: 'error',
+          message: "Account locked. Please check your email for instructions to unlock your account.",
         });
       }
 
@@ -126,16 +101,15 @@ class AuthController {
           // Lock the account
           await user.update({ status: "Locked" });
 
-          // Send lockout email (similar to above)
-          // ... email code ...
-
           return res.status(403).json({
-            message: "Account locked due to too many failed attempts. Please check   email for instructions.",
+            status: 'error',
+            message: "Account locked due to too many failed attempts. Please check your email for instructions.",
           });
         }
 
         const remainingAttempts = 5 - (user.loginAttempts + 1);
         return res.status(401).json({ 
+          status: 'error',
           message: `Invalid credentials. ${remainingAttempts} attempts remaining.` 
         });
       }
@@ -162,19 +136,35 @@ class AuthController {
 
       console.log('🎫 JWT token generated successfully');
 
-      // Return the success response
-      const response = {
-        message: "Login successful",
-        success: true,
-        token,
-        userId: user.id,
-        roleId: user.roleId,
-        first_name: user.first_name,
-        last_name: user.last_name,
+      // Prepare user data without sensitive information
+      const userData = {
+        id: user.id,
         username: user.username,
         email: user.email,
+        roleId: user.roleId,
+        role: user.role,
+        first_name: user.first_name,
+        last_name: user.last_name,
         profileImage: user.profileImage,
-        status: "Active"
+        status: "Active",
+        district_id: user.district_id,
+        sector_id: user.sector_id
+      };
+
+      // Set token in cookie and response
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      });
+
+      // Return the success response
+      const response = {
+        status: 'success',
+        message: "Login successful",
+        token,
+        user: userData
       };
 
       console.log('✅ Sending successful login response');
@@ -183,8 +173,9 @@ class AuthController {
     } catch (error) {
       console.error('❌ Login error:', error);
       res.status(500).json({ 
-        message: error.message,
-        error: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        status: 'error',
+        message: "An unexpected error occurred during login. Please try again.",
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
       });
     }
   }

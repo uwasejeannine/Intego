@@ -67,12 +67,12 @@ function App() {
   const { isAuthenticated, userType } = useAuthStore();
 
   return (
+    <Router>
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <Suspense fallback={<LoadingUI />}>
         <ErrorBoundary theme="light">
           <div className="min-h-screen">
             <Toaster />
-            <Router>
               <Routes>
                 <Route
                   path="sector-coordinator/*"
@@ -111,11 +111,11 @@ function App() {
                     !isAuthenticated ? (
                       <Navigate to="/auth/login" replace />
                     ) : userType === "sectorCoordinator" ? (
-                      <Navigate to="/sector-coordinator/overview" replace />
+                      <Navigate to="/sector-coordinator/dashboard" replace />
                     ) : userType === "districtAdministrator" ? (
-                      <Navigate to="/district-admin/overview" replace />
+                      <Navigate to="/district-admin/dashboard" replace />
                     ) : userType === "admin" ? (
-                      <Navigate to="/admin/overview" replace />
+                      <Navigate to="/admin/dashboard" replace />
                     ) : (
                       <Navigate to="/auth/login" replace />
                     )
@@ -123,11 +123,11 @@ function App() {
                 />
                 <Route path="*" element={<AuthenticationRoutes />} />
               </Routes>
-            </Router>
           </div>
         </ErrorBoundary>
       </Suspense>
     </ThemeProvider>
+    </Router>
   );
 }
 

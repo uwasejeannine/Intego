@@ -26,7 +26,7 @@ interface AuthState {
   logout: () => void;
 }
 
-// Map roleId to userType - Updated to match   database
+// Map roleId to userType - Updated to match database
 const roleIdToUserTypeMap: Record<number, UserType> = {
   3: "admin",
   4: "districtAdministrator",
@@ -60,47 +60,41 @@ export const useAuthStore = create<AuthState>()(
           const response = await login(email, password);
           console.log('📡 Full API Response:', response);
           
-          // Extract what we know exists from   database query
-          const {
-            token,
-            roleId,
-            first_name,
-            last_name,
-            profileImage,
-          } = response;
+          if (!response.token || !response.user) {
+            throw new Error('Invalid response format: missing token or user data');
+          }
+
+          const { token, user } = response;
           
-          // Use response.id as userId since   DB returns "id"
-          const userId = response.userId || response.id;
-          
-          // Set defaults for fields that might not exist
-          const gender = response.gender || null;
-          const username = response.username || null;
-          const phoneNumber = response.phoneNumber || null;
-          const agencyName = response.agencyName || null;
-          const sectorofOperations = response.sectorofOperations || null;
-          
-          const userType = roleIdToUserTypeMap[roleId] || null;
-          console.log('🎭 Mapped userType:', userType, 'from roleId:', roleId);
+          // Map role ID to user type
+          const userType = roleIdToUserTypeMap[user.roleId];
+          console.log('🎭 Mapped userType:', userType, 'from roleId:', user.roleId);
           console.log('🗂️ Available role mappings:', roleIdToUserTypeMap);
           
-          const userEmail = response.email || email;
+          if (!userType) {
+            console.error(`Invalid or missing roleId: ${user.roleId}`);
+            throw new Error('Invalid role configuration');
+          }
+
+          // Store token in localStorage for API client
+          localStorage.setItem('token', token);
           
           const newState = {
-            userId: userId?.toString(),
+            userId: user.id?.toString(),
             userType,
-            roleId,
+            roleId: user.roleId,
             token,
             isAuthenticated: true,
-            first_name,
-            last_name,
-            userEmail,
-            username,
-            gender,
-            profileImage,
-            phoneNumber,
-            agencyName,
-            sectorofOperations,
-            position: userType, 
+            first_name: user.first_name || null,
+            last_name: user.last_name || null,
+            userEmail: user.email,
+            username: user.username || null,
+            gender: user.gender || null,
+            profileImage: user.profileImage || null,
+            phoneNumber: user.phoneNumber || null,
+            agencyName: user.agencyName || null,
+            sectorofOperations: user.sectorofOperations || null,
+            position: userType,
           };
           
           console.log('💾 Setting new auth state:', newState);
@@ -109,12 +103,22 @@ export const useAuthStore = create<AuthState>()(
           
         } catch (error) {
           console.error("❌ Error logging in:", error);
-          set({ isAuthenticated: false });
+          // Clean up on error
+          localStorage.removeItem('token');
+          set({ 
+            isAuthenticated: false,
+            token: null,
+            userType: null,
+            userId: null,
+            roleId: null
+          });
           throw error;
         }
       },
       logout: () => {
         console.log('🚪 Logging out user...');
+        // Clean up token
+        localStorage.removeItem('token');
         set({
           userId: null,
           userType: null,
@@ -138,6 +142,23 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "auth-storage",
+      partialize: (state) => ({
+        userId: state.userId,
+        userType: state.userType,
+        roleId: state.roleId,
+        token: state.token,
+        isAuthenticated: state.isAuthenticated,
+        first_name: state.first_name,
+        last_name: state.last_name,
+        username: state.username,
+        userEmail: state.userEmail,
+        profileImage: state.profileImage,
+        gender: state.gender,
+        phoneNumber: state.phoneNumber,
+        agencyName: state.agencyName,
+        sectorofOperations: state.sectorofOperations,
+        position: state.position,
+      }),
     },
   ),
 );

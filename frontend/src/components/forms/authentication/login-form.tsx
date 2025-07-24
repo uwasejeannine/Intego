@@ -30,14 +30,14 @@ type FormData = z.infer<typeof loginFormSchema>;
 // Component for user authentication form
 export function UserAuthForm({ onForgotPasswordClick }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { login, isAuthenticated } = useAuthStore();
+  const { login } = useAuthStore();
 
   // Hook for displaying toast messages
   const { toast } = useToast();
 
   // Hook for managing form state and validation
-  const form: UseFormReturn<FormData> = useForm<FormData>({
-    resolver: zodResolver(loginFormSchema), // Using Zod schema for validation
+  const form = useForm<FormData>({
+    resolver: zodResolver(loginFormSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -48,62 +48,54 @@ export function UserAuthForm({ onForgotPasswordClick }: UserAuthFormProps) {
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     setIsLoading(true);
     try {
-      await login(data.email, data.password); // Attempt login
-      setIsLoading(false); // Reset loading state
+      await login(data.email, data.password);
+      setIsLoading(false);
+      
       toast({
         title: "Login Successful",
         description: "You have successfully logged in. Welcome back!",
         icon: <Icons.LoginSuccessIcon className="w-10 h-10 text-green-900" />,
       });
-
-      if (isAuthenticated) {
-        toast({
-          title: "Login Successful",
-          description: "You have successfully logged in. Welcome back!",
-          icon: <Icons.LoginSuccessIcon className="w-10 h-10 text-green-900" />,
-        });
-      }
     } catch (error: any) {
-      setIsLoading(false); // Reset loading state
+      setIsLoading(false);
+
+      if (error.name === 'ZodError') {
+        toast({
+          title: "Validation Error",
+          description: "Please check your email and password format.",
+          icon: <Icons.OtherErrorIcon className="w-10 h-10 text-red-600" />,
+        });
+        return;
+      }
+
       if (error.response?.status === 401) {
-        // Unauthorized access
         toast({
           title: "Wrong Email or Password",
-          description:
-            "You are not authorized to access this resource. Please log in with valid credentials.",
-          icon: (
-            <Icons.UnauthorizedAccessIcon className="w-10 h-10 text-red-600" />
-          ),
+          description: "Please check your credentials and try again.",
+          icon: <Icons.UnauthorizedAccessIcon className="w-10 h-10 text-red-600" />,
         });
       } else if (error.response?.status >= 500) {
-        // Server error
         toast({
           title: "Server Error",
-          description:
-            "An unexpected error occurred on the server. Please try again later or contact support for assistance.",
+          description: "An unexpected error occurred. Please try again later.",
           icon: <Icons.ServerErrorIcon className="w-10 h-10 text-red-600" />,
         });
       } else if (error.response?.status === 403) {
-        // Account locked
         toast({
           title: "Account Locked",
-          description:
-            "  account has been locked due to multiple failed login attempts. Check   email for unlocking instructions.",
+          description: "Your account has been locked. Please check your email for instructions.",
           icon: <Icons.AccountLockedIcon className="w-10 h-10 text-red-600" />,
         });
-      } else if (error.response?.status >= 404) {
-        // Server error
+      } else if (error.response?.status === 404) {
         toast({
           title: "User Not Found",
-          description:
-            "This user does not exist. Enter the right credentials or contact support",
+          description: "No account found with this email address.",
           icon: <Icons.ServerErrorIcon className="w-10 h-10 text-red-600" />,
         });
       } else {
-        // Other error
         toast({
           title: "Error",
-          description: "An unexpected error occurred. Please try again later.",
+          description: "An unexpected error occurred. Please try again.",
           icon: <Icons.OtherErrorIcon className="w-10 h-10 text-red-600" />,
         });
       }

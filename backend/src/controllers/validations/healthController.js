@@ -48,7 +48,7 @@ class HealthFacilityController {
           {
             model: Region,
             as: "region",
-            attributes: ['id', 'regionName', 'regionCode'],
+            attributes: ['id', 'region_name', 'region_code'],
           },
         ],
         order: [['facility_name', 'ASC']],
@@ -959,7 +959,7 @@ class HealthFacilityController {
           {
             model: Region,
             as: "region",
-            attributes: ['id', 'regionName', 'regionCode'],
+            attributes: ['id', 'region_name', 'region_code'],
           },
         ],
       });

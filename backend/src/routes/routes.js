@@ -16,6 +16,8 @@ const vaccinesRoutes = require('./vaccinesRoutes');
 const vaccinationRecordsRoutes = require('./vaccinationRecordsRoutes');
 const vaccinationCampaignsRoutes = require('./vaccinationCampaignsRoutes');
 const diseasesRoutes = require('./diseasesRoutes');
+const locationRoutes = require('./locationRoutes');
+const feedbackRoutes = require('./feedbackRoutes');
 
 const router = express.Router();
 
@@ -42,5 +44,7 @@ router.use('/teachers', require('./teacherRoutes'));
 router.use('/dropouts', require('./dropoutRoutes'));
 router.use('/performances', require('./performanceRoutes'));
 router.use('/infrastructures', require('./infrastructureRoutes'));
+router.use('/locations', locationRoutes);
+router.use('/feedback', feedbackRoutes);
 
 module.exports = router;

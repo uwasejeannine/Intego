@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { User } from "@/types/types";
+import { User, Role, District, Sector } from "@/types/types";
 import { Card, CardHeader } from "@/components/ui/card";
 import useMediaQuery from "@/hooks/useMediaQuery";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select";
 import { updateProfileFormSchema } from "@/lib/validation/schema";
 import { useToast } from "@/components/ui/use-toast";
+import { fetchDistricts, fetchRoles } from "@/lib/api/api";
 
 type FormData = z.infer<typeof updateProfileFormSchema>;
 
@@ -35,7 +36,11 @@ type E164Number = string;
 
 const UpdateUserForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [sectors, setSectors] = useState<Sector[]>([]);
+  const [selectedRole, setSelectedRole] = useState<string>("");
   const [, setLoading] = useState<boolean>(true);
   const [, setError] = useState<string | null>(null);
   const [phoneNumber, setPhoneNumber] = useState<E164Number>("");
@@ -53,17 +58,38 @@ const UpdateUserForm: React.FC = () => {
       agencyName: "",
       sectorofOperations: "",
       position: "",
+      district_id: "",
+      sector_id: "",
     },
   });
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:3000/api/v1/users/users/${id}`
-        );
-        setUser(response.data.user);
-        form.reset(response.data.user);
+        const [userResponse, rolesResponse, districtsResponse] = await Promise.all([
+          axios.get(`http://localhost:3000/api/v1/users/users/${id}`),
+          fetchRoles(),
+          fetchDistricts(),
+        ]);
+
+        const userData = userResponse.data.user;
+        setUser(userData);
+        setRoles(rolesResponse);
+        setDistricts(districtsResponse);
+        form.reset(userData);
+
+        const role = rolesResponse.find((r: Role) => r.id === userData.roleId);
+        if (role) {
+          setSelectedRole(role.name);
+        }
+        
+        if (userData.district_id) {
+          const district = districtsResponse.find((d: District) => d.id === userData.district_id);
+          if (district) {
+            setSectors(district.sectors);
+          }
+        }
+
         setLoading(false);
       } catch (error: any) {
         if (axios.isAxiosError(error)) {
@@ -75,9 +101,9 @@ const UpdateUserForm: React.FC = () => {
       }
     };
 
-    fetchUser();
+    fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, form]);
 
   useEffect(() => {
     const { first_name, last_name } = form.getValues();
@@ -85,9 +111,26 @@ const UpdateUserForm: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.watch("first_name"), form.watch("last_name")]);
 
+  const handleRoleChange = (roleId: string) => {
+    const role = roles.find((r) => r.id.toString() === roleId);
+    setSelectedRole(role ? role.name : "");
+    form.setValue("roleId", roleId);
+  };
+
+  const handleDistrictChange = (districtId: string) => {
+    const district = districts.find((d) => d.id.toString() === districtId);
+    setSectors(district ? district.sectors : []);
+    form.setValue("district_id", districtId);
+    form.setValue("sector_id", "");
+  };
+
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try {
-      await axios.put(`http://localhost:3000/api/v1/users/users/${id}`, data);
+      await axios.put(`http://localhost:3000/api/v1/users/users/${id}`, {
+        ...data,
+        district_id: data.district_id ? parseInt(data.district_id, 10) : undefined,
+        sector_id: data.sector_id ? parseInt(data.sector_id, 10) : undefined,
+      });
       toast({
         title: "User Updated",
         description: "The user has been updated successfully.",
@@ -237,26 +280,80 @@ const UpdateUserForm: React.FC = () => {
               />
               <FormField
                 control={form.control}
-                name="position"
+                name="roleId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[#137775] font-semibold">Position</FormLabel>
-                    <FormControl>
-                      <Select value={field.value} onValueChange={field.onChange}>
+                    <FormLabel className="text-[#137775] font-semibold">Role</FormLabel>
+                    <Select onValueChange={handleRoleChange} value={field.value?.toString()}>
+                      <FormControl>
                         <SelectTrigger className="border-gray-300 focus:border-[#137775] text-black">
-                          <SelectValue placeholder="Select a position" className="text-gray-500" />
+                          <SelectValue placeholder="Select a role" />
                         </SelectTrigger>
-                        <SelectContent className="bg-white">
-                          <SelectItem value="sectorCoordinator" className="text-black hover:bg-[#137775] hover:text-white">Sector Coordinator</SelectItem>
-                          <SelectItem value="admin" className="text-black hover:bg-[#137775] hover:text-white">Admin</SelectItem>
-                          <SelectItem value="districtAdministrator" className="text-black hover:bg-[#137775] hover:text-white">District Administrator</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
+                      </FormControl>
+                      <SelectContent>
+                        {roles.map((role) => (
+                          <SelectItem key={role.id} value={role.id.toString()}>
+                            {role.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              {(selectedRole === "districtAdministrator" || selectedRole === "sectorCoordinator") && (
+                <FormField
+                  control={form.control}
+                  name="district_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[#137775] font-semibold">District</FormLabel>
+                      <Select onValueChange={handleDistrictChange} value={field.value?.toString()}>
+                        <FormControl>
+                          <SelectTrigger className="border-gray-300 focus:border-[#137775] text-black">
+                            <SelectValue placeholder="Select a district" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {districts.map((district) => (
+                            <SelectItem key={district.id} value={district.id.toString()}>
+                              {district.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              {selectedRole === "sectorCoordinator" && (
+                <FormField
+                  control={form.control}
+                  name="sector_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[#137775] font-semibold">Sector</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value?.toString()}>
+                        <FormControl>
+                          <SelectTrigger className="border-gray-300 focus:border-[#137775] text-black">
+                            <SelectValue placeholder="Select a sector" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {sectors.map((sector) => (
+                            <SelectItem key={sector.id} value={sector.id.toString()}>
+                              {sector.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               <Button 
                 type="submit" 
                 className="lg:col-span-2 bg-[#137775] hover:bg-[#0f5f5d] text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-colors duration-200"

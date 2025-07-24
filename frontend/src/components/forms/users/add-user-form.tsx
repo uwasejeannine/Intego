@@ -28,7 +28,48 @@ import {
 import { Role } from "@/types/types";
 import { Input } from "@/components/ui/input";
 
-// Updated schema to match backend changes
+// Rwanda Districts data
+const RWANDA_DISTRICTS = [
+  "Bugesera", "Burera", "Gakenke", "Gasabo", "Gatsibo", "Gicumbi", "Gisagara",
+   "Huye", "Kamonyi", "Karongi", "Kayonza", "Kicukiro", "Kirehe", "Muhanga",
+  "Musanze", "Ngoma", "Ngororero", "Nyabihu", "Nyagatare", "Nyamagabe",
+  "Nyamasheke", "Nyanza", "Nyarugenge", "Nyaruguru", "Rubavu", "Ruhango",
+  "Rulindo", "Rusizi", "Rutsiro", "Rwamagana"
+];
+
+// Sectors for each district (adding more sectors for better functionality)
+const DISTRICT_SECTORS: Record<string, string[]> = {
+  "Bugesera": ["Gashora", "Juru", "Kamabuye", "Mareba", "Mayange", "Musenyi", "Mwogo", "Ngeruka", "Ntarama", "Nyamata", "Nyarugenge", "Rilima", "Ruhuha", "Rweru", "Shyara"],
+  "Burera": ["Bunge", "Butaro", "Cyanika", "Cyeru", "Gahunga", "Gatebe", "Gitovu", "Kagogo", "Kinoni", "Kinyababa", "Kivuye", "Nemba", "Rugarama", "Rugendabari", "Ruhunde", "Rusarabuye", "Rwerere"],
+  "Gakenke": ["Busengo", "Cyabingo", "Gakenke", "Gashenyi", "Mugunga", "Janja", "Kamubuga", "Karambo", "Kivuruga", "Mataba", "Minazi", "Muhondo", "Muyongwe", "Nemba", "Ruli", "Rusasa", "Rushashi"],
+  "Gasabo": ["Bumbogo", "Gatsata", "Gikomero", "Gisozi", "Jabana", "Jali", "Kacyiru", "Kimihurura", "Kimisagara", "Kinyinya", "Ndera", "Nduba", "Remera", "Rusororo", "Rutunga"],
+  "Gatsibo": ["Gasange", "Gatsibo", "Gitoki", "Kabarore", "Kageyo", "Kiramuruzi", "Kiziguro", "Muhura", "Murambi", "Ngarama", "Nyagihanga", "Remera", "Rugarama", "Rwimbogo"],
+  "Gicumbi": ["Bukure", "Bwisige", "Byumba", "Cyumba", "Gicumbi", "Kaniga", "Manyagiro", "Miyove", "Mutete", "Nyamiyaga", "Nyankenke", "Rubaya", "Rukomo", "Rushaki", "Rutare", "Ruvune", "Rwamiko", "Shangasha"],
+  "Gisagara": ["Gikonko", "Gishubi", "Kansi", "Kibirizi", "Kigembe", "Muganza", "Mukindo", "Ndora", "Nyanza", "Save"],
+  "Huye": ["Gishamvu", "Karama", "Kigoma", "Kinazi", "Maraba", "Mbazi", "Mukura", "Ngoma", "Ruhashya", "Rusatira", "Rwaniro", "Simbi", "Tumba", "Yanze"],
+  "Kamonyi": ["Gacurabwenge", "Karama", "Kayenzi", "Kayumbu", "Mugina", "Musambira", "Nyamiyaga", "Nyarubaka", "Rugalika", "Rukoma", "Runda", "Ruzo"],
+  "Karongi": ["Bwishyura", "Gashari", "Gishyita", "Gitesi", "Murambi", "Mutuntu", "Rugabano", "Ruganda", "Rutsiro", "Rwankuba"],
+  "Kayonza": ["Gahini", "Kabare", "Kabarondo", "Mukarange", "Murama", "Murundi", "Mwiri", "Ndego", "Nyamirama", "Rukara", "Ruramira", "Rwinkwavu"],
+  "Kicukiro": ["Gahanga", "Gatenga", "Gikondo", "Kagarama", "Kanombe", "Kicukiro", "Kigarama", "Masaka", "Niboye", "Nyarugunga"],
+  "Kirehe": ["Gatore", "Kigarama", "Kigina", "Kirehe", "Mahama", "Mpanga", "Musaza", "Mushikiri", "Nasho", "Nyamugari", "Nyarubuye"],
+  "Muhanga": ["Cyeza", "Kabacuzi", "Kibangu", "Kiyumba", "Muhanga", "Mukura", "Mushishiro", "Nyabinoni", "Nyamabuye", "Nyamiyaga", "Rongi", "Rugendabari"],
+  "Musanze": ["Busogo", "Cyuve", "Gacaca", "Gashaki", "Gataraga", "Kimonyi", "Kinigi", "Muhoza", "Muko", "Musanze", "Nkotsi", "Nyange", "Remera", "Rwaza", "Shingiro"],
+  "Ngoma": ["Gashanda", "Jarama", "Karembo", "Kazo", "Kibungo", "Mugesera", "Murama", "Mutenderi", "Remera", "Rukira", "Rukumberi", "Sake", "Zaza"],
+  "Ngororero": ["Bwira", "Gatumba", "Hindiro", "Kabaya", "Kageyo", "Kavumu", "Matyazo", "Muhanda", "Muhororo", "Ndaro", "Ngororero", "Nyange", "Sovu"],
+  "Nyabihu": ["Bigogwe", "Jenda", "Jomba", "Kabatwa", "Karago", "Kintobo", "Mukamira", "Muringa", "Rambura", "Rurembo", "Shyira"],
+  "Nyagatare": ["Gatunda", "Karama", "Karangazi", "Katabagemu", "Kiyombe", "Matimba", "Mimuli", "Mukama", "Musheri", "Nyagatare", "Rukomo", "Rwempasha", "Rwimiyaga", "Tabagwe"],
+  "Nyamagabe": ["Buruhukiro", "Cyanika", "Gasaka", "Gatare", "Kaduha", "Kamegeri", "Kibirizi", "Kibumbwe", "Kitabi", "Mbazi", "Mugano", "Mushubi", "Musange", "Nkomane", "Tare", "Uwinkingi"],
+  "Nyamasheke": ["Bushekeri", "Bushenge", "Cyato", "Gihombo", "Kagano", "Kanjongo", "Karambi", "Karengera", "Kirimbi", "Macuba", "Mahembe", "Nyabitekeri", "Rangiro", "Ruharambuga", "Shangi"],
+  "Nyanza": ["Busasamana", "Busoro", "Cyabakamyi", "Kibirizi", "Kigoma", "Mukingo", "Muyira", "Ntyazo", "Nyagisozi", "Rwabicuma"],
+  "Nyarugenge": ["Gitega", "Kanyinya", "Kigali", "Kimisagara", "Mageragere", "Muhima", "Nyakabanda", "Nyamirambo", "Nyarugenge", "Rwezamenyo"],
+  "Nyaruguru": ["Cyahinda", "Busanze", "Kibeho", "Kivu", "Mata", "Muganza", "Munini", "Ngera", "Ngoma", "Nyabimata", "Nyagisozi", "Ruheru", "Rusenge", "Rwabicuma"],
+  "Rubavu": ["Bugeshi", "Busasamana", "Cyanzarwe", "Gisenyi", "Kageyo", "Kanama", "Mudende", "Nyakiliba", "Nyamyumba", "Nyundo", "Rubavu", "Rugerero"],
+  "Ruhango": ["Bweramana", "Byimana", "Kabagari", "Kinazi", "Kinihira", "Muhanga", "Mwendo", "Ntongwe", "Ruhango"],
+  "Rulindo": ["Base", "Burega", "Bushoki", "Cyinzuzi", "Cyungo", "Kinihira", "Kisaro", "Masoro", "Mbogo", "Murambi", "Ngoma", "Ntarabana", "Rukozo", "Rusiga", "Shyorongi", "Tumba"],
+  "Rusizi": ["Bugarama", "Butare", "Buziba", "Gashonga", "Gikundamvura", "Giteranyi", "Kamembe", "Muganza", "Mururu", "Nkanka", "Nkombo", "Nyakabuye", "Nyakarenzo", "Ruganda", "Ruhwa", "Rwimbogo"],
+  "Rutsiro": ["Boneza", "Gihango", "Kigeyo", "Kivumu", "Manihira", "Mukura", "Musasa", "Mushonyi", "Mushubati", "Nyabirasi", "Ruhango", "Rusebeya"],
+  "Rwamagana": ["Gahengeri", "Gishari", "Karenge", "Kigabiro", "Muhazi", "Munyaga", "Munyiginya", "Musha", "Muyumbu", "Mwulire", "Nyakaliro", "Nzige", "Rubona", "Rurenge"]
+};
 const updatedAddUserFormSchema = z.object({
   username: z.string().min(2, "Username must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
@@ -40,13 +81,37 @@ const updatedAddUserFormSchema = z.object({
     required_error: "Please select a sector of operations",
   }),
   roleId: z.string().min(1, "Please select a role"),
+  district: z.string().optional(),
+  sector: z.string().optional(),
+}).refine((data) => {
+  const roles = JSON.parse(sessionStorage.getItem('roles') || '[]');
+  const selectedRole = roles.find((r: any) => r.id.toString() === data.roleId);
+  
+  if (selectedRole) {
+    const roleName = selectedRole.name.toLowerCase();
+    
+    // District Administrator must select a district
+    if (roleName === 'districtadministrator') {
+      return data.district && data.district.length > 0;
+    }
+    
+    // Sector Coordinator must select both district and sector
+    if (roleName === 'sectorcoordinator') {
+      return data.district && data.district.length > 0 && data.sector && data.sector.length > 0;
+    }
+  }
+  
+  return true;
+}, {
+  message: "Please select the required location fields for this role",
+  path: ["district"]
 });
 
 type FormData = z.infer<typeof updatedAddUserFormSchema>;
 
 const steps = [
   { label: "Step 1", description: "Personal Information" },
-  { label: "Step 2", description: "Professional Information" },
+  { label: "Step 2", description: "Professional Information & Location" },
 ];
 
 function StepperFormActions({ onSubmit, isLoading }: { onSubmit: () => void; isLoading: boolean }) {
@@ -106,6 +171,9 @@ const CreateUserForm: React.FC = () => {
   const isMobile = useMediaQuery("(max-width: 900px)");
   const [roles, setRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<string>("");
+  const [availableSectors, setAvailableSectors] = useState<string[]>([]);
 
   const form = useForm<FormData>({
     resolver: zodResolver(updatedAddUserFormSchema),
@@ -118,6 +186,8 @@ const CreateUserForm: React.FC = () => {
       phoneNumber: "",
       sectorofOperations: undefined,
       roleId: "",
+      district: "",
+      sector: "",
     },
   });
 
@@ -126,6 +196,8 @@ const CreateUserForm: React.FC = () => {
       try {
         const data = await fetchRoles();
         setRoles(data);
+        // Store roles in sessionStorage for validation
+        sessionStorage.setItem('roles', JSON.stringify(data));
       } catch (error) {
         console.error("Error fetching roles:", error);
       }
@@ -133,6 +205,32 @@ const CreateUserForm: React.FC = () => {
 
     fetchData();
   }, []);
+
+  // Watch for role changes
+  const watchedRoleId = form.watch("roleId");
+  useEffect(() => {
+    if (watchedRoleId) {
+      const role = roles.find(r => r.id.toString() === watchedRoleId);
+      setSelectedRole(role || null);
+      // Reset location fields when role changes
+      form.setValue("district", "");
+      form.setValue("sector", "");
+      setSelectedDistrict("");
+      setAvailableSectors([]);
+    }
+  }, [watchedRoleId, roles, form]);
+
+  // Watch for district changes
+  const watchedDistrict = form.watch("district");
+  useEffect(() => {
+    if (watchedDistrict) {
+      setSelectedDistrict(watchedDistrict);
+      const sectors = DISTRICT_SECTORS[watchedDistrict] || [];
+      setAvailableSectors(sectors);
+      // Reset sector when district changes
+      form.setValue("sector", "");
+    }
+  }, [watchedDistrict, form]);
 
   const handlePhoneChange = (value: string) => {
     form.setValue("phoneNumber", value);
@@ -145,26 +243,167 @@ const CreateUserForm: React.FC = () => {
     return "";
   };
 
+  // Helper functions
+  const isDistrictAdmin = () => {
+    if (!selectedRole) return false;
+    return selectedRole.name.toLowerCase() === 'districtadministrator';
+  };
+
+  const isSectorCoordinator = () => {
+    if (!selectedRole) return false;
+    return selectedRole.name.toLowerCase() === 'sectorcoordinator';
+  };
+
+  // Render location fields based on role
+  const renderLocationFields = () => {
+    if (!selectedRole) return null;
+
+    if (isDistrictAdmin() || isSectorCoordinator()) {
+      return (
+        <div className="grid lg:grid-cols-2 gap-6 mt-6">
+          {(isDistrictAdmin() || isSectorCoordinator()) && (
+            <FormField
+              control={form.control}
+              name="district"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel 
+                    htmlFor="district"
+                    style={{ color: "#137775" }}
+                  >
+                    District *
+                  </FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="focus:border-[#137775] focus:ring-[#137775]">
+                        <SelectValue placeholder="Select district" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {RWANDA_DISTRICTS.map((district) => (
+                        <SelectItem key={district} value={district}>
+                          {district}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          {isSectorCoordinator() && (
+            <FormField
+              control={form.control}
+              name="sector"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel 
+                    htmlFor="sector"
+                    style={{ color: "#137775" }}
+                  >
+                    Sector *
+                  </FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    disabled={!selectedDistrict}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="focus:border-[#137775] focus:ring-[#137775]">
+                        <SelectValue 
+                          placeholder={
+                            selectedDistrict 
+                              ? "Select sector" 
+                              : "Select district first"
+                          } 
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {availableSectors.map((sector) => (
+                        <SelectItem key={sector} value={sector}>
+                          {sector}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      await addUser({
-        ...data,
+      // Prepare submission data with proper field names
+      const submitData = {
+        username: data.username,
+        email: data.email,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        gender: data.gender,
+        phoneNumber: data.phoneNumber,
+        sectorofOperations: data.sectorofOperations,
         roleId: parseInt(data.roleId, 10),
-      });
+        // Send district and sector names (not IDs) and ensure they're not null
+        district: data.district || null,
+        sector: data.sector || null,
+      };
+
+      console.log('Submitting user data:', submitData);
+      
+      // Validate that required location fields are present based on role
+      if (selectedRole) {
+        const roleName = selectedRole.name.toLowerCase();
+        
+        if (roleName === 'districtadministrator' && !submitData.district) {
+          throw new Error('District is required for District Administrator role');
+        }
+        
+        if (roleName === 'sectorcoordinator' && (!submitData.district || !submitData.sector)) {
+          throw new Error('Both district and sector are required for Sector Coordinator role');
+        }
+      }
+
+      await addUser(submitData);
+      
+      // Reset form and state
       form.reset();
-      setIsLoading(false);
+      setSelectedRole(null);
+      setSelectedDistrict("");
+      setAvailableSectors([]);
+      
       toast({
         title: "User Created Successfully",
         description: "You have successfully created a new user!",
         icon: <Icons.CreateUserSuccess className="w-10 h-10 text-green-600" />,
       });
+      
     } catch (error: any) {
-      setIsLoading(false);
+      console.error('Error creating user:', error);
+      
       if (error.response && error.response.status === 409) {
         toast({
           title: "User Already Exists",
           description: "A user with the same username or email already exists.",
+          icon: <Icons.OtherErrorIcon className="w-10 h-10 text-red-600" />,
+        });
+      } else if (error.message && error.message.includes('required')) {
+        toast({
+          title: "Missing Required Fields",
+          description: error.message,
           icon: <Icons.OtherErrorIcon className="w-10 h-10 text-red-600" />,
         });
       } else {
@@ -174,6 +413,8 @@ const CreateUserForm: React.FC = () => {
           icon: <Icons.CreateUserFailed className="w-10 h-10 text-red-600" />,
         });
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -383,8 +624,10 @@ const CreateUserForm: React.FC = () => {
                       </Step>
                     );
                   } else {
+                    // Step 2: Professional Information & Location
                     return (
                       <Step key={stepProps.label} {...stepProps}>
+                        <div className="space-y-6">
                         <div className="grid lg:grid-cols-2 gap-6">
                           <FormField
                             control={form.control}
@@ -443,7 +686,7 @@ const CreateUserForm: React.FC = () => {
                                   Role
                                 </FormLabel>
                                 <Select
-                                  onValueChange={field.onChange}
+                                    onValueChange={field.onChange}
                                   value={field.value}
                                 >
                                   <FormControl>
@@ -466,7 +709,12 @@ const CreateUserForm: React.FC = () => {
                               </FormItem>
                             )}
                           />
+                          </div>
+                          
+                          {/* Location Assignment Section */}
+                          {renderLocationFields()}
                         </div>
+                        
                         <StepperFormActions
                           onSubmit={form.handleSubmit(onSubmit)}
                           isLoading={isLoading}

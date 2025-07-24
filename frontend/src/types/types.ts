@@ -11,18 +11,17 @@ export const flagStatus = [
   { label: "At Risk", value: "At Risk" },
 ];
 
-export type Role = {
+export interface Role {
   id: number;
   name: string;
-  description: string;
-};
+  description?: string;
+}
 
 export const roles = [
   { label: "Admin", value: "admin", id: 3 },
   { label: "District Administrator", value: "districtAdministrator", id: 4 },
   { label: "Sector Coordinator", value: "sectorCoordinator", id: 2 },
 ];
-
 
 export type SidebarItem = {
   label: React.ReactNode;
@@ -31,14 +30,7 @@ export type SidebarItem = {
   subItems?: SidebarItem[];
 };
 
-export type UserType =
-  | "seniorManagement"
-  | "MandEOfficer"
-  | "projectManager"
-  | "ITAdmin"
-  | "sectorCoordinator"
-  | "districtAdministrator"
-  | "admin";
+export type UserType = "admin" | "districtAdministrator" | "sectorCoordinator";
 
 export type OverviewDisplay = {
   label?: React.ReactNode;
@@ -47,48 +39,74 @@ export type OverviewDisplay = {
   dialogOptions?: OverviewDisplay[];
 };
 
-export type Report = {
-  userType: UserType;
-  categoryId: number;
-  flagStatus: any;
-  numberOfReports: React.ReactNode;
-  id: string;
-  projectName: string;
-  totalBudgetSpending: string;
-  location: string;
-  totalProjectBudget: {
+export interface Report {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  priority: string;
+  status: string;
+  assignedTo: string;
+  createdAt: string;
+  updatedAt: string;
+  userType?: UserType;
+  categoryId?: number;
+  flagStatus?: any;
+  numberOfReports?: React.ReactNode;
+  projectName?: string;
+  totalBudgetSpending?: string;
+  location?: string;
+  totalProjectBudget?: {
     currency: string;
     amount: string;
   };
-  projectDuration: string;
-  projectDescription: string;
-  projectObjectives: string;
-  keyOutputs: string;
-  keyChallengesFaced: string;
-  proposedSolutions: string;
-  categoryOfProject: string;
-  keyIndicators: string;
-  annTargets: anunualtargets;
-  cumulativeAchievements: string;
-  nonCumulativeAchievements: string;
-  cumulativeAchievementsOption: string;
-  term: string;
+  projectDuration?: string;
+  projectDescription?: string;
+  projectObjectives?: string;
+  keyOutputs?: string;
+  keyChallengesFaced?: string;
+  proposedSolutions?: string;
+  categoryOfProject?: string;
+  keyIndicators?: string;
+  annTargets?: Record<string, {
+    main: boolean;
+    values: [number, string];
+  }>;
+  cumulativeAchievements?: string;
+  nonCumulativeAchievements?: string;
+  cumulativeAchievementsOption?: string;
+  term?: string;
   MTof?: string | null;
   Haof?: string | null;
   numberOf?: string | null;
   percentOf?: string | null;
-  projectId: string;
-  status:
-    | "Pending"
-    | "Ongoing"
-    | "Completed"
-    | "Stopped"
-    | "Under Review"
-    | "Rejected";
-  createdAt: string;
-};
+  projectId?: string;
+}
 
-export type Profile = {
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  roleId: number;
+  role?: Role;
+  gender?: string;
+  phoneNumber?: string;
+  profileImage?: string;
+  agencyName?: string;
+  sectorofOperations?: string;
+  position?: string;
+  district_id?: number;
+  sector_id?: number;
+  status?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  newPassword?: string;
+  confirmPassword?: string;
+}
+
+export interface Profile {
   id?: string | number;
   username?: string;
   email?: string;
@@ -99,49 +117,38 @@ export type Profile = {
   gender?: string;
   agencyName?: string;
   sectorofOperations?: string;
-   Role?: string;
+  role?: string;
   position?: string;
   roleId?: string;
   newPassword?: string;
   confirmPassword?: string;
-  status: "Active" | "Inactive" | "Offline";
-};
-export type Category = {
-  id: string | number;
-  name: string;
-};
-
-export type Contributor = {
-  id: number;
-  name: string;
-  phoneNumber: string;
-  role?: string;
-};
-
-interface anunualtargets {
-  [key: string]: {
-    main: boolean;
-    values: [number, string];
-  };
+  status?: "Active" | "Inactive" | "Offline";
 }
 
-// types.ts
-export interface User {
-  role: any;
+export interface District {
   id: number;
-  username: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  gender: string;
-  phoneNumber: string;
-  agencyName: string;
-  sectorofOperations: string;
-  profileImage: string;
-  roleId: number;
-  projectId: number | null;
-  status: string;
-  passwordResetExpires: string | null;
-  passwordResetCode: string | null;
-  loginAttempts: number;
+  name: string;
+  sectors: Sector[];
+}
+
+export interface Sector {
+  id: number;
+  name: string;
+  district_id: number;
+}
+
+export interface Contributor {
+  id: number;
+  name: string;
+  email?: string;
+  phoneNumber?: string;
+  role?: string;
+  organization?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Category {
+  id: string | number;
+  name: string;
 }

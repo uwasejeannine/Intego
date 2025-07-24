@@ -16,32 +16,34 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { api } from "@/lib/api/api"; // ✅ Import the configured API instance
 
-const API_URL = "http://localhost:3000/api/v1/farmers/individual/";
-const COOP_API_URL = "http://localhost:3000/api/v1/farmers/cooperatives";
-const REGIONS_API_URL = "http://localhost:3000/api/v1/farmers/regions";
+// ✅ Use relative paths since api instance already has baseURL
+const API_URL = "/farmers/individual/";
+const COOP_API_URL = "/farmers/cooperatives";
+const REGIONS_API_URL = "/farmers/regions";
 
 const COOP_COLUMNS = [
-  { accessorKey: "cooperativeName", header: () => <div className="text-center">Name</div>, cell: ({ row }: any) => <div className="text-center">{row.original.cooperativeName}</div> },
+  { accessorKey: "cooperative_name", header: () => <div className="text-center">Name</div>, cell: ({ row }: any) => <div className="text-center">{row.original.cooperative_name}</div> },
   { accessorKey: "location", header: () => <div className="text-center">Location</div>, cell: ({ row }: any) => <div className="text-center">{row.original.location}</div> },
-  { accessorKey: "numberOfFarmers", header: () => <div className="text-center"># Farmers</div>, cell: ({ row }: any) => <div className="text-center">{row.original.numberOfFarmers}</div> },
-  { accessorKey: "mainCrops", header: () => <div className="text-center">Main Crops</div>, cell: ({ row }: any) => {
-    const crops = row.original.mainCrops;
-    let display = crops;
+  { accessorKey: "number_of_farmers", header: () => <div className="text-center"># Farmers</div>, cell: ({ row }: any) => <div className="text-center">{row.original.number_of_farmers}</div> },
+  { accessorKey: "main_crops", header: () => <div className="text-center">Main Crops</div>, cell: ({ row }: any) => {
+    const crops = row.original.main_crops || row.original.mainCropsArray;
+    let display = crops || "-";
     if (Array.isArray(crops)) {
-      display = crops.join(", ");
+      display = crops.length > 0 ? crops.join(", ") : "-";
     } else if (typeof crops === 'string' && crops.startsWith('[')) {
       try {
         const arr = JSON.parse(crops);
-        if (Array.isArray(arr)) display = arr.join(", ");
+        if (Array.isArray(arr)) display = arr.length > 0 ? arr.join(", ") : "-";
       } catch {
-        display = crops;
+        display = crops || "-";
       }
     }
     return <div className="text-center">{display}</div>;
   } },
-  { accessorKey: "regionId", header: () => <div className="text-center">Region</div>, cell: ({ row }: any) => <div className="text-center">{row.original.regionName || row.original.regionId}</div> },
-  { accessorKey: "isActive", header: () => <div className="text-center">Active</div>, cell: ({ row }: any) => <div className="text-center">{row.original.isActive ? "Yes" : "No"}</div> },
+  { accessorKey: "region_id", header: () => <div className="text-center">Region</div>, cell: ({ row }: any) => <div className="text-center">{row.original.region?.region_name || row.original.region_id}</div> },
+  { accessorKey: "is_active", header: () => <div className="text-center">Active</div>, cell: ({ row }: any) => <div className="text-center">{row.original.is_active ? "Yes" : "No"}</div> },
 ];
 
 const FarmersPage: React.FC = () => {
@@ -68,15 +70,15 @@ const FarmersPage: React.FC = () => {
   });
 
   const [coopForm, setCoopForm] = useState({
-    cooperativeName: "",
+    cooperative_name: "",
     location: "",
-    numberOfFarmers: "",
-    totalLandSize: "",
-    contactPersonPhone: "",
-    contactPersonEmail: "",
-    mainCrops: "",
-    regionId: "",
-    isActive: true,
+    number_of_farmers: "",
+    total_land_size: "",
+    contact_person_phone: "",
+    contact_person_email: "",
+    main_crops: "",
+    region_id: "",
+    is_active: true,
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -99,32 +101,36 @@ const FarmersPage: React.FC = () => {
     fetchRegions();
   }, []);
 
+  // ✅ Replace fetch with api instance
   const fetchFarmers = async () => {
     try {
-      const res = await fetch(API_URL);
-      const data = await res.json();
+      const res = await api.get(API_URL);
+      const data = res.data;
       console.log("Fetched individual farmers:", data);
       setFarmers(data?.data || data || []);
     } catch (e) {
+      console.error("Error fetching farmers:", e);
       setFarmers([]);
     }
   };
 
+  // ✅ Replace fetch with api instance
   const fetchCooperatives = async () => {
     try {
-      const res = await fetch(COOP_API_URL);
-      const data = await res.json();
+      const res = await api.get(COOP_API_URL);
+      const data = res.data;
       setCoopList(data?.data || data || []);
     } catch (e) {
+      console.error("Error fetching cooperatives:", e);
       setCoopList([]);
     }
   };
 
+  // ✅ Replace fetch with api instance
   const fetchRegions = async () => {
     try {
-      const res = await fetch(REGIONS_API_URL);
-      const data = await res.json();
-      // ✅ Fix: extract array from `data`
+      const res = await api.get(REGIONS_API_URL);
+      const data = res.data;
       setRegions(data?.data || []);
     } catch (e) {
       console.error("Failed to fetch regions", e);
@@ -140,6 +146,7 @@ const FarmersPage: React.FC = () => {
     setCoopForm({ ...coopForm, [e.target.name]: e.target.value });
   };
 
+  // ✅ Replace fetch with api instance
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -152,11 +159,7 @@ const FarmersPage: React.FC = () => {
         primary_crops: form.primary_crops.split(",").map((c) => c.trim()),
         cooperative_id: form.cooperative_id ? parseInt(form.cooperative_id) : null,
       };
-      await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      await api.post(API_URL, payload);
       setOpen(false);
       setForm({
         first_name: "", last_name: "", email: "", phone: "", region_id: "",
@@ -165,34 +168,35 @@ const FarmersPage: React.FC = () => {
         cooperative_id: "", registration_date: "2023-08-12"
       });
       fetchFarmers();
+    } catch (error) {
+      console.error("Error adding farmer:", error);
     } finally {
       setSubmitting(false);
     }
   };
 
+  // ✅ Replace fetch with api instance
   const handleCoopSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
       const payload = {
         ...coopForm,
-        regionId: coopForm.regionId ? parseInt(coopForm.regionId) : null,
-        numberOfFarmers: coopForm.numberOfFarmers ? parseInt(coopForm.numberOfFarmers) : null,
-        totalLandSize: coopForm.totalLandSize ? parseFloat(coopForm.totalLandSize) : null,
-        mainCrops: coopForm.mainCrops.split(",").map((c) => c.trim()),
-        isActive: coopForm.isActive,
+        region_id: coopForm.region_id ? parseInt(coopForm.region_id) : null,
+        number_of_farmers: coopForm.number_of_farmers ? parseInt(coopForm.number_of_farmers) : null,
+        total_land_size: coopForm.total_land_size ? parseFloat(coopForm.total_land_size) : null,
+        main_crops: coopForm.main_crops ? coopForm.main_crops.split(",").map((c) => c.trim()) : [],
+        is_active: coopForm.is_active,
       };
-      await fetch(COOP_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      await api.post(COOP_API_URL, payload);
       setOpen(false);
       setCoopForm({
-        cooperativeName: "", location: "", numberOfFarmers: "", totalLandSize: "",
-        contactPersonPhone: "", contactPersonEmail: "", mainCrops: "", regionId: "", isActive: true
+        cooperative_name: "", location: "", number_of_farmers: "", total_land_size: "",
+        contact_person_phone: "", contact_person_email: "", main_crops: "", region_id: "", is_active: true
       });
-      fetchFarmers();
+      fetchCooperatives(); // ✅ Fix: should call fetchCooperatives, not fetchFarmers
+    } catch (error) {
+      console.error("Error adding cooperative:", error);
     } finally {
       setSubmitting(false);
     }
@@ -208,9 +212,14 @@ const FarmersPage: React.FC = () => {
     setEditOpen(true);
   };
 
-  const handleDelete = (farmer: any) => {
+  const handleDelete = async (farmer: any) => {
     if (window.confirm("Are you sure you want to delete this farmer?")) {
-      console.log("Delete farmer", farmer);
+      try {
+        await api.delete(`${API_URL}${farmer.id}`);
+        fetchFarmers();
+      } catch (error) {
+        console.error("Error deleting farmer:", error);
+      }
     }
   };
 
@@ -219,13 +228,20 @@ const FarmersPage: React.FC = () => {
     setViewCoop(coop);
     setViewCoopOpen(true);
   };
+  
   const handleEditCoop = (coop: any) => {
     setEditCoop(coop);
     setEditCoopOpen(true);
   };
-  const handleDeleteCoop = (coop: any) => {
+  
+  const handleDeleteCoop = async (coop: any) => {
     if (window.confirm("Are you sure you want to delete this cooperative?")) {
-      console.log("Delete cooperative", coop);
+      try {
+        await api.delete(`${COOP_API_URL}/${coop.id}`);
+        fetchCooperatives();
+      } catch (error) {
+        console.error("Error deleting cooperative:", error);
+      }
     }
   };
 
@@ -304,6 +320,7 @@ const FarmersPage: React.FC = () => {
     COOP_ACTIONS_COLUMN,
   ];
 
+  // ✅ Replace fetch with api instance
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editFarmer) return;
@@ -317,19 +334,18 @@ const FarmersPage: React.FC = () => {
             ? JSON.parse(editFarmer.primary_crops)
             : editFarmer.primary_crops.split(',').map((c: string) => c.trim())),
       };
-      await fetch(`${API_URL}${editFarmer.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      await api.put(`${API_URL}${editFarmer.id}`, payload);
       setEditOpen(false);
       setEditFarmer(null);
       fetchFarmers();
+    } catch (error) {
+      console.error("Error updating farmer:", error);
     } finally {
       setSubmitting(false);
     }
   };
 
+  // ✅ Replace fetch with api instance
   const handleEditCoopSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editCoop) return;
@@ -337,20 +353,18 @@ const FarmersPage: React.FC = () => {
     try {
       const payload = {
         ...editCoop,
-        mainCrops: Array.isArray(editCoop.mainCrops)
-          ? editCoop.mainCrops
-          : (typeof editCoop.mainCrops === 'string' && editCoop.mainCrops.startsWith('[')
-            ? JSON.parse(editCoop.mainCrops)
-            : editCoop.mainCrops.split(',').map((c: string) => c.trim())),
+        main_crops: Array.isArray(editCoop.main_crops)
+          ? editCoop.main_crops
+          : (typeof editCoop.main_crops === 'string' && editCoop.main_crops.startsWith('[')
+            ? JSON.parse(editCoop.main_crops)
+            : editCoop.main_crops ? editCoop.main_crops.split(',').map((c: string) => c.trim()) : []),
       };
-      await fetch(`${COOP_API_URL}/${editCoop.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      await api.put(`${COOP_API_URL}/${editCoop.id}`, payload);
       setEditCoopOpen(false);
       setEditCoop(null);
       fetchCooperatives();
+    } catch (error) {
+      console.error("Error updating cooperative:", error);
     } finally {
       setSubmitting(false);
     }
@@ -409,22 +423,22 @@ const FarmersPage: React.FC = () => {
                           </form>
                         ) : (
                           <form className="space-y-4" onSubmit={handleCoopSubmit}>
-                            <input name="cooperativeName" placeholder="Cooperative Name" value={coopForm.cooperativeName} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
+                            <input name="cooperative_name" placeholder="Cooperative Name" value={coopForm.cooperative_name} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
                             <input name="location" placeholder="Location" value={coopForm.location} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
-                            <input name="numberOfFarmers" type="number" placeholder="Number of Farmers" value={coopForm.numberOfFarmers} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
-                            <input name="totalLandSize" type="number" placeholder="Total Land Size (Ha)" value={coopForm.totalLandSize} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
-                            <input name="contactPersonPhone" placeholder="Contact Person Phone" value={coopForm.contactPersonPhone} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
-                            <input name="contactPersonEmail" placeholder="Contact Person Email" value={coopForm.contactPersonEmail} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
-                            <select name="regionId" value={coopForm.regionId} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black">
+                            <input name="number_of_farmers" type="number" placeholder="Number of Farmers" value={coopForm.number_of_farmers} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
+                            <input name="total_land_size" type="number" placeholder="Total Land Size (Ha)" value={coopForm.total_land_size} onChange={handleCoopChange} className="w-full border rounded p-2 text-black" />
+                            <input name="contact_person_phone" placeholder="Contact Person Phone" value={coopForm.contact_person_phone} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
+                            <input name="contact_person_email" placeholder="Contact Person Email" value={coopForm.contact_person_email} onChange={handleCoopChange} className="w-full border rounded p-2 text-black" />
+                            <select name="region_id" value={coopForm.region_id} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black">
                               <option value="">Select Region</option>
                               {regions.map((r) => (
                                 <option key={r.id} value={r.id}>{r.regionName}</option>
                               ))}
                             </select>
-                            <input name="mainCrops" placeholder="Main Crops (comma separated)" value={coopForm.mainCrops} onChange={handleCoopChange} required className="w-full border rounded p-2 text-black" />
+                            <input name="main_crops" placeholder="Main Crops (comma separated)" value={coopForm.main_crops} onChange={handleCoopChange} className="w-full border rounded p-2 text-black" />
                             <div className="flex items-center space-x-2">
-                              <input type="checkbox" name="isActive" checked={coopForm.isActive} onChange={e => setCoopForm({ ...coopForm, isActive: e.target.checked })} />
-                              <label htmlFor="isActive" className="text-black">Active</label>
+                              <input type="checkbox" name="is_active" checked={coopForm.is_active} onChange={e => setCoopForm({ ...coopForm, is_active: e.target.checked })} />
+                              <label htmlFor="is_active" className="text-black">Active</label>
                             </div>
                             <Button type="submit" disabled={submitting}>{submitting ? "Adding..." : "Add Cooperative"}</Button>
                           </form>
@@ -478,22 +492,22 @@ const FarmersPage: React.FC = () => {
           <DialogTitle>Edit Cooperative</DialogTitle>
           {editCoop && (
             <form className="space-y-4" onSubmit={handleEditCoopSubmit}>
-              <input name="cooperativeName" placeholder="Cooperative Name" value={editCoop.cooperativeName || ''} onChange={e => setEditCoop({ ...editCoop, cooperativeName: e.target.value })} required className="w-full border rounded p-2 text-black" />
+              <input name="cooperative_name" placeholder="Cooperative Name" value={editCoop.cooperative_name || ''} onChange={e => setEditCoop({ ...editCoop, cooperative_name: e.target.value })} required className="w-full border rounded p-2 text-black" />
               <input name="location" placeholder="Location" value={editCoop.location || ''} onChange={e => setEditCoop({ ...editCoop, location: e.target.value })} required className="w-full border rounded p-2 text-black" />
-              <input name="numberOfFarmers" type="number" placeholder="Number of Farmers" value={editCoop.numberOfFarmers || ''} onChange={e => setEditCoop({ ...editCoop, numberOfFarmers: e.target.value })} required className="w-full border rounded p-2 text-black" />
-              <input name="totalLandSize" type="number" placeholder="Total Land Size (Ha)" value={editCoop.totalLandSize || ''} onChange={e => setEditCoop({ ...editCoop, totalLandSize: e.target.value })} required className="w-full border rounded p-2 text-black" />
-              <input name="contactPersonPhone" placeholder="Contact Person Phone" value={editCoop.contactPersonPhone || ''} onChange={e => setEditCoop({ ...editCoop, contactPersonPhone: e.target.value })} required className="w-full border rounded p-2 text-black" />
-              <input name="contactPersonEmail" placeholder="Contact Person Email" value={editCoop.contactPersonEmail || ''} onChange={e => setEditCoop({ ...editCoop, contactPersonEmail: e.target.value })} required className="w-full border rounded p-2 text-black" />
-              <input name="mainCrops" placeholder="Main Crops (comma separated)" value={Array.isArray(editCoop.mainCrops) ? editCoop.mainCrops.join(', ') : editCoop.mainCrops || ''} onChange={e => setEditCoop({ ...editCoop, mainCrops: e.target.value })} required className="w-full border rounded p-2 text-black" />
-              <select name="regionId" value={editCoop.regionId || ''} onChange={e => setEditCoop({ ...editCoop, regionId: e.target.value })} required className="w-full border rounded p-2 text-black">
+              <input name="number_of_farmers" type="number" placeholder="Number of Farmers" value={editCoop.number_of_farmers || ''} onChange={e => setEditCoop({ ...editCoop, number_of_farmers: e.target.value })} required className="w-full border rounded p-2 text-black" />
+              <input name="total_land_size" type="number" placeholder="Total Land Size (Ha)" value={editCoop.total_land_size || ''} onChange={e => setEditCoop({ ...editCoop, total_land_size: e.target.value })} className="w-full border rounded p-2 text-black" />
+              <input name="contact_person_phone" placeholder="Contact Person Phone" value={editCoop.contact_person_phone || ''} onChange={e => setEditCoop({ ...editCoop, contact_person_phone: e.target.value })} required className="w-full border rounded p-2 text-black" />
+              <input name="contact_person_email" placeholder="Contact Person Email" value={editCoop.contact_person_email || ''} onChange={e => setEditCoop({ ...editCoop, contact_person_email: e.target.value })} className="w-full border rounded p-2 text-black" />
+              <input name="main_crops" placeholder="Main Crops (comma separated)" value={Array.isArray(editCoop.main_crops) ? editCoop.main_crops.join(', ') : editCoop.main_crops || ''} onChange={e => setEditCoop({ ...editCoop, main_crops: e.target.value })} className="w-full border rounded p-2 text-black" />
+              <select name="region_id" value={editCoop.region_id || ''} onChange={e => setEditCoop({ ...editCoop, region_id: e.target.value })} required className="w-full border rounded p-2 text-black">
                 <option value="">Select Region</option>
                 {regions.map((r) => (
                   <option key={r.id} value={r.id}>{r.regionName}</option>
                 ))}
               </select>
               <div className="flex items-center space-x-2">
-                <input type="checkbox" name="isActive" checked={!!editCoop.isActive} onChange={e => setEditCoop({ ...editCoop, isActive: e.target.checked })} />
-                <label htmlFor="isActive" className="text-black">Active</label>
+                <input type="checkbox" name="is_active" checked={!!editCoop.is_active} onChange={e => setEditCoop({ ...editCoop, is_active: e.target.checked })} />
+                <label htmlFor="is_active" className="text-black">Active</label>
               </div>
               <div className="flex justify-end">
                 <Button type="submit" disabled={submitting}>{submitting ? "Saving..." : "Save Changes"}</Button>
@@ -531,15 +545,16 @@ const FarmersPage: React.FC = () => {
           <DialogTitle className="text-black">Cooperative Details</DialogTitle>
           {viewCoop && (
             <div className="space-y-2 text-black">
-              <div><b>Name:</b> {viewCoop.cooperativeName}</div>
+              <div><b>Name:</b> {viewCoop.cooperative_name}</div>
               <div><b>Location:</b> {viewCoop.location}</div>
-              <div><b>Number of Farmers:</b> {viewCoop.numberOfFarmers}</div>
-              <div><b>Main Crops:</b> {Array.isArray(viewCoop.mainCrops) ? viewCoop.mainCrops.join(", ") : (typeof viewCoop.mainCrops === 'string' && viewCoop.mainCrops.startsWith('[') ? JSON.parse(viewCoop.mainCrops).join(", ") : viewCoop.mainCrops)}</div>
-              <div><b>Region:</b> {viewCoop.regionName || viewCoop.regionId}</div>
-              <div><b>Contact Person Phone:</b> {viewCoop.contactPersonPhone}</div>
-              <div><b>Contact Person Email:</b> {viewCoop.contactPersonEmail}</div>
-              <div><b>Total Land Size (Ha):</b> {viewCoop.totalLandSize}</div>
-              <div><b>Active:</b> {viewCoop.isActive ? "Yes" : "No"}</div>
+              <div><b>Number of Farmers:</b> {viewCoop.number_of_farmers}</div>
+              <div><b>Main Crops:</b> {Array.isArray(viewCoop.main_crops) ? viewCoop.main_crops.join(", ") : (Array.isArray(viewCoop.mainCropsArray) ? viewCoop.mainCropsArray.join(", ") : (typeof viewCoop.main_crops === 'string' && viewCoop.main_crops.startsWith('[') ? JSON.parse(viewCoop.main_crops).join(", ") : viewCoop.main_crops || "-"))}</div>
+              <div><b>Region:</b> {viewCoop.region?.region_name || viewCoop.region_id}</div>
+              <div><b>Contact Person Phone:</b> {viewCoop.contact_person_phone}</div>
+              <div><b>Contact Person Email:</b> {viewCoop.contact_person_email || "-"}</div>
+              <div><b>Total Land Size (Ha):</b> {viewCoop.total_land_size || "-"}</div>
+              <div><b>Active:</b> {viewCoop.is_active ? "Yes" : "No"}</div>
+              <div><b>Farmers:</b> {viewCoop.farmers && viewCoop.farmers.length > 0 ? viewCoop.farmers.map((f: any) => `${f.first_name} ${f.last_name}`).join(", ") : "-"}</div>
               <div className="flex justify-end pt-4">
                 <Button onClick={() => { setViewCoopOpen(false); setEditCoop(viewCoop); setEditCoopOpen(true); }} className="bg-yellow-600 text-white">Edit</Button>
               </div>

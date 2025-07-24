@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "SET NULL",
       });
       Cooperative.belongsTo(models.Region, {
-        foreignKey: "regionId",
+        foreignKey: "region_id",
         as: "region",
         onDelete: "SET NULL",
       });
@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     // Instance method to get parsed main crops
     getMainCrops() {
       try {
-        return this.mainCrops ? JSON.parse(this.mainCrops) : [];
+        return this.main_crops ? JSON.parse(this.main_crops) : [];
       } catch (error) {
         return [];
       }
@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
 
     // Instance method to set main crops
     setMainCrops(crops) {
-      this.mainCrops = JSON.stringify(crops);
+      this.main_crops = JSON.stringify(crops);
     }
   }
 
@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
         type: DataTypes.INTEGER,
       },
-      cooperativeName: {
+      cooperative_name: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
@@ -61,7 +61,7 @@ module.exports = (sequelize, DataTypes) => {
           },
         },
       },
-      numberOfFarmers: {
+      number_of_farmers: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0,
@@ -77,18 +77,18 @@ module.exports = (sequelize, DataTypes) => {
         // Add a setter to ensure proper conversion
         set(value) {
           if (value === null || value === undefined || value === '') {
-            this.setDataValue('numberOfFarmers', 0);
+            this.setDataValue('number_of_farmers', 0);
           } else {
             const parsed = parseInt(value, 10);
             if (isNaN(parsed)) {
-              this.setDataValue('numberOfFarmers', 0);
+              this.setDataValue('number_of_farmers', 0);
             } else {
-              this.setDataValue('numberOfFarmers', Math.max(0, parsed));
+              this.setDataValue('number_of_farmers', Math.max(0, parsed));
             }
           }
         }
       },
-      totalLandSize: {
+      total_land_size: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: true,
         validate: {
@@ -103,18 +103,18 @@ module.exports = (sequelize, DataTypes) => {
         // Add a setter to ensure proper conversion
         set(value) {
           if (value === null || value === undefined || value === '') {
-            this.setDataValue('totalLandSize', null);
+            this.setDataValue('total_land_size', null);
           } else {
             const parsed = parseFloat(value);
             if (isNaN(parsed)) {
-              this.setDataValue('totalLandSize', null);
+              this.setDataValue('total_land_size', null);
             } else {
-              this.setDataValue('totalLandSize', Math.max(0, parsed));
+              this.setDataValue('total_land_size', Math.max(0, parsed));
             }
           }
         }
       },
-      contactPersonPhone: {
+      contact_person_phone: {
         type: DataTypes.STRING(20),
         allowNull: false,
         validate: {
@@ -123,7 +123,7 @@ module.exports = (sequelize, DataTypes) => {
           },
         },
       },
-      contactPersonEmail: {
+      contact_person_email: {
         type: DataTypes.STRING(100),
         allowNull: true,
         validate: {
@@ -132,7 +132,7 @@ module.exports = (sequelize, DataTypes) => {
           },
         },
       },
-      mainCrops: {
+      main_crops: {
         type: DataTypes.TEXT,
         allowNull: true,
         validate: {
@@ -147,7 +147,7 @@ module.exports = (sequelize, DataTypes) => {
           },
         },
       },
-      regionId: {
+      region_id: {
         type: DataTypes.INTEGER,
         allowNull: true,
         validate: {
@@ -157,14 +157,14 @@ module.exports = (sequelize, DataTypes) => {
         },
         set(value) {
           if (value === null || value === undefined || value === '') {
-            this.setDataValue('regionId', null);
+            this.setDataValue('region_id', null);
           } else {
             const parsed = parseInt(value, 10);
-            this.setDataValue('regionId', isNaN(parsed) ? null : parsed);
+            this.setDataValue('region_id', isNaN(parsed) ? null : parsed);
           }
         }
       },
-      isActive: {
+      is_active: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: true,
@@ -173,8 +173,9 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "Cooperative",
-      tableName: "Cooperatives",
+      tableName: "cooperatives",
       timestamps: true,
+      underscored: true,
     }
   );
 

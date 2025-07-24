@@ -1,46 +1,74 @@
-const jwt = require("jsonwebtoken");
-const db = require("../../models/index");
+const jwt = require('jsonwebtoken');
+const { User, Role } = require('../../models');
+const config = require('../../config/config');
 
-const { Roles } = db;
-
-const checkUserRole =
-  (...roles) =>
-  async (req, res, next) => {
+const authorize = (allowedRoles = []) => {
+  return async (req, res, next) => {
     try {
-      if (!req.headers.authorization) throw new Error("First Login !!!");
-
-      const token = req.headers.authorization.split(" ")[1];
-
-      const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-      console.log(decoded);
-
-      const userRole = await Roles.findOne({ where: { id: decoded.roleId } });
-
-      if (!userRole) {
-        res.status(404).send({ message: "Role not found" });
-        return;
+      // Get token from header
+      const token = req.headers.authorization?.split(' ')[1];
+      if (!token) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'No token provided'
+        });
       }
 
-      if (roles.includes(userRole.name)) {
-        next();
-      } else {
-        res.status(403).send({ message: "Unauthorized" });
+      // Verify token
+      const decoded = jwt.verify(token, config.JWT_SECRET);
+      
+      // Get user with role
+      const user = await User.findOne({
+        where: { id: decoded.id },
+        include: [{
+          model: Role,
+          as: 'role',
+          attributes: ['name']
+        }]
+      });
+
+      if (!user) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'User not found'
+        });
       }
-    } catch (err) {
-      res.status(500).send({ message: err.message });
+
+      // If no specific roles are required, just check authentication
+      if (!allowedRoles.length) {
+        req.user = user;
+        return next();
+      }
+
+      // Check if user's role is allowed
+      const userRole = user.role.name;
+      if (!allowedRoles.includes(userRole)) {
+        return res.status(403).json({
+          status: 'error',
+          message: 'Unauthorized'
+        });
+      }
+
+      // Attach user and location info to request
+      req.user = user;
+      if (userRole === 'districtAdministrator') {
+        req.districtId = user.district;
+      } else if (userRole === 'sectorCoordinator') {
+        req.sectorId = user.sector_id;
+        req.districtId = user.district;
+      }
+
+      next();
+    } catch (error) {
+      console.error('Authorization error:', error);
+      return res.status(401).json({
+        status: 'error',
+        message: 'Invalid token'
+      });
     }
   };
+};
 
-// Middleware to authenticate session token
-function authenticateToken(req, res, next) {
-  const token = req.cookies.sessionToken;
-  if (!token) return res.status(401).json({ message: "Unauthorized" });
-
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) return res.status(403).json({ message: "Invalid token" });
-    req.user = decoded; // Set req.user with decoded token data
-    next();
-  });
-}
-
-module.exports = checkUserRole;
+module.exports = {
+  authorize
+}; 

@@ -2,7 +2,7 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Farmers', {
+    await queryInterface.createTable('farmers', {
       farmer_id: {
         allowNull: false,
         autoIncrement: true,
@@ -30,7 +30,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: true,
         references: {
-          model: 'Regions',
+          model: 'regions',
           key: 'id'
         },
         onUpdate: 'CASCADE',
@@ -65,7 +65,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: true,
         references: {
-          model: 'Cooperatives',
+          model: 'cooperatives',
           key: 'id'
         },
         onUpdate: 'CASCADE',
@@ -93,6 +93,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Farmers');
+    await queryInterface.dropTable('farmers');
   }
 };

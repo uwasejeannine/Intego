@@ -670,7 +670,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "HealthFacility",
-      tableName: "HealthFacilities",
+      tableName: "healthfacilities",
       timestamps: true,
       underscored: true,
       hooks: {

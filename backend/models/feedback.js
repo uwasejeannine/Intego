@@ -3,12 +3,34 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Feedback extends Model {
     static associate(models) {
-      Feedback.belongsTo(models.User, { foreignKey: "fromUserId", as: "fromUser" });
-      Feedback.belongsTo(models.User, { foreignKey: "toUserId", as: "toUser" });
-      Feedback.belongsTo(Feedback, { foreignKey: "parentId", as: "parent" });
-      Feedback.hasMany(Feedback, { foreignKey: "parentId", as: "replies" });
+      // User associations
+      Feedback.belongsTo(models.User, {
+        foreignKey: "fromUserId",
+        as: "fromUser",
+        onDelete: "CASCADE"
+      });
+      
+      Feedback.belongsTo(models.User, {
+        foreignKey: "toUserId",
+        as: "toUser",
+        onDelete: "CASCADE"
+      });
+
+      // Self-referential association for replies
+      Feedback.belongsTo(Feedback, {
+        foreignKey: "parentId",
+        as: "parent",
+        onDelete: "CASCADE"
+      });
+      
+      Feedback.hasMany(Feedback, {
+        foreignKey: "parentId",
+        as: "replies",
+        onDelete: "CASCADE"
+      });
     }
   }
+
   Feedback.init(
     {
       id: {
@@ -20,6 +42,9 @@ module.exports = (sequelize, DataTypes) => {
       section: {
         type: DataTypes.STRING,
         allowNull: false,
+        validate: {
+          notEmpty: true
+        }
       },
       itemId: {
         type: DataTypes.INTEGER,
@@ -28,18 +53,33 @@ module.exports = (sequelize, DataTypes) => {
       fromUserId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+          model: 'Users',
+          key: 'id'
+        }
       },
       toUserId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
+        references: {
+          model: 'Users',
+          key: 'id'
+        }
       },
       message: {
         type: DataTypes.TEXT,
         allowNull: false,
+        validate: {
+          notEmpty: true
+        }
       },
       parentId: {
         type: DataTypes.INTEGER,
         allowNull: true,
+        references: {
+          model: 'Feedbacks',
+          key: 'id'
+        }
       },
     },
     {
@@ -47,7 +87,22 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "Feedback",
       tableName: "Feedbacks",
       timestamps: true,
+      indexes: [
+        {
+          fields: ['fromUserId']
+        },
+        {
+          fields: ['toUserId']
+        },
+        {
+          fields: ['parentId']
+        },
+        {
+          fields: ['section', 'itemId']
+        }
+      ]
     }
   );
+
   return Feedback;
 }; 

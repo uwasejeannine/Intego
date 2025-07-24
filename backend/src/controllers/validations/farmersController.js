@@ -2,7 +2,7 @@ const db = require("../../../models/index");
 const { Region, Cooperative, Farmer } = db;
 const { Op } = require("sequelize");
 
-// Region Controller
+// Region Controller - FIXED VERSION
 class RegionController {
   static async getAllRegions(req, res) {
     try {
@@ -10,8 +10,16 @@ class RegionController {
       const offset = (page - 1) * limit;
       
       const whereClause = {};
+      if (req.districtId) {
+        whereClause.id = req.districtId;
+      } else if (req.sectorId) {
+        // This assumes a direct relationship between region and sector, which doesn't exist yet.
+        // This will need to be implemented properly.
+        // For now, this will not filter by sector.
+      }
+      
       if (isActive !== undefined) {
-        whereClause.isActive = isActive === 'true';
+        whereClause.is_active = isActive === 'true';
       }
 
       const regions = await Region.findAndCountAll({
@@ -27,10 +35,10 @@ class RegionController {
           {
             model: Cooperative,
             as: "cooperatives",
-            attributes: ['id', 'cooperativeName', 'numberOfFarmers'],
+            attributes: ['id', 'cooperative_name', 'number_of_farmers'],
           },
         ],
-        order: [['regionName', 'ASC']],
+        order: [['region_name', 'ASC']],
       });
 
       res.status(200).json({
@@ -79,12 +87,13 @@ class RegionController {
 
   static async createRegion(req, res) {
     try {
-      const { regionName, regionCode, description } = req.body;
+      const { region_name, region_code, description } = req.body;
 
       // Check if region with same name or code exists
       const existingRegion = await Region.findOne({
         where: {
-          [Op.or]: [{ regionName }, { regionCode }],
+          [Op.or]: [{ region_name }
+            , { region_code }],
         },
       });
 
@@ -95,8 +104,8 @@ class RegionController {
       }
 
       const newRegion = await Region.create({
-        regionName,
-        regionCode: regionCode.toUpperCase(),
+        region_name,
+        region_code: region_code.toUpperCase(),
         description,
       });
 
@@ -140,7 +149,7 @@ class RegionController {
 
       // Check if region has associated farmers or cooperatives
       const farmerCount = await Farmer.count({ where: { region_id: regionId } });
-      const cooperativeCount = await Cooperative.count({ where: { regionId } });
+      const cooperativeCount = await Cooperative.count({ where: { region_id: regionId } });
 
       if (farmerCount > 0 || cooperativeCount > 0) {
         return res.status(400).json({
@@ -159,7 +168,7 @@ class RegionController {
   }
 }
 
-// Cooperative Controller
+// Cooperative Controller - FIXED VERSION
 class CooperativeController {
   static async getAllCooperatives(req, res) {
     try {
@@ -167,12 +176,20 @@ class CooperativeController {
       const offset = (page - 1) * limit;
       
       const whereClause = {};
-      if (regionId) whereClause.regionId = regionId;
-      if (isActive !== undefined) whereClause.isActive = isActive === 'true';
+      if (req.districtId) {
+        whereClause.region_id = req.districtId;
+      } else if (req.sectorId) {
+        // This assumes a direct relationship between cooperative and sector, which doesn't exist yet.
+        // This will need to be implemented properly.
+        // For now, this will not filter by sector.
+      }
+      
+      if (regionId) whereClause.region_id = regionId;
+      if (isActive !== undefined) whereClause.is_active = isActive === 'true';
       
       if (search) {
         whereClause[Op.or] = [
-          { cooperativeName: { [Op.iLike]: `%${search}%` } },
+          { cooperative_name: { [Op.iLike]: `%${search}%` } },
           { location: { [Op.iLike]: `%${search}%` } },
         ];
       }
@@ -185,7 +202,7 @@ class CooperativeController {
           {
             model: Region,
             as: "region",
-            attributes: ['id', 'regionName', 'regionCode'],
+            attributes: ['id', 'region_name', 'region_code'],
           },
           {
             model: Farmer,
@@ -193,13 +210,16 @@ class CooperativeController {
             attributes: ['farmer_id', 'first_name', 'last_name'],
           },
         ],
-        order: [['cooperativeName', 'ASC']],
+        order: [['cooperative_name', 'ASC']],
       });
 
       // Add parsed main crops to each cooperative
       const cooperativesWithParsedData = cooperatives.rows.map(coop => {
         const coopData = coop.toJSON();
-        coopData.mainCropsArray = coop.getMainCrops();
+        // Only call getMainCrops if the method exists
+        if (typeof coop.getMainCrops === 'function') {
+          coopData.mainCropsArray = coop.getMainCrops();
+        }
         return coopData;
       });
 
@@ -240,7 +260,10 @@ class CooperativeController {
 
       // Add computed fields
       const cooperativeData = cooperative.toJSON();
-      cooperativeData.mainCropsArray = cooperative.getMainCrops();
+      // Only call getMainCrops if the method exists
+      if (typeof cooperative.getMainCrops === 'function') {
+        cooperativeData.mainCropsArray = cooperative.getMainCrops();
+      }
 
       return res.status(200).json({
         message: "Cooperative fetched successfully",
@@ -257,25 +280,25 @@ class CooperativeController {
       console.log('Raw request body:', JSON.stringify(req.body, null, 2));
       
       const {
-        cooperativeName,
+        cooperative_name,
         location,
-        numberOfFarmers,
-        totalLandSize,
-        contactPersonPhone,
-        contactPersonEmail,
-        mainCrops,
-        regionId,
-        isActive,
+        number_of_farmers,
+        total_land_size,
+        contact_person_phone,
+        contact_person_email,
+        main_crops,
+        region_id,
+        is_active,
       } = req.body;
   
       console.log('Extracted values:');
-      console.log('- numberOfFarmers:', numberOfFarmers, 'Type:', typeof numberOfFarmers);
-      console.log('- totalLandSize:', totalLandSize, 'Type:', typeof totalLandSize);
-      console.log('- regionId:', regionId, 'Type:', typeof regionId);
+      console.log('- number_of_farmers:', number_of_farmers, 'Type:', typeof number_of_farmers);
+      console.log('- total_land_size:', total_land_size, 'Type:', typeof total_land_size);
+      console.log('- region_id:', region_id, 'Type:', typeof region_id);
   
       // Check if cooperative with same name exists
       const existingCooperative = await Cooperative.findOne({
-        where: { cooperativeName },
+        where: { cooperative_name },
       });
   
       if (existingCooperative) {
@@ -285,23 +308,23 @@ class CooperativeController {
       }
   
       // Verify region exists if provided
-      if (regionId) {
-        const region = await Region.findByPk(regionId);
+      if (region_id) {
+        const region = await Region.findByPk(region_id);
         if (!region) {
           return res.status(400).json({ message: "Invalid region ID" });
         }
       }
   
-      // Convert mainCrops array to JSON string if it's an array
-      let mainCropsString = mainCrops;
-      if (Array.isArray(mainCrops)) {
-        mainCropsString = JSON.stringify(mainCrops);
+      // Convert main_crops array to JSON string if it's an array
+      let mainCropsString = main_crops;
+      if (Array.isArray(main_crops)) {
+        mainCropsString = JSON.stringify(main_crops);
       }
   
       // Explicit conversion and validation
-      const processedNumberOfFarmers = numberOfFarmers === undefined || numberOfFarmers === null ? 0 : parseInt(numberOfFarmers, 10);
-      const processedTotalLandSize = totalLandSize === undefined || totalLandSize === null ? null : parseFloat(totalLandSize);
-      const processedRegionId = regionId === undefined || regionId === null ? null : parseInt(regionId, 10);
+      const processedNumberOfFarmers = number_of_farmers === undefined || number_of_farmers === null ? 0 : parseInt(number_of_farmers, 10);
+      const processedTotalLandSize = total_land_size === undefined || total_land_size === null ? null : parseFloat(total_land_size);
+      const processedRegionId = region_id === undefined || region_id === null ? null : parseInt(region_id, 10);
   
       console.log('Processed values:');
       console.log('- processedNumberOfFarmers:', processedNumberOfFarmers, 'Type:', typeof processedNumberOfFarmers);
@@ -311,30 +334,30 @@ class CooperativeController {
       // Validate processed values
       if (isNaN(processedNumberOfFarmers) || processedNumberOfFarmers < 0) {
         return res.status(400).json({
-          message: "Invalid numberOfFarmers. Must be a non-negative integer.",
-          received: numberOfFarmers,
+          message: "Invalid number_of_farmers. Must be a non-negative integer.",
+          received: number_of_farmers,
           processed: processedNumberOfFarmers
         });
       }
   
       if (processedTotalLandSize !== null && (isNaN(processedTotalLandSize) || processedTotalLandSize < 0)) {
         return res.status(400).json({
-          message: "Invalid totalLandSize. Must be a non-negative number.",
-          received: totalLandSize,
+          message: "Invalid total_land_size. Must be a non-negative number.",
+          received: total_land_size,
           processed: processedTotalLandSize
         });
       }
   
       const cooperativeData = {
-        cooperativeName,
+        cooperative_name,
         location,
-        numberOfFarmers: processedNumberOfFarmers,
-        totalLandSize: processedTotalLandSize,
-        contactPersonPhone,
-        contactPersonEmail,
-        mainCrops: mainCropsString,
-        regionId: processedRegionId,
-        isActive: isActive !== undefined ? Boolean(isActive) : true,
+        number_of_farmers: processedNumberOfFarmers,
+        total_land_size: processedTotalLandSize,
+        contact_person_phone,
+        contact_person_email,
+        main_crops: mainCropsString,
+        region_id: processedRegionId,
+        is_active: is_active !== undefined ? Boolean(is_active) : true,
       };
   
       console.log('Final cooperative data:', JSON.stringify(cooperativeData, null, 2));
@@ -380,10 +403,10 @@ class CooperativeController {
         return res.status(404).json({ message: "Cooperative not found" });
       }
 
-      // Handle mainCrops conversion if it's an array
+      // Handle main_crops conversion if it's an array
       const updateData = { ...req.body };
-      if (Array.isArray(updateData.mainCrops)) {
-        updateData.mainCrops = JSON.stringify(updateData.mainCrops);
+      if (Array.isArray(updateData.main_crops)) {
+        updateData.main_crops = JSON.stringify(updateData.main_crops);
       }
 
       const updatedCooperative = await cooperative.update(updateData);
@@ -428,75 +451,91 @@ class CooperativeController {
 
 // Farmer Controller
 class FarmerController {
-  static async getAllFarmers(req, res) {
-    try {
-      const { 
-        page = 1, 
-        limit = 10, 
-        region_id, 
-        cooperative_id, 
-        farmer_type,
-        is_active,
-        search 
-      } = req.query;
-      const offset = (page - 1) * limit;
-      
-      const whereClause = {};
-      if (region_id) whereClause.region_id = region_id;
-      if (cooperative_id) whereClause.cooperative_id = cooperative_id;
-      if (farmer_type) whereClause.farmer_type = farmer_type;
-      if (is_active !== undefined) whereClause.is_active = is_active === 'true';
-      
-      if (search) {
-        whereClause[Op.or] = [
-          { first_name: { [Op.iLike]: `%${search}%` } },
-          { last_name: { [Op.iLike]: `%${search}%` } },
-          { email: { [Op.iLike]: `%${search}%` } },
-        ];
-      }
-
-      const farmers = await Farmer.findAndCountAll({
-        where: whereClause,
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-        include: [
-          {
-            model: Region,
-            as: "region",
-            attributes: ['id', 'regionName', 'regionCode'],
-          },
-          {
-            model: Cooperative,
-            as: "cooperative",
-            attributes: ['id', 'cooperativeName', 'location'],
-          },
-        ],
-        order: [['first_name', 'ASC'], ['last_name', 'ASC']],
-      });
-
-      // Add computed fields to each farmer
-      const farmersWithComputedData = farmers.rows.map(farmer => {
-        const farmerData = farmer.toJSON();
-        farmerData.fullName = farmer.getFullName();
-        farmerData.experienceLevel = farmer.getExperienceLevel();
-        farmerData.primaryCropsArray = farmer.getPrimaryCrops();
-        return farmerData;
-      });
-
-      res.status(200).json({
-        message: "Farmers fetched successfully",
-        data: farmersWithComputedData,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(farmers.count / limit),
-          totalItems: farmers.count,
-          itemsPerPage: parseInt(limit),
-        },
-      });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
+static async getAllFarmers(req, res) {
+  try {
+    const { 
+      page = 1, 
+      limit = 10, 
+      region_id, 
+      cooperative_id, 
+      farmer_type,
+      is_active,
+      search 
+    } = req.query;
+    const offset = (page - 1) * limit;
+    
+    const whereClause = {};
+    if (req.districtId) {
+      whereClause.region_id = req.districtId;
+    } else if (req.sectorId) {
+      // This assumes a direct relationship between farmer and sector, which doesn't exist yet.
+      // This will need to be implemented properly.
+      // For now, this will not filter by sector.
     }
+    
+    if (region_id) whereClause.region_id = region_id;
+    if (cooperative_id) whereClause.cooperative_id = cooperative_id;
+    if (farmer_type) whereClause.farmer_type = farmer_type;
+    if (is_active !== undefined) whereClause.is_active = is_active === 'true';
+    
+    if (search) {
+      whereClause[Op.or] = [
+        { first_name: { [Op.iLike]: `%${search}%` } },
+        { last_name: { [Op.iLike]: `%${search}%` } },
+        { email: { [Op.iLike]: `%${search}%` } },
+      ];
+    }
+
+    const farmers = await Farmer.findAndCountAll({
+      where: whereClause,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      include: [
+        {
+          model: Region,
+          as: "region",
+          attributes: [
+            'id', 
+            'region_name',  // FIXED: Removed the alias that was causing the error
+            'region_code'
+          ],
+        },
+        {
+          model: Cooperative,
+          as: "cooperative",
+          attributes: [
+            'id', 
+            'cooperative_name',  // FIXED: Removed the alias that was causing the error
+            'location'
+          ],
+        },
+      ],
+      order: [['first_name', 'ASC'], ['last_name', 'ASC']],
+    });
+
+    // Add computed fields to each farmer
+    const farmersWithComputedData = farmers.rows.map(farmer => {
+      const farmerData = farmer.toJSON();
+      farmerData.fullName = farmer.getFullName();
+      farmerData.experienceLevel = farmer.getExperienceLevel();
+      farmerData.primaryCropsArray = farmer.getPrimaryCrops();
+      return farmerData;
+    });
+
+    res.status(200).json({
+      message: "Farmers fetched successfully",
+      data: farmersWithComputedData,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(farmers.count / limit),
+        totalItems: farmers.count,
+        itemsPerPage: parseInt(limit),
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
+}
 
   static async getFarmerById(req, res) {
     const farmerId = req.params.id;
@@ -595,7 +634,7 @@ class FarmerController {
         primaryCropsString = JSON.stringify(primary_crops);
       }
   
-      // FIXED: Proper type conversion and validation
+      // Proper type conversion and validation
       const processedTotalFarmArea = total_farm_area_hectares === undefined || total_farm_area_hectares === null || total_farm_area_hectares === '' 
         ? null 
         : parseFloat(total_farm_area_hectares);
@@ -657,7 +696,7 @@ class FarmerController {
   
       // If farmer is added to a cooperative, update the cooperative's farmer count
       if (processedCooperativeId) {
-        await Cooperative.increment('numberOfFarmers', { where: { id: processedCooperativeId } });
+        await Cooperative.increment('number_of_farmers', { where: { id: processedCooperativeId } });
       }
   
       console.log('Successfully created farmer:', newFarmer.toJSON());
@@ -713,11 +752,11 @@ class FarmerController {
       if (updateData.cooperative_id !== undefined && oldCooperativeId !== updateData.cooperative_id) {
         // Decrease count from old cooperative
         if (oldCooperativeId) {
-          await Cooperative.decrement('numberOfFarmers', { where: { id: oldCooperativeId } });
+          await Cooperative.decrement('number_of_farmers', { where: { id: oldCooperativeId } });
         }
         // Increase count for new cooperative
         if (updateData.cooperative_id) {
-          await Cooperative.increment('numberOfFarmers', { where: { id: updateData.cooperative_id } });
+          await Cooperative.increment('number_of_farmers', { where: { id: updateData.cooperative_id } });
         }
       }
 
@@ -745,7 +784,7 @@ class FarmerController {
 
       // Update cooperative farmer count if farmer was part of a cooperative
       if (cooperativeId) {
-        await Cooperative.decrement('numberOfFarmers', { where: { id: cooperativeId } });
+        await Cooperative.decrement('number_of_farmers', { where: { id: cooperativeId } });
       }
 
       return res.status(200).json({
@@ -832,12 +871,12 @@ class FarmerController {
           {
             model: Region,
             as: "region",
-            attributes: ['regionName'],
+            attributes: ['region_name'],
           },
           {
             model: Cooperative,
             as: "cooperative",
-            attributes: ['cooperativeName'],
+            attributes: ['cooperative_name'],
           },
         ],
         order: [['first_name', 'ASC'], ['last_name', 'ASC']],

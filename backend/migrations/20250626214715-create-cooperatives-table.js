@@ -2,14 +2,14 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Cooperatives', {
+    await queryInterface.createTable('cooperatives', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      cooperativeName: {
+      cooperative_name: {
         type: Sequelize.STRING,
         allowNull: false
       },
@@ -17,47 +17,47 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      numberOfFarmers: {
+      number_of_farmers: {
         type: Sequelize.INTEGER,
         allowNull: false,
         defaultValue: 0
       },
-      totalLandSize: {
+      total_land_size: {
         type: Sequelize.DECIMAL(10, 2),
         allowNull: true
       },
-      contactPersonPhone: {
+      contact_person_phone: {
         type: Sequelize.STRING(20),
         allowNull: false
       },
-      contactPersonEmail: {
+      contact_person_email: {
         type: Sequelize.STRING(100),
         allowNull: true
       },
-      mainCrops: {
+      main_crops: {
         type: Sequelize.TEXT,
         allowNull: true
       },
-      regionId: {
+      region_id: {
         type: Sequelize.INTEGER,
         allowNull: true,
         references: {
-          model: 'Regions',
+          model: 'regions',
           key: 'id'
         },
         onUpdate: 'CASCADE',
         onDelete: 'SET NULL'
       },
-      isActive: {
+      is_active: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: true
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE
       }
@@ -65,6 +65,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Cooperatives');
+    await queryInterface.dropTable('cooperatives');
   }
 };

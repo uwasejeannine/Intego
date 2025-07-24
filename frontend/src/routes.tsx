@@ -2,7 +2,6 @@ import { Route, Routes, Navigate } from "react-router-dom";
 
 // SectorCoordinator routes
 import SectorCoordinatorUpdateProfilePage from "@/views/SectorCoordinator/Profile/update-profile";
-import SectorCoordinatorOverviewPage from "@/views/SectorCoordinator/Overview/overview";
 import SectorCoordinatorDashboardPage from "./views/SectorCoordinator/Dashboard/dashboard";
 import Agriculture from "./views/SectorCoordinator/Dashboard/Agriculture";
 import Health from "./views/SectorCoordinator/Health/Health";
@@ -27,7 +26,6 @@ import PerformancePage from "./views/SectorCoordinator/Education/Performance";
 import DropoutsPage from "./views/SectorCoordinator/Education/Dropouts";
 
 // DistrictAdministrator routes
-import DistrictAdministratorOverviewPage from "./views/DistrictAdministrator/Overview/overview";
 import DistrictAdministratorUpdateProfilePage from "./views/DistrictAdministrator/Profile/update-profile";
 import DistrictAdministratorDashboardPage from "./views/DistrictAdministrator/Dashboard/dashboard";
 import DA_Education from "./views/DistrictAdministrator/Education/Education";
@@ -54,7 +52,6 @@ import DA_Productivity from "./views/DistrictAdministrator/Agriculture/productiv
 // Admin routes
 import UserViewPage from "./views/Admin/Users/user-view";
 import AddUserPage from "./views/Admin/Users/add-user";
-import AdminOverviewPage from "./views/Admin/Overview/overview";
 import AuthenticationPage from "./views/Authentication/authentication";
 import AdminUpdateProfilePage from "./views/Admin/Profile/update-profile";
 import { useAuthStore } from "./stores/authStore";
@@ -163,7 +160,6 @@ const SectorCoordinatorRoutes: React.FC = () => {
       <Route path="education/performance" element={<PerformancePage />} />
       <Route path="education/dropouts" element={<DropoutsPage />} />
       <Route path="alerts" element={<Alerts />} />
-      <Route path="overview" element={<SectorCoordinatorOverviewPage />} />
       <Route path="update-profile" element={<SectorCoordinatorUpdateProfilePage />} />
       <Route path="*" element={<AuthenticationPage />} />
     </Routes>
@@ -173,7 +169,6 @@ const SectorCoordinatorRoutes: React.FC = () => {
 const DistrictAdministratorRoutes: React.FC = () => {
   return (
     <Routes>
-      <Route path="overview" element={<DistrictAdministratorOverviewPage />} />
       <Route path="dashboard" element={<DistrictAdministratorDashboardPage />} />
       <Route path="update-profile" element={<DistrictAdministratorUpdateProfilePage />} />
       <Route path="education" element={<DA_Education />} />
@@ -206,7 +201,6 @@ const AdminRoutes: React.FC = () => {
   return (
     <Routes>
       <Route path="dashboard" element={<AdminDashboardPage />} />
-      <Route path="overview" element={<AdminOverviewPage />} />
       <Route path="add-user" element={<AddUserPage />} />
       <Route path="users-view" element={<UserViewPage />} />
       <Route path="update-profile" element={<AdminUpdateProfilePage />} />

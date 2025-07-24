@@ -26,33 +26,52 @@ type NavbarProps = {
 };
 
 export function Navbar({ className = "", ...props }: NavbarProps) {
-  const { logout, userId, userType } = useAuthStore();
+  const { 
+    logout, 
+    userId, 
+    userType,
+    first_name,
+    last_name,
+    userEmail,
+    profileImage,
+    username
+  } = useAuthStore();
+  
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const [user, setUser] = useState<User | null>(null);
-  const [, setLoading] = useState<boolean>(true);
-  const [, setError] = useState<string | null>(null);
   const [feedbackCount, setFeedbackCount] = useState(0);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3000/api/v1/users/users/${userId}`,
-        );
-        setUser(response.data.user);
-        setLoading(false);
-      } catch (error: any) {
-        if (axios.isAxiosError(error)) {
-          setError(error.message);
-        } else {
-          setError("An unexpected error occurred");
-        }
-        setLoading(false);
-      }
-    };
+  // Get user initials for avatar
+  const getInitials = () => {
+    if (first_name && last_name) {
+      return `${first_name[0]}${last_name[0]}`;
+    }
+    if (username) {
+      return username.slice(0, 2).toUpperCase();
+    }
+    return "??";
+  };
 
-    fetchUser();
-  }, [userId]);
+  // Get display name
+  const getDisplayName = () => {
+    if (first_name && last_name) {
+      return `${first_name} ${last_name}`;
+    }
+    if (username) {
+      return username;
+    }
+    return "User";
+  };
+
+  // Get short display name for navbar
+  const getShortDisplayName = () => {
+    if (first_name && last_name) {
+      return `${first_name} ${last_name[0]}.`;
+    }
+    if (username) {
+      return username;
+    }
+    return "User";
+  };
 
   useEffect(() => {
     if ((userType !== "sectorCoordinator" && userType !== "districtAdministrator") || !userId) return;
@@ -127,12 +146,6 @@ export function Navbar({ className = "", ...props }: NavbarProps) {
               </DropdownMenuContent>
             </DropdownMenu>
           </li>
-          {/* Remove dashboard icon/link for admin */}
-          {/* <Link to={`${userPath}/overview`} replace>
-            <li className="lg:mr-[30px]">
-              <Icons.DashboardIcon className="w-[24px] h-[24px] text-white cursor-pointer " />
-            </li>
-          </Link> */}
           <li className="lg:mr-[30px] flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -142,22 +155,23 @@ export function Navbar({ className = "", ...props }: NavbarProps) {
                     className="relative h-8 w-8 rounded-full"
                   >
                     <Avatar className="h-8 w-8">
-                      {user?.profileImage ? (
+                      {profileImage ? (
                         <AvatarImage
-                          src={`http://localhost:3000/uploads/${user.profileImage}`}
-                          alt={`${user.first_name} ${user.last_name}`}
+                          src={`http://localhost:3000/uploads/${profileImage}`}
+                          alt={getDisplayName()}
                         />
                       ) : (
                         <AvatarFallback>
-                          {user?.first_name?.[0]}
-                          {user?.last_name?.[0]}
+                          {getInitials()}
                         </AvatarFallback>
                       )}
                     </Avatar>
                   </Button>
                   <div
                     className={`${!isMobile ? "lg:block text-[#ffffff] ml-[5px]" : "hidden"}`}
-                  >{`${user?.first_name} ${user?.last_name?.[0]}.`}</div>
+                  >
+                    {getShortDisplayName()}
+                  </div>
                 </div>
               </DropdownMenuTrigger>
 
@@ -169,21 +183,20 @@ export function Navbar({ className = "", ...props }: NavbarProps) {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col items-center justify-center space-y-1">
                     <Avatar className="w-[70px] h-[70px]">
-                      {user?.profileImage ? (
+                      {profileImage ? (
                         <AvatarImage
-                          src={`http://localhost:3000/uploads/${user.profileImage}`}
-                          alt={`${user.first_name} ${user.last_name}`}
+                          src={`http://localhost:3000/uploads/${profileImage}`}
+                          alt={getDisplayName()}
                         />
                       ) : (
                         <AvatarFallback>
-                          {user?.first_name?.[0]}
-                          {user?.last_name?.[0]}
+                          {getInitials()}
                         </AvatarFallback>
                       )}
                     </Avatar>
-                    <h2 className="font-bold">{`${user?.first_name} ${user?.last_name}`}</h2>
+                    <h2 className="font-bold">{getDisplayName()}</h2>
                     <p className="text-xs leading-none text-muted-foreground">
-                      {user?.email?.toLowerCase()}
+                      {userEmail?.toLowerCase() || ""}
                     </p>
                   </div>
                 </DropdownMenuLabel>
@@ -214,4 +227,4 @@ export function Navbar({ className = "", ...props }: NavbarProps) {
   );
 }
 
-<Navbar />;
+export default Navbar;

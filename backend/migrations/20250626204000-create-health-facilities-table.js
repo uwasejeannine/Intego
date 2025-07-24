@@ -2,7 +2,7 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('HealthFacilities', {
+    await queryInterface.createTable('healthfacilities', {
       facility_id: {
         allowNull: false,
         autoIncrement: true,
@@ -31,7 +31,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: true,
         references: {
-          model: 'Regions',
+          model: 'regions',
           key: 'id'
         },
         onUpdate: 'CASCADE',
@@ -230,13 +230,13 @@ module.exports = {
     });
 
     // Add indexes for better performance
-    await queryInterface.addIndex('HealthFacilities', ['facility_type']);
-    await queryInterface.addIndex('HealthFacilities', ['region_id']);
-    await queryInterface.addIndex('HealthFacilities', ['operational_status']);
-    await queryInterface.addIndex('HealthFacilities', ['is_active']);
+    await queryInterface.addIndex('healthfacilities', ['facility_type']);
+    await queryInterface.addIndex('healthfacilities', ['region_id']);
+    await queryInterface.addIndex('healthfacilities', ['operational_status']);
+    await queryInterface.addIndex('healthfacilities', ['is_active']);
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('HealthFacilities');
+    await queryInterface.dropTable('healthfacilities');
   }
 };

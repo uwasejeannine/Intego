@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,8 +10,7 @@ import { Role } from "@/types/types";
 import { Navbar } from "@/components/navigation/main-navbar";
 import AdminSidebar from "@/views/Admin/Navigation/sidebar-menu";
 import useMediaQuery from "@/hooks/useMediaQuery";
-
-const API_URL = "http://localhost:3000/api/v1/roles/roles";
+import { api, fetchRoles as apiFetchRoles } from "@/lib/api/api";
 
 const RolesManagementPage: React.FC = () => {
   const [roles, setRoles] = useState<Role[]>([]);
@@ -27,12 +25,17 @@ const RolesManagementPage: React.FC = () => {
   const fetchRoles = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(API_URL);
-      setRoles(res.data.roles || res.data);
+      const roles = await apiFetchRoles();
+      setRoles(roles);
       setError(null);
     } catch (err: any) {
-      setError("Failed to fetch roles");
-      toast({ title: "Error", description: "Failed to fetch roles", variant: "destructive" });
+      console.error('Error fetching roles:', err);
+      setError(err?.response?.data?.message || "Failed to fetch roles");
+      toast({ 
+        title: "Error", 
+        description: err?.response?.data?.message || "Failed to fetch roles", 
+        variant: "destructive" 
+      });
     } finally {
       setLoading(false);
     }
@@ -44,7 +47,7 @@ const RolesManagementPage: React.FC = () => {
 
   const handleOpen = (role?: Role) => {
     setEditRole(role || null);
-    setForm(role ? { name: role.name, description: role.description } : { name: "", description: "" });
+    setForm(role ? { name: role.name, description: role.description || "" } : { name: "", description: "" });
     setOpen(true);
   };
 
@@ -62,27 +65,49 @@ const RolesManagementPage: React.FC = () => {
     e.preventDefault();
     try {
       if (editRole) {
-        await axios.put(`${API_URL}/${editRole.id}`, form);
-        toast({ title: "Role updated" });
+        const response = await api.put(`/roles/${editRole.id}`, form);
+        toast({ 
+          title: "Success", 
+          description: "Role updated successfully",
+          variant: "default" 
+        });
       } else {
-        await axios.post(API_URL, form);
-        toast({ title: "Role added" });
+        const response = await api.post("/roles", form);
+        toast({ 
+          title: "Success", 
+          description: "Role added successfully",
+          variant: "default" 
+        });
       }
       fetchRoles();
       handleClose();
     } catch (err: any) {
-      toast({ title: "Error", description: err?.response?.data?.message || "Failed to save role", variant: "destructive" });
+      console.error('Error saving role:', err);
+      toast({ 
+        title: "Error", 
+        description: err?.response?.data?.message || "Failed to save role", 
+        variant: "destructive" 
+      });
     }
   };
 
   const handleDelete = async (role: Role) => {
-    if (!window.confirm(`Delete role '${role.name}'?`)) return;
+    if (!window.confirm(`Are you sure you want to delete the role '${role.name}'?`)) return;
     try {
-      await axios.delete(`${API_URL}/${role.id}`);
-      toast({ title: "Role deleted" });
+      await api.delete(`/roles/${role.id}`);
+      toast({ 
+        title: "Success", 
+        description: "Role deleted successfully",
+        variant: "default" 
+      });
       fetchRoles();
     } catch (err: any) {
-      toast({ title: "Error", description: err?.response?.data?.message || "Failed to delete role", variant: "destructive" });
+      console.error('Error deleting role:', err);
+      toast({ 
+        title: "Error", 
+        description: err?.response?.data?.message || "Failed to delete role", 
+        variant: "destructive" 
+      });
     }
   };
 
@@ -92,8 +117,8 @@ const RolesManagementPage: React.FC = () => {
       <AdminSidebar />
       <main className={`${!isMobile ? " ml-7px pt-[100px] pl-[300px] pr-[100px]" : "w-full py-20 px-2"} min-h-screen flex flex-col items-start`}>
         <div className="w-full max-w-7xl">
-        <Card className="mb-6 w-90em">
-      <CardContent className="p-4">
+          <Card className="mb-6 w-90em">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-semibold text-[#137775]">
                   Roles Management
@@ -197,7 +222,7 @@ const RolesManagementPage: React.FC = () => {
                     <Icons.RoleIcon className="w-6 h-6 text-gray-400" />
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No roles found</h3>
-                  <p className="text-gray-500 mb-4">Get started by adding   first role.</p>
+                  <p className="text-gray-500 mb-4">Get started by adding your first role.</p>
                   <Button 
                     onClick={() => handleOpen()} 
                     className="bg-[#137775] hover:bg-[#0f5f5d] text-white"

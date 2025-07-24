@@ -74,6 +74,14 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
+      district: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      sector: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
       projectId: {
         type: DataTypes.INTEGER,
         allowNull: true,
@@ -81,7 +89,7 @@ module.exports = (sequelize, DataTypes) => {
       status: {
         type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: "Offline", // Default status is "Offline"
+        defaultValue: "Offline",
       },
       passwordResetExpires: {
         type: DataTypes.DATE,

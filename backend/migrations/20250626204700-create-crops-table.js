@@ -2,7 +2,7 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Crops', {
+    await queryInterface.createTable('crops', {
       crop_id: {
         allowNull: false,
         autoIncrement: true,
@@ -70,14 +70,14 @@ module.exports = {
     });
 
     // Add indexes for better performance
-    await queryInterface.addIndex('Crops', ['crop_name']);
-    await queryInterface.addIndex('Crops', ['crop_category']);
-    await queryInterface.addIndex('Crops', ['planting_season']);
-    await queryInterface.addIndex('Crops', ['suitable_for_smallholders']);
-    await queryInterface.addIndex('Crops', ['is_active']);
+    await queryInterface.addIndex('crops', ['crop_name']);
+    await queryInterface.addIndex('crops', ['crop_category']);
+    await queryInterface.addIndex('crops', ['planting_season']);
+    await queryInterface.addIndex('crops', ['suitable_for_smallholders']);
+    await queryInterface.addIndex('crops', ['is_active']);
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Crops');
+    await queryInterface.dropTable('crops');
   }
 }; 

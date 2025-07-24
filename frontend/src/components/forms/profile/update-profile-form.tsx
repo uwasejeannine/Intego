@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { updateProfileFormSchema } from "@/lib/validation/schema";
 import { User } from "@/types/types";
 import {
   Card,
@@ -25,6 +27,8 @@ import {
 import ImageUpload from "@/components/ui/upload";
 import { X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { api } from "@/lib/api/api";
+import { useToast } from "@/components/ui/use-toast";
 
 interface UpdateUserProps {}
 
@@ -32,14 +36,23 @@ type UserUpdate = Partial<User>;
 
 const UpdateUser: React.FC<UpdateUserProps> = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [, setLoading] = useState<boolean>(true);
-  const [, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [isContactEditable, setIsContactEditable] = useState<boolean>(false);
   const [isPersonalEditable, setIsPersonalEditable] = useState<boolean>(false);
   const [isCompanyEditable, setIsCompanyEditable] = useState<boolean>(false);
   const isMobile = useMediaQuery("(max-width: 900px)");
   const { userId } = useAuthStore();
   const [fullName, setFullName] = useState<string>("");
+  const { toast } = useToast();
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(updateProfileFormSchema),
+  });
 
   const toggleContactEdit = () => {
     setIsContactEditable(!isContactEditable);
@@ -56,69 +69,102 @@ const UpdateUser: React.FC<UpdateUserProps> = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:3000/api/v1/users/users/${userId}`
-        );
-        setUser(response.data.user);
-        setFullName(`${response.data.user.first_name} ${response.data.user.last_name}`);
+        const response = await api.get(`/users/${userId}`);
+        const userData = response.data.user;
+        setUser(userData);
+        setFullName(`${userData.first_name} ${userData.last_name}`);
+
+        // Set form values
+        setValue('first_name', userData.first_name);
+        setValue('last_name', userData.last_name);
+        setValue('gender', userData.gender);
+        setValue('phoneNumber', userData.phoneNumber);
+        setValue('agencyName', userData.agencyName);
+        setValue('sectorofOperations', userData.sectorofOperations);
+        setValue('position', userData.position);
+
         setLoading(false);
       } catch (error: any) {
-        if (axios.isAxiosError(error)) {
-          setError(error.message);
-        } else {
-          setError("An unexpected error occurred");
-        }
+        toast({
+          title: "Error",
+          description: error?.response?.data?.message || "Failed to fetch user data",
+          variant: "destructive",
+        });
         setLoading(false);
       }
     };
 
     fetchUser();
-  }, [userId]);
+  }, [userId, setValue, toast]);
 
-  const handleContactUpdate = async () => {
+  const handleContactUpdate = async (data: any) => {
     try {
-      await axios.put(`http://localhost:3000/api/v1/users/users/${user?.id}`, {
-        email: user?.email,
-        phoneNumber: user?.phoneNumber,
+      await api.put(`/users/${user?.id}`, {
+        phoneNumber: data.phoneNumber,
       });
       setIsContactEditable(false);
-      // Show success toast
+      toast({
+        title: "Success",
+        description: "Contact information updated successfully",
+      });
     } catch (error: any) {
-      // Show error toast
+      toast({
+        title: "Error",
+        description: error?.response?.data?.message || "Failed to update contact information",
+        variant: "destructive",
+      });
     }
   };
 
-  const handlePersonalUpdate = async () => {
+  const handlePersonalUpdate = async (data: any) => {
     try {
-      await axios.put(`http://localhost:3000/api/v1/users/users/${user?.id}`, {
-        first_name: user?.first_name,
-        last_name: user?.last_name,
-        gender: user?.gender,
+      await api.put(`/users/${user?.id}`, {
+        first_name: data.first_name,
+        last_name: data.last_name,
+        gender: data.gender,
       });
       setIsPersonalEditable(false);
-      // Show success toast
+      toast({
+        title: "Success",
+        description: "Personal information updated successfully",
+      });
     } catch (error: any) {
-      // Show error toast
+      toast({
+        title: "Error",
+        description: error?.response?.data?.message || "Failed to update personal information",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleCompanyUpdate = async () => {
+  const handleCompanyUpdate = async (data: any) => {
     try {
-      await axios.put(`http://localhost:3000/api/v1/users/users/${user?.id}`, {
-        agencyName: user?.agencyName,
-        sectorofOperations: user?.sectorofOperations,
+      await api.put(`/users/${user?.id}`, {
+        agencyName: data.agencyName,
+        sectorofOperations: data.sectorofOperations,
+        position: data.position,
       });
       setIsCompanyEditable(false);
-      // Show success toast
+      toast({
+        title: "Success",
+        description: "Company information updated successfully",
+      });
     } catch (error: any) {
-      // Show error toast
+      toast({
+        title: "Error",
+        description: error?.response?.data?.message || "Failed to update company information",
+        variant: "destructive",
+      });
     }
   };
 
-  // Helper for type-safe setUser
-  const updateUser = (update: UserUpdate) => {
-    setUser((prev) => (prev ? { ...prev, ...update } : prev));
-  };
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Icons.spinner className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <main
@@ -136,14 +182,17 @@ const UpdateUser: React.FC<UpdateUserProps> = () => {
               <DialogTrigger>
                 <div className="flex flex-col items-center justify-center mt-5">
                   <Avatar className="w-[140px] h-[140px]">
-                    <AvatarImage src="/avatars/01.png" alt="@shadcn" />
-                    <AvatarFallback>SO</AvatarFallback>
+                    {user?.profileImage ? (
+                      <AvatarImage src={`http://localhost:3000/uploads/${user.profileImage}`} alt={fullName} />
+                    ) : (
+                      <AvatarFallback>{fullName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    )}
                   </Avatar>
                 </div>
               </DialogTrigger>
               <DialogContent className="dark:bg-slate-700">
                 <DialogHeader>
-                  <DialogTitle>Update   Profile Image</DialogTitle>
+                  <DialogTitle>Update Profile Image</DialogTitle>
                   <DialogDescription>
                     <ImageUpload />
                   </DialogDescription>
@@ -175,24 +224,21 @@ const UpdateUser: React.FC<UpdateUserProps> = () => {
               </CardHeader>
               <CardContent className="grid grid-cols-1 gap-2">
                 {isContactEditable ? (
-                  <>
-                    <Input
-                      type="email"
-                      value={user?.email || ""}
-                      onChange={(e) =>
-                        updateUser({ email: e.target.value })
-                      }
-                      readOnly={!isContactEditable}
-                    />
-                    <Input
-                      type="tel"
-                      value={user?.phoneNumber || ""}
-                      onChange={(e) =>
-                        updateUser({ phoneNumber: e.target.value })
-                      }
-                      readOnly={!isContactEditable}
-                    />
-                  </>
+                  <form onSubmit={handleSubmit(handleContactUpdate)}>
+                    <div className="space-y-4">
+                      <div>
+                        <Input
+                          type="tel"
+                          {...register("phoneNumber")}
+                          placeholder="Phone Number"
+                        />
+                        {errors.phoneNumber && (
+                          <p className="text-red-500 text-sm">{`${errors.phoneNumber.message}`}</p>
+                        )}
+                      </div>
+                      <Button type="submit">Update</Button>
+                    </div>
+                  </form>
                 ) : (
                   <>
                     <p>Email Address: {user?.email}</p>
@@ -200,16 +246,6 @@ const UpdateUser: React.FC<UpdateUserProps> = () => {
                   </>
                 )}
               </CardContent>
-              {isContactEditable && (
-                <CardFooter className="flex justify-end">
-                  <Button
-                    type="button"
-                    onClick={handleContactUpdate}
-                  >
-                    Update
-                  </Button>
-                </CardFooter>
-              )}
             </Card>
 
             <Card className="dark:bg-slate-700 mb-4">
@@ -229,39 +265,48 @@ const UpdateUser: React.FC<UpdateUserProps> = () => {
               </CardHeader>
               <CardContent className="grid grid-cols-1 gap-2">
                 {isPersonalEditable ? (
-                  <>
-                    <Input
-                      type="text"
-                      value={user?.first_name || ""}
-                      onChange={(e) =>
-                        updateUser({ first_name: e.target.value })
-                      }
-                      readOnly={!isPersonalEditable}
-                    />
-                    <Input
-                      type="text"
-                      value={user?.last_name || ""}
-                      onChange={(e) =>
-                        updateUser({ last_name: e.target.value })
-                      }
-                      readOnly={!isPersonalEditable}
-                    />
-                    <Select
-                      value={user?.gender || ""}
-                      onValueChange={(value) =>
-                        updateUser({ gender: value })
-                      }
-                      disabled={!isPersonalEditable}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Gender" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Male">Male</SelectItem>
-                        <SelectItem value="Female">Female</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </>
+                  <form onSubmit={handleSubmit(handlePersonalUpdate)}>
+                    <div className="space-y-4">
+                      <div>
+                        <Input
+                          type="text"
+                          {...register("first_name")}
+                          placeholder="First Name"
+                        />
+                        {errors.first_name && (
+                          <p className="text-red-500 text-sm">{`${errors.first_name.message}`}</p>
+                        )}
+                      </div>
+                      <div>
+                        <Input
+                          type="text"
+                          {...register("last_name")}
+                          placeholder="Last Name"
+                        />
+                        {errors.last_name && (
+                          <p className="text-red-500 text-sm">{`${errors.last_name.message}`}</p>
+                        )}
+                      </div>
+                      <div>
+                        <Select
+                          onValueChange={(value) => setValue("gender", value)}
+                          defaultValue={user?.gender}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Gender" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Male">Male</SelectItem>
+                            <SelectItem value="Female">Female</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {errors.gender && (
+                          <p className="text-red-500 text-sm">{`${errors.gender.message}`}</p>
+                        )}
+                      </div>
+                      <Button type="submit">Update</Button>
+                    </div>
+                  </form>
                 ) : (
                   <>
                     <p>First Name: {user?.first_name}</p>
@@ -270,16 +315,6 @@ const UpdateUser: React.FC<UpdateUserProps> = () => {
                   </>
                 )}
               </CardContent>
-              {isPersonalEditable && (
-                <CardFooter>
-                  <Button
-                    type="button"
-                    onClick={handlePersonalUpdate}
-                  >
-                    Update
-                  </Button>
-                </CardFooter>
-              )}
             </Card>
 
             <Card className="dark:bg-slate-700 mb-4">
@@ -299,41 +334,57 @@ const UpdateUser: React.FC<UpdateUserProps> = () => {
               </CardHeader>
               <CardContent className="grid grid-cols-1 gap-2">
                 {isCompanyEditable ? (
-                  <>
-                    <Input
-                      type="text"
-                      value={user?.agencyName || ""}
-                      onChange={(e) =>
-                        updateUser({ agencyName: e.target.value })
-                      }
-                      readOnly={!isCompanyEditable}
-                    />
-                    <Input
-                      type="text"
-                      value={user?.sectorofOperations || ""}
-                      onChange={(e) =>
-                        updateUser({ sectorofOperations: e.target.value })
-                      }
-                      readOnly={!isCompanyEditable}
-                    />
-                  </>
+                  <form onSubmit={handleSubmit(handleCompanyUpdate)}>
+                    <div className="space-y-4">
+                      <div>
+                        <Input
+                          type="text"
+                          {...register("agencyName")}
+                          placeholder="Agency Name"
+                        />
+                        {errors.agencyName && (
+                          <p className="text-red-500 text-sm">{`${errors.agencyName.message}`}</p>
+                        )}
+                      </div>
+                      <div>
+                        <Select
+                          onValueChange={(value) => setValue("sectorofOperations", value)}
+                          defaultValue={user?.sectorofOperations}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Sector of Operations" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Education">Education</SelectItem>
+                            <SelectItem value="Agriculture">Agriculture</SelectItem>
+                            <SelectItem value="Health">Health</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {errors.sectorofOperations && (
+                          <p className="text-red-500 text-sm">{`${errors.sectorofOperations.message}`}</p>
+                        )}
+                      </div>
+                      <div>
+                        <Input
+                          type="text"
+                          {...register("position")}
+                          placeholder="Position"
+                        />
+                        {errors.position && (
+                          <p className="text-red-500 text-sm">{`${errors.position.message}`}</p>
+                        )}
+                      </div>
+                      <Button type="submit">Update</Button>
+                    </div>
+                  </form>
                 ) : (
                   <>
                     <p>Agency Name: {user?.agencyName}</p>
                     <p>Sector of Operations: {user?.sectorofOperations}</p>
+                    <p>Position: {user?.position}</p>
                   </>
                 )}
               </CardContent>
-              {isCompanyEditable && (
-                <CardFooter>
-                  <Button
-                    type="button"
-                    onClick={handleCompanyUpdate}
-                  >
-                    Update
-                  </Button>
-                </CardFooter>
-              )}
             </Card>
           </div>
         </CardContent>

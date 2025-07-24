@@ -2,19 +2,19 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Regions', {
+    await queryInterface.createTable('regions', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      regionName: {
+      region_name: {
         type: Sequelize.STRING,
         allowNull: false,
         unique: true
       },
-      regionCode: {
+      region_code: {
         type: Sequelize.STRING(10),
         allowNull: false,
         unique: true
@@ -23,16 +23,16 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: true
       },
-      isActive: {
+      is_active: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: true
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE
       }
@@ -40,6 +40,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Regions');
+    await queryInterface.dropTable('regions');
   }
 };

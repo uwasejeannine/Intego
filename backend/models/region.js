@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "SET NULL",
       });
       Region.hasMany(models.Cooperative, {
-        foreignKey: "regionId",
+        foreignKey: "region_id",
         as: "cooperatives",
         onDelete: "SET NULL",
       });
@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
         type: DataTypes.INTEGER,
       },
-      regionName: {
+      region_name: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
           },
         },
       },
-      regionCode: {
+      region_code: {
         type: DataTypes.STRING(10),
         allowNull: false,
         unique: true,
@@ -56,7 +56,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.TEXT,
         allowNull: true,
       },
-      isActive: {
+      is_active: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: true,
@@ -65,8 +65,9 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "Region",
-      tableName: "Regions",
+      tableName: "regions",
       timestamps: true,
+      underscored: true,
     }
   );
 
