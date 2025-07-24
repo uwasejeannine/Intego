@@ -24,10 +24,8 @@ const Agriculture: React.FC = () => {
   const [farmers, setFarmers] = useState<any[]>([]);
   const [crops, setCrops] = useState<any[]>([]);
   const [cooperatives, setCooperatives] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
     Promise.all([
       fetchFarmers(),
       fetchCrops(),
@@ -36,7 +34,7 @@ const Agriculture: React.FC = () => {
       setFarmers(farmers);
       setCrops(crops);
       setCooperatives(cooperatives);
-    }).finally(() => setLoading(false));
+    });
   }, []);
 
   // Overview stats
@@ -77,10 +75,6 @@ const Agriculture: React.FC = () => {
     { name: 'Cooperatives', count: cooperativesArray.length },
   ];
   const farmersVsCoopsColors = ['#099773', '#ef8f20'];
-
-  if (loading) {
-    return <div className="p-12 text-center text-lg">Loading...</div>;
-  }
 
   return (
     <>
@@ -227,4 +221,4 @@ const Agriculture: React.FC = () => {
   );
 };
 
-export default Agriculture; 
+export default Agriculture;

@@ -23,10 +23,8 @@ const Education: React.FC = () => {
   const [students, setStudents] = useState<any[]>([]);
   const [teachers, setTeachers] = useState<any[]>([]);
   const [infras, setInfras] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
     Promise.all([
       fetchSchools(),
       fetchStudents(),
@@ -37,7 +35,7 @@ const Education: React.FC = () => {
       setStudents(students);
       setTeachers(teachers);
       setInfras(infras);
-    }).finally(() => setLoading(false));
+    });
   }, []);
 
   // Overview stats
@@ -97,10 +95,6 @@ const Education: React.FC = () => {
     else attendanceDist[4]++;
   });
   const attendanceData = attendanceBuckets.map((bucket, i) => ({ bucket, count: attendanceDist[i] }));
-
-  if (loading) {
-    return <div className="p-12 text-center text-lg">Loading...</div>;
-  }
 
   return (
     <>
