@@ -140,12 +140,13 @@ export async function verifyCode(code: string) {
   const validatedData = VerificationCodeSchema.parse({ code });
   return api.post("/auth/validate-code", validatedData);
 }
-export async function changePassword(userId: string, password: string) {
+export async function changePassword(email: string, password: string) {
   const validatedData = changePasswordFormSchema.parse({
     newPassword: password,
     confirmPassword: password,
   });
-  return api.put(`/users/users/${userId}`, {
+  return api.post(`/users/change-password`, {
+    email: email,
     password: validatedData.newPassword,
   });
 }

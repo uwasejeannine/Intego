@@ -28,6 +28,7 @@ import DropoutsPage from "./views/SectorCoordinator/Education/Dropouts";
 // DistrictAdministrator routes
 import DistrictAdministratorUpdateProfilePage from "./views/DistrictAdministrator/Profile/update-profile";
 import DistrictAdministratorDashboardPage from "./views/DistrictAdministrator/Dashboard/dashboard";
+import DA_Alerts from "./views/DistrictAdministrator/Notifications/Alerts";
 import DA_Education from "./views/DistrictAdministrator/Education/Education";
 import DA_Schools from "./views/DistrictAdministrator/Education/Schools";
 import DA_Students from "./views/DistrictAdministrator/Education/Students";
@@ -171,6 +172,7 @@ const DistrictAdministratorRoutes: React.FC = () => {
   return (
     <Routes>
       <Route path="dashboard" element={<DistrictAdministratorDashboardPage />} />
+      <Route path="alerts" element={<DA_Alerts />} />
       <Route path="update-profile" element={<DistrictAdministratorUpdateProfilePage />} />
       <Route path="education" element={<DA_Education />} />
       <Route path="education/schools" element={<DA_Schools />} />

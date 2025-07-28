@@ -16,5 +16,6 @@ router.put(
 router.put("/users", authorize("admin"), userController.updateMultipleUsers);
 router.delete("/users/:id", authorize("admin"), userController.deleteUser);
 router.delete("/users", authorize("admin"), userController.deleteMultipleUsers);
+router.post("/change-password", userController.changePassword);
 
 module.exports = router;

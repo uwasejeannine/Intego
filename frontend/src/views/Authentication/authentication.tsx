@@ -4,6 +4,7 @@ import IntegoImage from "@/assets/intego.svg";
 import logoImage from "@/assets/logo.svg";
 import { VerificationCodeForm } from "@/components/forms/authentication/verification-code-form";
 import { ChangePasswordForm } from "@/components/forms/authentication/change-password-form";
+import { ForceChangePasswordForm } from "@/components/forms/authentication/force-password-change";
 import { PasswordResetForm } from "@/components/forms/authentication/forgot-password-form";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -115,6 +116,22 @@ export function AuthenticationPage() {
             </div>
             <div className="form-card">
               <ChangePasswordForm onSubmit={handleResetPasswordSubmit} />
+            </div>
+          </>
+        );
+      case "/auth/force-password-change":
+        return (
+          <>
+            <div className="form-title mb-8">
+              <h1 className="text-4xl font-bold text-gray-800 mb-2">
+                Change Password
+              </h1>
+              <p className="text-gray-500 text-base">
+                Please change your password to continue.
+              </p>
+            </div>
+            <div className="form-card">
+              <ForceChangePasswordForm />
             </div>
           </>
         );

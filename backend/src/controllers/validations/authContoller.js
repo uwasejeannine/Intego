@@ -60,7 +60,8 @@ class AuthController {
           "loginAttempts",
           "status",
           "district_id",
-          "sector_id"
+          "sector_id",
+          "resetPassword"
         ],
       });
 
@@ -148,7 +149,8 @@ class AuthController {
         profileImage: user.profileImage,
         status: "Active",
         district_id: user.district_id,
-        sector_id: user.sector_id
+        sector_id: user.sector_id,
+        resetPassword: user.resetPassword
       };
 
       // Set token in cookie and response

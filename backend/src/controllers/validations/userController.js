@@ -210,6 +210,7 @@ class UsersController {
         sectorofOperations,
         roleId,
         status: "Pending",
+        resetPassword: true,
       });
 
       // Send the temporary password to the user via email
@@ -329,6 +330,29 @@ class UsersController {
           details: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
       }
+    }
+  }
+
+  static async changePassword(req, res) {
+    const { email, password } = req.body;
+
+    try {
+      const user = await User.findOne({ where: { email } });
+
+      if (!user) {
+        return res.status(404).send({ message: "User not found" });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      await user.update({
+        password: hashedPassword,
+        resetPassword: false,
+      });
+
+      return res.status(200).send({ message: "Password updated successfully" });
+    } catch (error) {
+      return res.status(500).send({ message: error.message });
     }
   }
 }

@@ -22,7 +22,11 @@ interface AuthState {
   position: string | null;
   newPassword: string | null;
   confirmPassword: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  resetPassword?: boolean;
+  login: (
+    email: string,
+    password: string
+  ) => Promise<{ resetPassword?: boolean }>;
   logout: () => void;
 }
 
@@ -55,30 +59,37 @@ export const useAuthStore = create<AuthState>()(
       confirmPassword: null,
       login: async (email, password) => {
         try {
-          console.log('🔐 Starting login process...');
-          
+          console.log("🔐 Starting login process...");
+
           const response = await login(email, password);
-          console.log('📡 Full API Response:', response);
-          
+          console.log("📡 Full API Response:", response);
+
           if (!response.token || !response.user) {
-            throw new Error('Invalid response format: missing token or user data');
+            throw new Error(
+              "Invalid response format: missing token or user data"
+            );
           }
 
           const { token, user } = response;
-          
+
           // Map role ID to user type
           const userType = roleIdToUserTypeMap[user.roleId];
-          console.log('🎭 Mapped userType:', userType, 'from roleId:', user.roleId);
-          console.log('🗂️ Available role mappings:', roleIdToUserTypeMap);
-          
+          console.log(
+            "🎭 Mapped userType:",
+            userType,
+            "from roleId:",
+            user.roleId
+          );
+          console.log("🗂️ Available role mappings:", roleIdToUserTypeMap);
+
           if (!userType) {
             console.error(`Invalid or missing roleId: ${user.roleId}`);
-            throw new Error('Invalid role configuration');
+            throw new Error("Invalid role configuration");
           }
 
           // Store token in localStorage for API client
-          localStorage.setItem('token', token);
-          
+          localStorage.setItem("token", token);
+
           const newState = {
             userId: user.id?.toString(),
             userType,
@@ -95,22 +106,23 @@ export const useAuthStore = create<AuthState>()(
             agencyName: user.agencyName || null,
             sectorofOperations: user.sectorofOperations || null,
             position: userType,
+            resetPassword: user.resetPassword,
           };
-          
-          console.log('💾 Setting new auth state:', newState);
-          
+
+          console.log("💾 Setting new auth state:", newState);
+
           set(newState);
-          
+          return { resetPassword: user.resetPassword };
         } catch (error) {
           console.error("❌ Error logging in:", error);
           // Clean up on error
-          localStorage.removeItem('token');
-          set({ 
+          localStorage.removeItem("token");
+          set({
             isAuthenticated: false,
             token: null,
             userType: null,
             userId: null,
-            roleId: null
+            roleId: null,
           });
           throw error;
         }

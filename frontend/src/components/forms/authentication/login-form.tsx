@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Icons } from "@/components/ui/icons";
 import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 import {
   Form,
@@ -31,6 +32,7 @@ type FormData = z.infer<typeof loginFormSchema>;
 export function UserAuthForm({ onForgotPasswordClick }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { login } = useAuthStore();
+  const navigate = useNavigate();
 
   // Hook for displaying toast messages
   const { toast } = useToast();
@@ -48,14 +50,18 @@ export function UserAuthForm({ onForgotPasswordClick }: UserAuthFormProps) {
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     setIsLoading(true);
     try {
-      await login(data.email, data.password);
+      const { resetPassword } = await login(data.email, data.password);
       setIsLoading(false);
-      
-      toast({
-        title: "Login Successful",
-        description: "You have successfully logged in. Welcome back!",
-        icon: <Icons.LoginSuccessIcon className="w-10 h-10 text-green-900" />,
-      });
+
+      if (resetPassword) {
+        navigate("/auth/force-password-change");
+      } else {
+        toast({
+          title: "Login Successful",
+          description: "You have successfully logged in. Welcome back!",
+          icon: <Icons.LoginSuccessIcon className="w-10 h-10 text-green-900" />,
+        });
+      }
     } catch (error: any) {
       setIsLoading(false);
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import SectorCoordinatorSidebar from "@/views/SectorCoordinator/Navigation/sidebar-menu";
+import DistrictAdministratorSidebar from "@/views/DistrictAdministrator/Navigation/sidebar-menu";
 import { Navbar } from "@/components/navigation/main-navbar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -100,7 +100,7 @@ const Alerts: React.FC = () => {
   return (
     <>
       <Navbar />
-      <SectorCoordinatorSidebar />
+      <DistrictAdministratorSidebar />
       <main className="pl-[250px] pr-[20px] bg-gray-50">
         <div className="p-8">
           <h1 className="text-2xl font-bold mb-4 text-[#137775]">Alerts</h1>

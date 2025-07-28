@@ -11,16 +11,15 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  LineChart,
-  Line,
   PieChart,
   Pie,
   Cell,
 } from "recharts";
+import { useNavigate } from "react-router-dom";
 import { api } from "@/lib/api/api"; // ✅ Use the configured API instance instead of axios
 import { Users, Leaf, Stethoscope, School, AlertCircle } from "lucide-react";
 
-// ✅ Use relative paths since api instance already has baseURL configured
+//  Use relative paths since api instance already has baseURL configured
 const API_FARMERS = "/farmers/individual/";
 const API_COOPS = "/farmers/cooperatives";
 const API_HEALTH = "/hospital";
@@ -150,6 +149,7 @@ const SectorCoordinatorDashboardPage: React.FC = () => {
   const [userLocation, setUserLocation] = useState<{district: string, sector: string} | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -249,7 +249,6 @@ const SectorCoordinatorDashboardPage: React.FC = () => {
         const failedRequests = results.filter(result => result.status === 'rejected');
         if (failedRequests.length > 0) {
           console.warn(`⚠️ ${failedRequests.length} out of 6 requests failed`);
-          setError(`Some data could not be loaded. ${failedRequests.length} requests failed.`);
         }
 
       } catch (err: any) {
@@ -287,15 +286,6 @@ const SectorCoordinatorDashboardPage: React.FC = () => {
     { name: "Agriculture", value: 78, color: COLORS[0] },
     { name: "Health", value: 87, color: COLORS[1] },
     { name: "Education", value: 91, color: COLORS[2] },
-  ];
-
-  const agricultureTrends = [
-    { month: "Sep", seasonA: 32, seasonB: 0, seasonC: 15 },
-    { month: "Oct", seasonA: 45, seasonB: 0, seasonC: 28 },
-    { month: "Nov", seasonA: 68, seasonB: 0, seasonC: 12 },
-    { month: "Dec", seasonA: 85, seasonB: 0, seasonC: 5 },
-    { month: "Jan", seasonA: 92, seasonB: 0, seasonC: 0 },
-    { month: "Feb", seasonA: 78, seasonB: 12, seasonC: 0 },
   ];
 
   const alerts = [
@@ -344,15 +334,6 @@ const SectorCoordinatorDashboardPage: React.FC = () => {
       <SectorCoordinatorSidebar />
       <main className="pl-[250px] pr-[20px] bg-gray-50 min-h-screen">
         <div className="flex flex-col items-center space-y-6 max-w-full px-4 pt-24">
-          {/* Error Alert */}
-          {error && (
-            <div className="w-full max-w-6xl border-yellow-200 bg-yellow-50 border rounded-lg p-4 flex items-center space-x-3">
-              <AlertCircle className="h-4 w-4 text-yellow-600 flex-shrink-0" />
-              <p className="text-yellow-700 text-sm">
-                {error}
-              </p>
-            </div>
-          )}
 
           {/* Welcome Section */}
           <div className="bg-[#137775] rounded-lg shadow-lg p-6 text-white w-full max-w-6xl">
@@ -461,27 +442,6 @@ const SectorCoordinatorDashboardPage: React.FC = () => {
             </Card>
           </div>
 
-          {/* Agricultural Seasonal Trends */}
-          <Card className="bg-white rounded-lg shadow-sm border p-6 w-full max-w-6xl">
-            <CardHeader>
-              <CardTitle>Agricultural Seasonal Trends</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <LineChart data={agricultureTrends}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="seasonA" stroke="#137775" name="Season A" strokeWidth={2} />
-                  <Line type="monotone" dataKey="seasonB" stroke="#099773" name="Season B" strokeWidth={2} />
-                  <Line type="monotone" dataKey="seasonC" stroke="#ef8f20" name="Season C" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
           {/* Recent Alerts and Activities */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full max-w-6xl">
             {/* Recent Alerts */}
@@ -519,7 +479,10 @@ const SectorCoordinatorDashboardPage: React.FC = () => {
                   ))}
                 </div>
                 <div className="mt-4">
-                  <button className="w-full text-center text-sm text-[#137775] hover:text-[#0f5f5d] font-medium transition-colors">
+                  <button
+                    onClick={() => navigate("/district-admin/alerts")}
+                    className="w-full text-center text-sm text-[#137775] hover:text-[#0f5f5d] font-medium transition-colors"
+                  >
                     View all alerts →
                   </button>
                 </div>
