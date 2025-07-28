@@ -233,7 +233,7 @@ class UsersController {
         }
       });
 
-      const loginLink = `http://localhost:5174/auth/login`;
+      const loginLink = `http://localhost:5173/auth/login`;
 
       let mailOptions = {
         from: `"Intego360 Team" <${process.env.EMAIL_USERNAME || "jeannineuwasee@gmail.com"}>`,

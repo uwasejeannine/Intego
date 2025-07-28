@@ -1,0 +1,2296 @@
+openapi: 3.0.3
+info:
+  title: Intego360 API
+  description: |
+    Intego360 is a comprehensive management system for MINAGRI (Ministry of Agriculture) in Rwanda.
+    This API provides endpoints for managing agriculture, health, and education sectors including
+    farmers, cooperatives, health facilities, schools, and administrative functions.
+  version: 1.0.0
+  contact:
+    name: Intego360 Development Team
+    email: jeannineuwasee@gmail.com
+  license:
+    name: ISC
+    
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Development server
+  - url: https://api.intego360.gov.rw/api/v1
+    description: Production server
+
+security:
+  - bearerAuth: []
+
+paths:
+  # Authentication Endpoints
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user with username/email and password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - password
+              properties:
+                usernameOrEmail:
+                  type: string
+                  description: Username or email address
+                  example: "admin@intego.gov.rw"
+                email:
+                  type: string
+                  format: email
+                  description: Email address (alternative to usernameOrEmail)
+                username:
+                  type: string
+                  description: Username (alternative to usernameOrEmail)
+                password:
+                  type: string
+                  format: password
+                  description: User password
+                  example: "password123"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Login successful"
+                  token:
+                    type: string
+                    description: JWT authentication token
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request - missing credentials
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Account locked
+        '404':
+          description: User not found
+        '500':
+          description: Internal server error
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: User logout
+      description: Logout user and update status to offline
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - usernameOrEmail
+              properties:
+                usernameOrEmail:
+                  type: string
+                  description: Username or email address
+                email:
+                  type: string
+                  format: email
+                username:
+                  type: string
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Logout successful"
+                  success:
+                    type: boolean
+                    example: true
+        '400':
+          description: Username or email required
+        '404':
+          description: User not found
+        '500':
+          description: Internal server error
+
+  /auth/forgot-password:
+    put:
+      tags:
+        - Authentication
+      summary: Request password reset
+      description: Send password reset code to user's email
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User's email address
+                  example: "user@example.com"
+      responses:
+        '200':
+          description: Password reset code sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Password reset code sent to your email"
+                  success:
+                    type: boolean
+                    example: true
+        '400':
+          description: Code already sent recently
+        '404':
+          description: User not found
+        '500':
+          description: Failed to send email
+
+  /auth/validate-code:
+    post:
+      tags:
+        - Authentication
+      summary: Validate password reset code
+      description: Validate the 6-digit password reset code
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - code
+              properties:
+                code:
+                  type: string
+                  description: 6-digit reset code
+                  example: "123456"
+      responses:
+        '200':
+          description: Code is valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Code is valid"
+                  success:
+                    type: boolean
+                    example: true
+                  userId:
+                    type: integer
+                  email:
+                    type: string
+        '400':
+          description: Reset code is required
+        '401':
+          description: Invalid or expired code
+        '500':
+          description: Internal server error
+
+  # User Management Endpoints
+  /users/users:
+    get:
+      tags:
+        - Users
+      summary: Get all users
+      description: Retrieve all users (admin only)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - admin access required
+        '500':
+          description: Internal server error
+
+  /users/create:
+    post:
+      tags:
+        - Users
+      summary: Create new user
+      description: Create a new user (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - admin access required
+        '500':
+          description: Internal server error
+
+  /users/users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Get user by ID
+      description: Retrieve a specific user by ID (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: User ID
+      responses:
+        '200':
+          description: User retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - admin access required
+        '500':
+          description: Internal server error
+
+    put:
+      tags:
+        - Users
+      summary: Update user
+      description: Update a specific user (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: User ID
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error
+        '404':
+          description: User not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - admin access required
+        '500':
+          description: Internal server error
+
+    delete:
+      tags:
+        - Users
+      summary: Delete user
+      description: Delete a specific user (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: User ID
+      responses:
+        '200':
+          description: User deleted successfully
+        '404':
+          description: User not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - admin access required
+        '500':
+          description: Internal server error
+
+  # Farmer Management Endpoints
+  /farmers:
+    get:
+      tags:
+        - Farmers
+      summary: Get all farmers
+      description: Retrieve all farmers with pagination and filtering
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: Items per page
+        - name: region_id
+          in: query
+          schema:
+            type: integer
+          description: Filter by region ID
+        - name: cooperative_id
+          in: query
+          schema:
+            type: integer
+          description: Filter by cooperative ID
+        - name: farmer_type
+          in: query
+          schema:
+            type: string
+            enum: [smallholder, commercial, cooperative, estate]
+          description: Filter by farmer type
+        - name: is_active
+          in: query
+          schema:
+            type: boolean
+          description: Filter by active status
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search by name or email
+      responses:
+        '200':
+          description: Farmers retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Farmer'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+    post:
+      tags:
+        - Farmers
+      summary: Create new farmer
+      description: Create a new farmer record
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFarmerRequest'
+      responses:
+        '201':
+          description: Farmer created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Farmer'
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+  /farmers/stats:
+    get:
+      tags:
+        - Farmers
+      summary: Get farmer statistics
+      description: Retrieve farmer statistics and analytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: region_id
+          in: query
+          schema:
+            type: integer
+          description: Filter by region ID
+        - name: cooperative_id
+          in: query
+          schema:
+            type: integer
+          description: Filter by cooperative ID
+      responses:
+        '200':
+          description: Farmer statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/FarmerStats'
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+  /farmers/individual/{id}:
+    get:
+      tags:
+        - Farmers
+      summary: Get farmer by ID
+      description: Retrieve a specific farmer by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Farmer ID
+      responses:
+        '200':
+          description: Farmer retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Farmer'
+        '404':
+          description: Farmer not found
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+    put:
+      tags:
+        - Farmers
+      summary: Update farmer
+      description: Update a specific farmer
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Farmer ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFarmerRequest'
+      responses:
+        '200':
+          description: Farmer updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Farmer'
+        '400':
+          description: Validation error
+        '404':
+          description: Farmer not found
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+    delete:
+      tags:
+        - Farmers
+      summary: Delete farmer
+      description: Delete a specific farmer
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Farmer ID
+      responses:
+        '200':
+          description: Farmer deleted successfully
+        '404':
+          description: Farmer not found
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+  /farmers/type/{farmer_type}:
+    get:
+      tags:
+        - Farmers
+      summary: Get farmers by type
+      description: Retrieve farmers filtered by type
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: farmer_type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [smallholder, commercial, cooperative, estate]
+          description: Farmer type
+      responses:
+        '200':
+          description: Farmers retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Farmer'
+        '400':
+          description: Invalid farmer type
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+  # Cooperative Management Endpoints
+  /farmers/cooperatives:
+    get:
+      tags:
+        - Cooperatives
+      summary: Get all cooperatives
+      description: Retrieve all cooperatives with pagination and filtering
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: regionId
+          in: query
+          schema:
+            type: integer
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cooperatives retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Cooperative'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      tags:
+        - Cooperatives
+      summary: Create new cooperative
+      description: Create a new cooperative
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCooperativeRequest'
+      responses:
+        '201':
+          description: Cooperative created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Cooperative'
+
+  /farmers/cooperatives/{id}:
+    get:
+      tags:
+        - Cooperatives
+      summary: Get cooperative by ID
+      description: Retrieve a specific cooperative by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Cooperative retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Cooperative'
+
+    put:
+      tags:
+        - Cooperatives
+      summary: Update cooperative
+      description: Update a specific cooperative
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCooperativeRequest'
+      responses:
+        '200':
+          description: Cooperative updated successfully
+
+    delete:
+      tags:
+        - Cooperatives
+      summary: Delete cooperative
+      description: Delete a specific cooperative
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Cooperative deleted successfully
+
+  # Region Management Endpoints
+  /farmers/regions:
+    get:
+      tags:
+        - Regions
+      summary: Get all regions
+      description: Retrieve all regions with pagination
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Regions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Region'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      tags:
+        - Regions
+      summary: Create new region
+      description: Create a new region (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRegionRequest'
+      responses:
+        '201':
+          description: Region created successfully
+
+  /farmers/regions/{id}:
+    get:
+      tags:
+        - Regions
+      summary: Get region by ID
+      description: Retrieve a specific region by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Region retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Region'
+
+    put:
+      tags:
+        - Regions
+      summary: Update region
+      description: Update a specific region (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRegionRequest'
+      responses:
+        '200':
+          description: Region updated successfully
+
+    delete:
+      tags:
+        - Regions
+      summary: Delete region
+      description: Delete a specific region (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Region deleted successfully
+
+  # Health Facility Endpoints
+  /hospital:
+    get:
+      tags:
+        - Health Facilities
+      summary: Get all health facilities
+      description: Retrieve all health facilities
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Health facilities retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HealthFacility'
+
+    post:
+      tags:
+        - Health Facilities
+      summary: Create new health facility
+      description: Create a new health facility
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHealthFacilityRequest'
+      responses:
+        '201':
+          description: Health facility created successfully
+
+  /hospital/stats:
+    get:
+      tags:
+        - Health Facilities
+      summary: Get health facility statistics
+      description: Retrieve health facility statistics
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/HealthFacilityStats'
+
+  /hospital/dashboard-summary:
+    get:
+      tags:
+        - Health Facilities
+      summary: Get dashboard summary
+      description: Retrieve health facilities dashboard summary
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard summary retrieved successfully
+
+  /hospital/critical:
+    get:
+      tags:
+        - Health Facilities
+      summary: Get critical facilities
+      description: Retrieve health facilities with critical status
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Critical facilities retrieved successfully
+
+  /hospital/nearby:
+    get:
+      tags:
+        - Health Facilities
+      summary: Get nearby facilities
+      description: Retrieve nearby health facilities
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Nearby facilities retrieved successfully
+
+  /hospital/type/{facility_type}:
+    get:
+      tags:
+        - Health Facilities
+      summary: Get facilities by type
+      description: Retrieve health facilities by type
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: facility_type
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Facilities retrieved successfully
+
+  /hospital/{id}:
+    get:
+      tags:
+        - Health Facilities
+      summary: Get health facility by ID
+      description: Retrieve a specific health facility by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Health facility retrieved successfully
+
+    put:
+      tags:
+        - Health Facilities
+      summary: Update health facility
+      description: Update a specific health facility
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateHealthFacilityRequest'
+      responses:
+        '200':
+          description: Health facility updated successfully
+
+    delete:
+      tags:
+        - Health Facilities
+      summary: Delete health facility
+      description: Delete a specific health facility
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Health facility deleted successfully
+
+  # School Management Endpoints
+  /schools:
+    get:
+      tags:
+        - Schools
+      summary: Get all schools
+      description: Retrieve all schools
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Schools retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/School'
+
+    post:
+      tags:
+        - Schools
+      summary: Create new school
+      description: Create a new school
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSchoolRequest'
+      responses:
+        '201':
+          description: School created successfully
+
+  /schools/{id}:
+    get:
+      tags:
+        - Schools
+      summary: Get school by ID
+      description: Retrieve a specific school by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: School retrieved successfully
+
+    put:
+      tags:
+        - Schools
+      summary: Update school
+      description: Update a specific school
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSchoolRequest'
+      responses:
+        '200':
+          description: School updated successfully
+
+    delete:
+      tags:
+        - Schools
+      summary: Delete school
+      description: Delete a specific school
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: School deleted successfully
+
+  # Location Endpoints
+  /locations/districts:
+    get:
+      tags:
+        - Locations
+      summary: Get all districts
+      description: Retrieve all districts in Rwanda
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Districts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/District'
+
+  /locations/sectors:
+    get:
+      tags:
+        - Locations
+      summary: Get all sectors
+      description: Retrieve all sectors in Rwanda
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Sectors retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Sector'
+
+  /locations/districts/{districtId}/sectors:
+    get:
+      tags:
+        - Locations
+      summary: Get sectors by district
+      description: Retrieve all sectors in a specific district
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: districtId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: District ID
+      responses:
+        '200':
+          description: Sectors retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Sector'
+
+  # Additional endpoints for other modules
+  /crops:
+    get:
+      tags:
+        - Agriculture
+      summary: Get all crops
+      description: Retrieve all crop information
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Crops retrieved successfully
+
+  /seeds:
+    get:
+      tags:
+        - Agriculture
+      summary: Get all seeds
+      description: Retrieve all seed information
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Seeds retrieved successfully
+
+  /fertilizers:
+    get:
+      tags:
+        - Agriculture
+      summary: Get all fertilizers
+      description: Retrieve all fertilizer information
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Fertilizers retrieved successfully
+
+  /pesticides:
+    get:
+      tags:
+        - Agriculture
+      summary: Get all pesticides
+      description: Retrieve all pesticide information
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Pesticides retrieved successfully
+
+  /market-prices:
+    get:
+      tags:
+        - Agriculture
+      summary: Get market prices
+      description: Retrieve current market prices
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Market prices retrieved successfully
+
+  /vaccines:
+    get:
+      tags:
+        - Health
+      summary: Get all vaccines
+      description: Retrieve all vaccine information
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Vaccines retrieved successfully
+
+  /vaccination-records:
+    get:
+      tags:
+        - Health
+      summary: Get vaccination records
+      description: Retrieve vaccination records
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Vaccination records retrieved successfully
+
+  /vaccination-campaigns:
+    get:
+      tags:
+        - Health
+      summary: Get vaccination campaigns
+      description: Retrieve vaccination campaigns
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Vaccination campaigns retrieved successfully
+
+  /diseases:
+    get:
+      tags:
+        - Health
+      summary: Get all diseases
+      description: Retrieve disease information
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Diseases retrieved successfully
+
+  /students:
+    get:
+      tags:
+        - Education
+      summary: Get all students
+      description: Retrieve all student records
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Students retrieved successfully
+
+  /teachers:
+    get:
+      tags:
+        - Education
+      summary: Get all teachers
+      description: Retrieve all teacher records
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Teachers retrieved successfully
+
+  /dropouts:
+    get:
+      tags:
+        - Education
+      summary: Get dropout records
+      description: Retrieve student dropout records
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dropout records retrieved successfully
+
+  /performances:
+    get:
+      tags:
+        - Education
+      summary: Get performance records
+      description: Retrieve student performance records
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Performance records retrieved successfully
+
+  /infrastructures:
+    get:
+      tags:
+        - Education
+      summary: Get infrastructure records
+      description: Retrieve school infrastructure records
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Infrastructure records retrieved successfully
+
+  /feedback:
+    get:
+      tags:
+        - System
+      summary: Get feedback records
+      description: Retrieve system feedback records
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Feedback records retrieved successfully
+
+  /roles:
+    get:
+      tags:
+        - System
+      summary: Get all roles
+      description: Retrieve all system roles
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Roles retrieved successfully
+
+  /archives:
+    get:
+      tags:
+        - System
+      summary: Get archived records
+      description: Retrieve archived system records
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Archived records retrieved successfully
+
+  /backups:
+    get:
+      tags:
+        - System
+      summary: Get backup records
+      description: Retrieve system backup records
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Backup records retrieved successfully
+
+  /reports:
+    get:
+      tags:
+        - System
+      summary: Get system reports
+      description: Retrieve system reports
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Reports retrieved successfully
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from login endpoint
+
+  schemas:
+    # User Schemas
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: User ID
+          example: 1
+        username:
+          type: string
+          description: Username
+          example: "admin"
+        email:
+          type: string
+          format: email
+          description: Email address
+          example: "admin@intego.gov.rw"
+        first_name:
+          type: string
+          description: First name
+          example: "John"
+        last_name:
+          type: string
+          description: Last name
+          example: "Doe"
+        gender:
+          type: string
+          description: Gender
+          example: "Male"
+        phoneNumber:
+          type: string
+          description: Phone number
+          example: "+250788123456"
+        sectorofOperations:
+          type: string
+          enum: [Education, Agriculture, Health]
+          description: Sector of operations
+          example: "Agriculture"
+        profileImage:
+          type: string
+          nullable: true
+          description: Profile image URL
+        roleId:
+          type: integer
+          description: Role ID
+          example: 1
+        role:
+          $ref: '#/components/schemas/Role'
+        district:
+          type: string
+          nullable: true
+          description: District
+        sector:
+          type: string
+          nullable: true
+          description: Sector
+        status:
+          type: string
+          description: User status
+          example: "Active"
+        district_id:
+          type: integer
+          nullable: true
+          description: District ID
+        sector_id:
+          type: integer
+          nullable: true
+          description: Sector ID
+
+    CreateUserRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+        - first_name
+        - last_name
+        - gender
+        - phoneNumber
+        - sectorofOperations
+      properties:
+        username:
+          type: string
+          description: Username
+        email:
+          type: string
+          format: email
+          description: Email address
+        password:
+          type: string
+          format: password
+          description: Password
+        first_name:
+          type: string
+          description: First name
+        last_name:
+          type: string
+          description: Last name
+        gender:
+          type: string
+          description: Gender
+        phoneNumber:
+          type: string
+          description: Phone number
+        sectorofOperations:
+          type: string
+          enum: [Education, Agriculture, Health]
+          description: Sector of operations
+        roleId:
+          type: integer
+          description: Role ID
+        district:
+          type: string
+          description: District
+        sector:
+          type: string
+          description: Sector
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        gender:
+          type: string
+        phoneNumber:
+          type: string
+        sectorofOperations:
+          type: string
+          enum: [Education, Agriculture, Health]
+        profileImage:
+          type: string
+          format: binary
+          description: Profile image file
+        roleId:
+          type: integer
+        district:
+          type: string
+        sector:
+          type: string
+
+    # Role Schema
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Role ID
+          example: 1
+        name:
+          type: string
+          description: Role name
+          example: "admin"
+        description:
+          type: string
+          description: Role description
+          example: "System administrator"
+
+    # Farmer Schemas
+    Farmer:
+      type: object
+      properties:
+        farmer_id:
+          type: integer
+          description: Farmer ID
+          example: 1
+        first_name:
+          type: string
+          description: First name
+          example: "Jean"
+        last_name:
+          type: string
+          description: Last name
+          example: "Uwimana"
+        email:
+          type: string
+          format: email
+          nullable: true
+          description: Email address
+        phone:
+          type: string
+          nullable: true
+          description: Phone number
+        region_id:
+          type: integer
+          nullable: true
+          description: Region ID
+        address:
+          type: string
+          nullable: true
+          description: Address
+        farm_location:
+          type: string
+          nullable: true
+          description: Farm location
+        total_farm_area_hectares:
+          type: number
+          format: decimal
+          nullable: true
+          description: Total farm area in hectares
+        years_experience:
+          type: integer
+          nullable: true
+          description: Years of farming experience
+        farmer_type:
+          type: string
+          enum: [smallholder, commercial, cooperative, estate]
+          description: Type of farmer
+          example: "smallholder"
+        primary_crops:
+          type: string
+          nullable: true
+          description: Primary crops (JSON string)
+        cooperative_id:
+          type: integer
+          nullable: true
+          description: Cooperative ID
+        registration_date:
+          type: string
+          format: date-time
+          description: Registration date
+        is_active:
+          type: boolean
+          description: Active status
+          example: true
+        region:
+          $ref: '#/components/schemas/Region'
+        cooperative:
+          $ref: '#/components/schemas/Cooperative'
+        fullName:
+          type: string
+          description: Computed full name
+        experienceLevel:
+          type: string
+          description: Computed experience level
+        primaryCropsArray:
+          type: array
+          items:
+            type: string
+          description: Parsed primary crops array
+
+    CreateFarmerRequest:
+      type: object
+      required:
+        - first_name
+        - last_name
+        - farmer_type
+      properties:
+        first_name:
+          type: string
+          description: First name
+        last_name:
+          type: string
+          description: Last name
+        email:
+          type: string
+          format: email
+          description: Email address
+        phone:
+          type: string
+          description: Phone number
+        region_id:
+          type: integer
+          description: Region ID
+        address:
+          type: string
+          description: Address
+        farm_location:
+          type: string
+          description: Farm location
+        total_farm_area_hectares:
+          type: number
+          format: decimal
+          description: Total farm area in hectares
+        years_experience:
+          type: integer
+          description: Years of farming experience
+        farmer_type:
+          type: string
+          enum: [smallholder, commercial, cooperative, estate]
+          description: Type of farmer
+        primary_crops:
+          type: array
+          items:
+            type: string
+          description: Primary crops
+        cooperative_id:
+          type: integer
+          description: Cooperative ID
+        registration_date:
+          type: string
+          format: date-time
+          description: Registration date
+
+    UpdateFarmerRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        region_id:
+          type: integer
+        address:
+          type: string
+        farm_location:
+          type: string
+        total_farm_area_hectares:
+          type: number
+          format: decimal
+        years_experience:
+          type: integer
+        farmer_type:
+          type: string
+          enum: [smallholder, commercial, cooperative, estate]
+        primary_crops:
+          type: array
+          items:
+            type: string
+        cooperative_id:
+          type: integer
+        is_active:
+          type: boolean
+
+    # Cooperative Schemas
+    Cooperative:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Cooperative ID
+          example: 1
+        cooperative_name:
+          type: string
+          description: Cooperative name
+          example: "Ubwiyunge Cooperative"
+        location:
+          type: string
+          description: Location
+          example: "Kigali"
+        number_of_farmers:
+          type: integer
+          description: Number of farmers
+          example: 50
+        total_land_size:
+          type: number
+          format: decimal
+          nullable: true
+          description: Total land size in hectares
+        contact_person_phone:
+          type: string
+          nullable: true
+          description: Contact person phone
+        contact_person_email:
+          type: string
+          format: email
+          nullable: true
+          description: Contact person email
+        main_crops:
+          type: string
+          nullable: true
+          description: Main crops (JSON string)
+        region_id:
+          type: integer
+          nullable: true
+          description: Region ID
+        is_active:
+          type: boolean
+          description: Active status
+          example: true
+        region:
+          $ref: '#/components/schemas/Region'
+        farmers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Farmer'
+
+    CreateCooperativeRequest:
+      type: object
+      required:
+        - cooperative_name
+        - location
+      properties:
+        cooperative_name:
+          type: string
+          description: Cooperative name
+        location:
+          type: string
+          description: Location
+        number_of_farmers:
+          type: integer
+          description: Number of farmers
+          default: 0
+        total_land_size:
+          type: number
+          format: decimal
+          description: Total land size in hectares
+        contact_person_phone:
+          type: string
+          description: Contact person phone
+        contact_person_email:
+          type: string
+          format: email
+          description: Contact person email
+        main_crops:
+          type: array
+          items:
+            type: string
+          description: Main crops
+        region_id:
+          type: integer
+          description: Region ID
+        is_active:
+          type: boolean
+          description: Active status
+          default: true
+
+    UpdateCooperativeRequest:
+      type: object
+      properties:
+        cooperative_name:
+          type: string
+        location:
+          type: string
+        number_of_farmers:
+          type: integer
+        total_land_size:
+          type: number
+          format: decimal
+        contact_person_phone:
+          type: string
+        contact_person_email:
+          type: string
+          format: email
+        main_crops:
+          type: array
+          items:
+            type: string
+        region_id:
+          type: integer
+        is_active:
+          type: boolean
+
+    # Region Schemas
+    Region:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Region ID
+          example: 1
+        region_name:
+          type: string
+          description: Region name
+          example: "Eastern Province"
+        region_code:
+          type: string
+          description: Region code
+          example: "EP"
+        description:
+          type: string
+          nullable: true
+          description: Region description
+        is_active:
+          type: boolean
+          description: Active status
+          example: true
+        farmers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Farmer'
+        cooperatives:
+          type: array
+          items:
+            $ref: '#/components/schemas/Cooperative'
+
+    CreateRegionRequest:
+      type: object
+      required:
+        - region_name
+        - region_code
+      properties:
+        region_name:
+          type: string
+          description: Region name
+        region_code:
+          type: string
+          description: Region code
+        description:
+          type: string
+          description: Region description
+
+    UpdateRegionRequest:
+      type: object
+      properties:
+        region_name:
+          type: string
+        region_code:
+          type: string
+        description:
+          type: string
+        is_active:
+          type: boolean
+
+    # Health Facility Schemas
+    HealthFacility:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Health facility ID
+        facility_name:
+          type: string
+          description: Facility name
+        facility_type:
+          type: string
+          description: Type of facility
+        location:
+          type: string
+          description: Location
+        capacity:
+          type: integer
+          description: Facility capacity
+        services:
+          type: array
+          items:
+            type: string
+          description: Available services
+        contact_info:
+          type: string
+          description: Contact information
+        is_active:
+          type: boolean
+          description: Active status
+
+    CreateHealthFacilityRequest:
+      type: object
+      required:
+        - facility_name
+        - facility_type
+        - location
+      properties:
+        facility_name:
+          type: string
+        facility_type:
+          type: string
+        location:
+          type: string
+        capacity:
+          type: integer
+        services:
+          type: array
+          items:
+            type: string
+        contact_info:
+          type: string
+
+    UpdateHealthFacilityRequest:
+      type: object
+      properties:
+        facility_name:
+          type: string
+        facility_type:
+          type: string
+        location:
+          type: string
+        capacity:
+          type: integer
+        services:
+          type: array
+          items:
+            type: string
+        contact_info:
+          type: string
+        is_active:
+          type: boolean
+
+    # School Schemas
+    School:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: School ID
+        school_name:
+          type: string
+          description: School name
+        school_type:
+          type: string
+          description: Type of school
+        location:
+          type: string
+          description: School location
+        student_capacity:
+          type: integer
+          description: Student capacity
+        current_enrollment:
+          type: integer
+          description: Current enrollment
+        contact_info:
+          type: string
+          description: Contact information
+        is_active:
+          type: boolean
+          description: Active status
+
+    CreateSchoolRequest:
+      type: object
+      required:
+        - school_name
+        - school_type
+        - location
+      properties:
+        school_name:
+          type: string
+        school_type:
+          type: string
+        location:
+          type: string
+        student_capacity:
+          type: integer
+        current_enrollment:
+          type: integer
+        contact_info:
+          type: string
+
+    UpdateSchoolRequest:
+      type: object
+      properties:
+        school_name:
+          type: string
+        school_type:
+          type: string
+        location:
+          type: string
+        student_capacity:
+          type: integer
+        current_enrollment:
+          type: integer
+        contact_info:
+          type: string
+        is_active:
+          type: boolean
+
+    # Location Schemas
+    District:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: District ID
+        district_name:
+          type: string
+          description: District name
+        district_code:
+          type: string
+          description: District code
+        province:
+          type: string
+          description: Province
+        is_active:
+          type: boolean
+          description: Active status
+
+    Sector:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Sector ID
+        sector_name:
+          type: string
+          description: Sector name
+        sector_code:
+          type: string
+          description: Sector code
+        district_id:
+          type: integer
+          description: District ID
+        is_active:
+          type: boolean
+          description: Active status
+
+    # Statistics Schemas
+    FarmerStats:
+      type: object
+      properties:
+        totalActiveFarmers:
+          type: integer
+          description: Total number of active farmers
+        farmersByType:
+          type: object
+          properties:
+            smallholder:
+              type: integer
+            commercial:
+              type: integer
+            cooperative:
+              type: integer
+            estate:
+              type: integer
+        totalFarmArea:
+          type: number
+          format: decimal
+          description: Total farm area in hectares
+        farmersInCooperatives:
+          type: integer
+          description: Number of farmers in cooperatives
+        averageExperience:
+          type: number
+          format: decimal
+          description: Average years of experience
+
+    HealthFacilityStats:
+      type: object
+      properties:
+        totalFacilities:
+          type: integer
+          description: Total number of health facilities
+        facilitiesByType:
+          type: object
+          additionalProperties:
+            type: integer
+        totalCapacity:
+          type: integer
+          description: Total capacity across all facilities
+        averageCapacity:
+          type: number
+          format: decimal
+          description: Average facility capacity
+
+    # Pagination Schema
+    Pagination:
+      type: object
+      properties:
+        currentPage:
+          type: integer
+          description: Current page number
+          example: 1
+        totalPages:
+          type: integer
+          description: Total number of pages
+          example: 10
+        totalItems:
+          type: integer
+          description: Total number of items
+          example: 100
+        itemsPerPage:
+          type: integer
+          description: Items per page
+          example: 10
+
+    # Error Schema
+    Error:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "error"
+        message:
+          type: string
+          description: Error message
+          example: "An error occurred"
+        details:
+          type: array
+          items:
+            type: object
+          description: Additional error details

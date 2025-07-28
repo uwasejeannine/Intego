@@ -58,6 +58,7 @@ import { useAuthStore } from "./stores/authStore";
 import UpdateUserPage from "./views/Admin/Users/update-user";
 import RolesManagementPage from "./views/Admin/Roles/roles-management";
 import AdminDashboardPage from "./views/Admin/Dashboard/dashboard";
+import TermsAndConditions from "./views/Admin/TermsAndConditions";
 
 const AuthenticationRoutes: React.FC = () => {
   const { isAuthenticated, userType } = useAuthStore();
@@ -206,6 +207,7 @@ const AdminRoutes: React.FC = () => {
       <Route path="update-profile" element={<AdminUpdateProfilePage />} />
       <Route path="users/:id" element={<UpdateUserPage />} />
       <Route path="roles-management" element={<RolesManagementPage />} />
+      <Route path="terms-and-conditions" element={<TermsAndConditions />} />
       <Route path="*" element={<AuthenticationPage />} />
     </Routes>
   );

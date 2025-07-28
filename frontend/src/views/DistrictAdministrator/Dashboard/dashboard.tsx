@@ -481,10 +481,6 @@ const DistrictAdministratorDashboardPage: React.FC = () => {
                 </p>
                 <div className="mt-4 flex flex-wrap items-center gap-4">
                   <div className="flex items-center">
-                    <div className="w-3 h-3 bg-green-400 rounded-full mr-2"></div>
-                    <span className="text-sm">System Status: Operational</span>
-                  </div>
-                  <div className="flex items-center">
                     <div className="w-3 h-3 bg-yellow-400 rounded-full mr-2"></div>
                     <span className="text-sm">{alerts.length} Active Alerts</span>
                   </div>

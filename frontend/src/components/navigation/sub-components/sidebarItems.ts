@@ -160,6 +160,11 @@ export const sidebarItemsForITAdmin: SidebarItem[] = [
     href: "/roles-management",
   },
   {
+    label: "Terms & Conditions",
+    icon: Icons.SystemIcon,
+    href: "/terms-and-conditions",
+  },
+  {
     label: "System",
     icon: Icons.SystemIcon,
     href: "/system",
