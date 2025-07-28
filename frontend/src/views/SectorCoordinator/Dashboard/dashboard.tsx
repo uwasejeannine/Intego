@@ -249,6 +249,7 @@ const SectorCoordinatorDashboardPage: React.FC = () => {
         const failedRequests = results.filter(result => result.status === 'rejected');
         if (failedRequests.length > 0) {
           console.warn(`⚠️ ${failedRequests.length} out of 6 requests failed`);
+          setError(`Some data could not be loaded. ${failedRequests.length} requests failed.`);
         }
 
       } catch (err: any) {
@@ -334,6 +335,15 @@ const SectorCoordinatorDashboardPage: React.FC = () => {
       <SectorCoordinatorSidebar />
       <main className="pl-[250px] pr-[20px] bg-gray-50 min-h-screen">
         <div className="flex flex-col items-center space-y-6 max-w-full px-4 pt-24">
+          {/* Error Alert */}
+          {error && (
+            <div className="w-full max-w-6xl border-yellow-200 bg-yellow-50 border rounded-lg p-4 flex items-center space-x-3">
+              <AlertCircle className="h-4 w-4 text-yellow-600 flex-shrink-0" />
+              <p className="text-yellow-700 text-sm">
+                {error}
+              </p>
+            </div>
+          )}
 
           {/* Welcome Section */}
           <div className="bg-[#137775] rounded-lg shadow-lg p-6 text-white w-full max-w-6xl">
