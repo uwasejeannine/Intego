@@ -14,26 +14,54 @@ const API_URL = "http://localhost:3000/api/v1/farmers/individual/";
 const COOP_API_URL = "http://localhost:3000/api/v1/farmers/cooperatives";
 
 const COOP_COLUMNS = [
-  { accessorKey: "cooperativeName", header: () => <div className="text-center">Name</div>, cell: ({ row }: any) => <div className="text-center">{row.original.cooperativeName}</div> },
-  { accessorKey: "location", header: () => <div className="text-center">Location</div>, cell: ({ row }: any) => <div className="text-center">{row.original.location}</div> },
-  { accessorKey: "numberOfFarmers", header: () => <div className="text-center"># Farmers</div>, cell: ({ row }: any) => <div className="text-center">{row.original.numberOfFarmers}</div> },
-  { accessorKey: "mainCrops", header: () => <div className="text-center">Main Crops</div>, cell: ({ row }: any) => {
-    const crops = row.original.mainCrops;
-    let display = crops;
-    if (Array.isArray(crops)) {
-      display = crops.join(", ");
-    } else if (typeof crops === 'string' && crops.startsWith('[')) {
-      try {
-        const arr = JSON.parse(crops);
-        if (Array.isArray(arr)) display = arr.join(", ");
-      } catch {
+  { 
+    accessorKey: "cooperative_name", 
+    header: () => <div className="text-center">Name</div>, 
+    cell: ({ row }: any) => <div className="text-center">{row.original.cooperative_name || "-"}</div> 
+  },
+  { 
+    accessorKey: "location", 
+    header: () => <div className="text-center">Location</div>, 
+    cell: ({ row }: any) => <div className="text-center">{row.original.location || "-"}</div> 
+  },
+  { 
+    accessorKey: "number_of_farmers", 
+    header: () => <div className="text-center"># Farmers</div>, 
+    cell: ({ row }: any) => <div className="text-center">{row.original.number_of_farmers || 0}</div> 
+  },
+  { 
+    accessorKey: "main_crops", 
+    header: () => <div className="text-center">Main Crops</div>, 
+    cell: ({ row }: any) => {
+      const crops = row.original.main_crops || row.original.mainCropsArray;
+      let display = "-";
+      
+      if (Array.isArray(crops)) {
+        display = crops.length > 0 ? crops.join(", ") : "-";
+      } else if (typeof crops === 'string' && crops.startsWith('[')) {
+        try {
+          const arr = JSON.parse(crops);
+          if (Array.isArray(arr)) display = arr.length > 0 ? arr.join(", ") : "-";
+        } catch {
+          display = crops || "-";
+        }
+      } else if (crops) {
         display = crops;
       }
-    }
-    return <div className="text-center">{display}</div>;
-  } },
-  { accessorKey: "regionId", header: () => <div className="text-center">Region</div>, cell: ({ row }: any) => <div className="text-center">{row.original.regionName || row.original.regionId}</div> },
-  { accessorKey: "isActive", header: () => <div className="text-center">Active</div>, cell: ({ row }: any) => <div className="text-center">{row.original.isActive ? "Yes" : "No"}</div> },
+      
+      return <div className="text-center">{display}</div>;
+    } 
+  },
+  { 
+    accessorKey: "region_id", 
+    header: () => <div className="text-center">Region</div>, 
+    cell: ({ row }: any) => <div className="text-center">{row.original.region?.region_name || row.original.region_id || "-"}</div> 
+  },
+  { 
+    accessorKey: "is_active", 
+    header: () => <div className="text-center">Active</div>, 
+    cell: ({ row }: any) => <div className="text-center">{row.original.is_active ? "Yes" : "No"}</div> 
+  },
 ];
 
 const Farmers = () => {
@@ -43,15 +71,32 @@ const Farmers = () => {
   const [tab, setTab] = useState<'individual' | 'cooperative'>('individual');
   const [sectors, setSectors] = useState<Sector[]>([]);
   const [selectedSector, setSelectedSector] = useState<string | null>(null);
-  const { district_id } = useAuthStore();
+  const [selectedCoopSector, setSelectedCoopSector] = useState<string | null>(null);
+  const { district_id, token, userId } = useAuthStore();
+
+  // Create authenticated headers
+  const getAuthHeaders = () => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    return headers;
+  };
 
   useEffect(() => {
-    fetchFarmers();
-    fetchCooperatives();
-    if (district_id) {
-      loadSectors(district_id);
+    // Only fetch data if we have authentication
+    if (token && userId) {
+      fetchFarmers();
+      fetchCooperatives();
+      if (district_id) {
+        loadSectors(district_id);
+      }
     }
-  }, [district_id]);
+  }, [district_id, token, userId]);
 
   const loadSectors = async (districtId: number) => {
     try {
@@ -64,28 +109,63 @@ const Farmers = () => {
   };
 
   const fetchFarmers = async (sectorId: string | null = null) => {
+    if (!token || !userId) {
+      console.warn('No authentication token available');
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       let url = API_URL;
       if (sectorId) {
         url += `?sector_id=${sectorId}`;
       }
-      const res = await fetch(url);
+      
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
       const data = await res.json();
       setFarmers(data?.data || data || []);
     } catch (e) {
+      console.error('Error fetching farmers:', e);
       setFarmers([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchCooperatives = async () => {
+  const fetchCooperatives = async (sectorId: string | null = null) => {
+    if (!token || !userId) {
+      console.warn('No authentication token available');
+      return;
+    }
+
     try {
-      const res = await fetch(COOP_API_URL);
+      let url = COOP_API_URL;
+      if (sectorId) {
+        url += `?sector_id=${sectorId}`;
+      }
+
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
       const data = await res.json();
       setCoopList(data?.data || data || []);
     } catch (e) {
+      console.error('Error fetching cooperatives:', e);
       setCoopList([]);
     }
   };
@@ -98,6 +178,33 @@ const Farmers = () => {
       fetchFarmers(value);
     }
   };
+
+  const handleCoopSectorChange = (value: string) => {
+    setSelectedCoopSector(value);
+    if (value === 'all') {
+      fetchCooperatives(null);
+    } else {
+      fetchCooperatives(value);
+    }
+  };
+
+  // Show loading or unauthorized message if no auth
+  if (!token || !userId) {
+    return (
+      <>
+        <Navbar />
+        <DistrictAdministratorSidebar />
+        <main className="pl-[250px] pr-[20px] pt-20 bg-gray-50 min-h-screen">
+          <div className="space-y-6 py-6">
+            <Card className="w-full p-8 text-center">
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Authentication Required</h2>
+              <p className="text-gray-600">Please log in to view farmers data.</p>
+            </Card>
+          </div>
+        </main>
+      </>
+    );
+  }
 
   return (
     <>
@@ -128,6 +235,23 @@ const Farmers = () => {
                   </Select>
                 </div>
               )}
+              {tab === 'cooperative' && (
+                <div className="pr-4">
+                  <Select onValueChange={handleCoopSectorChange} value={selectedCoopSector || ""}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Filter by Sector" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Sectors</SelectItem>
+                      {sectors.map(sector => (
+                        <SelectItem key={sector.id} value={sector.id.toString()}>
+                          {sector.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </Card>
             <Card className="w-full dark:bg-slate-500">
               <TabsContent value="individual">
@@ -144,4 +268,4 @@ const Farmers = () => {
   );
 };
 
-export default Farmers; 
+export default Farmers;
